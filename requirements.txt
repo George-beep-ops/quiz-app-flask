@@ -1,8 +1,1 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Apr 12 18:59:24 2025
-
-@author: nilsc
-"""
-
 flask==2.3.3
