@@ -1,0 +1,16 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Apr 12 19:00:52 2025
+
+@author: nilsc
+"""
+
+services:
+  - type: web
+    name: quiz-app
+    env: python
+    buildCommand: ""
+    startCommand: python app.py
+    envVars:
+      - key: FLASK_ENV
+        value: production
