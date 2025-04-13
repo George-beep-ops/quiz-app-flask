@@ -1,149 +1,69 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <title>Minispiel 3 – Reaktion per Bewegung</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f5f5f5;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-    header {
-      background-color: #00549F;
-      color: white;
-      width: 100%;
-      padding: 1.2rem;
-      font-size: 1.8rem;
-    }
-    #wordBox {
-      font-size: 2.5rem;
-      font-weight: bold;
-      padding: 2rem;
-      margin: 2rem;
-      background-color: white;
-      border: 3px solid #333;
-      border-radius: 12px;
-      min-width: 60vw;
-    }
-    #info {
-      margin-top: 2rem;
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #222;
-    }
-    form {
-      margin-top: 2rem;
-      display: none;
-    }
-    button {
-      font-size: 1.3rem;
-      padding: 0.8rem 2rem;
-      background-color: #00549F;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0077cc;
-    }
-    footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      padding: 0.5rem 1rem;
-      background: #fff;
-    }
-    .logo {
-      height: 40px;
-    }
-  </style>
-</head>
-<body>
-  <header>Minispiel 3 – Schüttle beim richtigen Wort!</header>
-  <div id="wordBox">Bereit?</div>
-  <div id="info"></div>
+{% extends 'base.html' %}
 
-  <form method="POST" id="submitForm">
+{% block title %}Minispiel 3 – Reaktion per Bewegung{% endblock %}
+
+{% block content %}
+  <h2>Schüttle das Handy, wenn das Wort <span style="color: green;">"richtig"</span> erscheint!</h2>
+  <div id="wordBox" style="font-size: 2rem; font-weight: bold; padding: 2rem; background-color: white; border: 2px solid #333; border-radius: 12px; display: inline-block; min-width: 200px;">Bereit?</div>
+
+  <form method="POST" id="submitForm" style="margin-top: 2rem; display: none;">
     <input type="hidden" name="score" id="scoreInput" value="0">
     <button type="submit">Weiter</button>
   </form>
 
-  <footer>
-    <img src="/static/logo_tuwien.png" alt="TU Wien" class="logo">
-    <img src="/static/logo_fraunhofer.png" alt="Fraunhofer" class="logo">
-  </footer>
+  <div id="info" style="margin-top: 2rem;"></div>
+{% endblock %}
 
-  <script>
-    const words = ["falsch", "richtig", "falsch", "nein", "ja aber nein", "richtig"];
-    const wordBox = document.getElementById("wordBox");
-    const info = document.getElementById("info");
-    const scoreInput = document.getElementById("scoreInput");
-    const form = document.getElementById("submitForm");
-    let score = 0;
-    let currentWord = "";
-    let index = 0;
-    let lastShake = 0;
+{% block script %}
+<script>
+  const words = ["falsch", "richtig", "falsch", "nein", "ja aber nein", "richtig"];
+  const wordBox = document.getElementById("wordBox");
+  const info = document.getElementById("info");
+  const scoreInput = document.getElementById("scoreInput");
+  let score = 0;
+  let currentWord = "";
+  let index = 0;
+  let lastShake = 0;
 
-    function showNextWord() {
-      if (index >= words.length) {
-        endGame();
-        return;
-      }
-      currentWord = words[index];
-      wordBox.textContent = currentWord;
-      index++;
-      setTimeout(showNextWord, 1500);
+  function showNextWord() {
+    if (index >= words.length) {
+      endGame();
+      return;
     }
+    currentWord = words[index];
+    wordBox.textContent = currentWord;
+    index++;
+    setTimeout(showNextWord, 1500);
+  }
 
-    function endGame() {
-      wordBox.textContent = "Fertig!";
-      scoreInput.value = score;
-      form.style.display = "block";
-    }
+  function endGame() {
+    wordBox.textContent = "Fertig!";
+    scoreInput.value = score;
+    document.getElementById("submitForm").style.display = "block";
+  }
 
-    function detectShake(event) {
-      const now = new Date().getTime();
-      if ((now - lastShake) < 1000) return;
-      const acc = event.accelerationIncludingGravity;
-      const total = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
-      if (total > 25) {
-        lastShake = now;
-        if (currentWord === "richtig") {
-          score++;
-          info.textContent = "✔️ Punkt erhalten!";
-        } else {
-          info.textContent = "❌ Falscher Zeitpunkt.";
-        }
+  function detectShake(event) {
+    const now = new Date().getTime();
+    if ((now - lastShake) < 1000) return;
+    const acc = event.accelerationIncludingGravity;
+    const total = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
+    if (total > 25) {
+      lastShake = now;
+      if (currentWord === "richtig") {
+        score++;
+        info.textContent = "✔️ Punkt erhalten!";
+      } else {
+        info.textContent = "❌ Falscher Zeitpunkt.";
       }
     }
+  }
 
-    if (window.DeviceMotionEvent) {
-      window.addEventListener("devicemotion", detectShake, false);
-    } else {
-      alert("Dein Gerät unterstützt leider keine Bewegungserkennung.");
-    }
+  if (window.DeviceMotionEvent) {
+    window.addEventListener("devicemotion", detectShake, false);
+  } else {
+    alert("Dein Gerät unterstützt leider keine Bewegungserkennung.");
+  }
 
-    setTimeout(showNextWord, 1000);
-  </script>
-
-<footer>
-  <img src="/static/logo_tuwien.png" alt="TU Wien" class="logo">
-  <img src="/static/logo_fraunhofer.png" alt="Fraunhofer" class="logo">
-</footer>
-
-
-</body>
-</html>
+  setTimeout(showNextWord, 1000);
+</script>
+{% endblock %}
