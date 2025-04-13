@@ -4,14 +4,14 @@
 
 {% block content %}
   <h2>Schüttle das Handy, wenn das Wort <span style="color: green;">"richtig"</span> erscheint!</h2>
-  <div id="wordBox" style="font-size: 2rem; font-weight: bold; padding: 2rem; background-color: white; border: 2px solid #333; border-radius: 12px; display: inline-block; min-width: 200px;">Bereit?</div>
+  <div id="wordBox" style="font-size: 2rem; font-weight: bold; padding: 2rem; background-color: white; border: 2px solid #333; border-radius: 12px; display: inline-block; min-width: 200px; transition: background-color 0.3s ease;">Bereit?</div>
 
   <form method="POST" id="submitForm" style="margin-top: 2rem; display: none;">
     <input type="hidden" name="score" id="scoreInput" value="0">
     <button type="submit">Weiter</button>
   </form>
 
-  <div id="info" style="margin-top: 2rem;"></div>
+  <div id="info" style="margin-top: 1rem; font-weight: bold;"></div>
 {% endblock %}
 
 {% block script %}
@@ -23,17 +23,16 @@
   let score = 0;
   let currentWord = "";
   let index = 0;
+  let shakeCount = 0;
   let lastShake = 0;
 
   function showNextWord() {
-    if (index >= words.length) {
-      endGame();
-      return;
-    }
+    if (index >= words.length || shakeCount >= 2) return;
     currentWord = words[index];
     wordBox.textContent = currentWord;
+    wordBox.style.backgroundColor = "white";
     index++;
-    setTimeout(showNextWord, 1500);
+    setTimeout(showNextWord, 2000);
   }
 
   function endGame() {
@@ -47,13 +46,20 @@
     if ((now - lastShake) < 1000) return;
     const acc = event.accelerationIncludingGravity;
     const total = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
-    if (total > 25) {
+    if (total > 25 && shakeCount < 2) {
       lastShake = now;
       if (currentWord === "richtig") {
         score++;
         info.textContent = "✔️ Punkt erhalten!";
+        wordBox.style.backgroundColor = "#8f8";
       } else {
-        info.textContent = "❌ Falscher Zeitpunkt.";
+        score--;
+        info.textContent = "❌ Falscher Begriff – Minuspunkt.";
+        wordBox.style.backgroundColor = "#f88";
+      }
+      shakeCount++;
+      if (shakeCount >= 2) {
+        setTimeout(endGame, 1500);
       }
     }
   }
