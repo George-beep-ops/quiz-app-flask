@@ -1,69 +1,72 @@
 {% extends 'base.html' %}
 
-{% block title %}Minispiel 4 – Begriffe und Bewegung{% endblock %}
+{% block title %}Minispiel 4 – Begriffe eingeben{% endblock %}
 
 {% block content %}
-  <h2>Gib zwei Begriffe aus der Präsentation ein (getrennt mit Komma) und lege das Handy <strong>innerhalb von 20 Sekunden waagerecht</strong> auf den Tisch.</h2>
-
-  <input type="text" id="inputField" placeholder="Begriffe eingeben..." style="padding: 1rem; font-size: 1rem; width: 80%; max-width: 400px; margin-bottom: 1rem;">
-  <div id="status" style="font-weight: bold; margin: 1rem; font-size: 1.2rem;">⏳ Zeit läuft: <span id="timer">20</span>s</div>
-
-  <form method="POST" id="submitForm" style="display: none;">
-    <input type="hidden" name="score" id="scoreInput" value="0">
-    <button type="submit">Weiter</button>
-  </form>
+<h2>Welche Begriffe wurden in der Präsentation genannt?</h2>
+<p>Gib zwei Begriffe ein (getrennt mit Komma) und lege dann das Handy waagerecht auf den Tisch!</p>
+<input type="text" id="inputField" placeholder="Begriffe eingeben...">
+<div id="status">⏳ Zeit läuft... <span id="timer">20</span>s</div>
+<div id="extraPoint" style="color: green; font-weight: bold; font-size: 1.2rem; display: none;">+1</div>
 {% endblock %}
 
 {% block script %}
 <script>
   const correctAnswers = ["learning", "gamification"];
   let score = 0;
+  let extraPoint = false;
   let submitted = false;
-  let flatDetected = false;
-  let timer = 20;
+  let timeLeft = 20;
 
+  const inputField = document.getElementById("inputField");
+  const status = document.getElementById("status");
   const timerDisplay = document.getElementById("timer");
-
-  const countdown = setInterval(() => {
-    timer--;
-    timerDisplay.textContent = timer;
-    if (timer <= 0) {
-      clearInterval(countdown);
-      checkAndSubmit();
-    }
-  }, 1000);
+  const extraPointDisplay = document.getElementById("extraPoint");
 
   function checkInput() {
-    const input = document.getElementById("inputField").value.toLowerCase();
+    const input = inputField.value.toLowerCase();
     const given = input.split(",").map(word => word.trim());
     score = 0;
     correctAnswers.forEach(answer => {
-      if (given.includes(answer)) {
-        score++;
-      }
+      if (given.includes(answer)) score++;
     });
   }
 
+  function sendResult() {
+    if (submitted) return;
+    if (extraPoint) score++;
+    submitted = true;
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.style.display = "none";
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "score";
+    input.value = score;
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+  }
+
   function checkIfFlat(event) {
-    const orientation = Math.abs(event.accelerationIncludingGravity.z);
-    if (orientation > 9 && orientation < 10.5) {
-      flatDetected = true;
+    const z = Math.abs(event.accelerationIncludingGravity.z);
+    if (z > 9 && z < 10.5 && !extraPoint && !submitted) {
+      extraPoint = true;
+      extraPointDisplay.style.display = "block";
     }
   }
 
   window.addEventListener("devicemotion", checkIfFlat);
 
-  function checkAndSubmit() {
-    if (!submitted) {
-      submitted = true;
+  const countdown = setInterval(() => {
+    timeLeft--;
+    timerDisplay.textContent = timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(countdown);
       checkInput();
-      if (flatDetected) {
-        score += 1; // Extrapunkt bei korrekt abgelegtem Handy
-      }
-      document.getElementById("scoreInput").value = score;
-      document.getElementById("submitForm").style.display = "block";
+      sendResult();
     }
-  }
+  }, 1000);
 </script>
 {% endblock %}
 
