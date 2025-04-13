@@ -58,9 +58,11 @@
         const tiles = document.querySelectorAll('.tile');
         let selected = [];
         let score = 0;
+        let gameEnded = false;
 
         tiles.forEach(tile => {
             tile.addEventListener('click', () => {
+                if (gameEnded) return;
                 const word = tile.dataset.word;
                 if (!selected.includes(word) && selected.length < 2) {
                     selected.push(word);
@@ -78,16 +80,19 @@
         });
 
         function endGame() {
+            if (gameEnded) return;
+            gameEnded = true;
             document.getElementById('scoreInput').value = score;
             document.querySelectorAll('.tile').forEach(tile => tile.classList.add('disabled'));
             document.getElementById('gameForm').submit();
         }
 
-        // 3 Sekunden Timer
+        // 5 Sekunden Timer
         setTimeout(() => {
             endGame();
         }, 5000);
     </script>
 </body>
 </html>
+
 
