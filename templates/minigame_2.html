@@ -1,85 +1,116 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <title>Kachel-Auswahl</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 2rem;
-      margin: 0;
-      text-align: center;
-      background-color: #f5f5f5;
+{% extends "base.html" %}
+
+{% block title %}Minispiel 2 – Gefahr erkennen{% endblock %}
+
+{% block extra_style %}
+<style>
+  .container {
+    position: relative;
+    width: 100%;
+    height: 60vh;
+    margin-top: 1rem;
+    overflow: hidden;
+    background-color: #f9f9f9;
+    border: 2px solid #ccc;
+    border-radius: 12px;
+  }
+
+  .word-tile {
+    position: absolute;
+    padding: 0.5rem 1rem;
+    background-color: #ddd;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+
+  .word-tile.correct { background-color: #90ee90 !important; }
+  .word-tile.incorrect { background-color: #ffcccb !important; }
+
+  button { display: none; } /* Kein Button notwendig */
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>Was ist eine mögliche Gefahr bei Gamification? Wähle bitte <strong>drei passende Begriffe!</strong></h2>
+
+<form method="POST" id="submitForm">
+  <input type="hidden" name="score" id="scoreInput" value="0">
+  <div class="container" id="container"></div>
+</form>
+{% endblock %}
+
+{% block script %}
+<script>
+  const allWords = [
+    "zu wenige spiele", "zu viele spiele", "ablenkung",
+    "einsamkeit", "traurigkeit", "bedauern"
+  ];
+
+  const correctWords = [
+    "zu wenige spiele", "einsamkeit", "traurigkeit", "bedauern"
+  ];
+
+  let selectedCount = 0;
+  let score = 0;
+  const container = document.getElementById("container");
+
+  allWords.forEach((word, index) => {
+    const el = document.createElement("div");
+    el.classList.add("word-tile");
+    el.textContent = word;
+
+    const x = Math.random() * 80 + 5; // x-Position (%)
+    const y = Math.random() * 50 + 10; // y-Position (%)
+    el.style.left = x + "%";
+    el.style.top = y + "%";
+
+    const dx = (Math.random() - 0.5) * 1.5;
+    const dy = (Math.random() - 0.5) * 1.5;
+
+    let posX = x;
+    let posY = y;
+
+    // Bewegung
+    function animate() {
+      if (selectedCount >= 3) return;
+      posX += dx;
+      posY += dy;
+
+      if (posX < 0 || posX > 90) posX -= dx * 2;
+      if (posY < 0 || posY > 80) posY -= dy * 2;
+
+      el.style.left = posX + "%";
+      el.style.top = posY + "%";
+      requestAnimationFrame(animate);
     }
 
-    h2 {
-      font-size: 1.5rem;
-      margin-bottom: 2rem;
-    }
+    animate();
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 1rem;
-      max-width: 600px;
-      margin: 0 auto;
-    }
+    // Klick-Logik
+    el.addEventListener("click", () => {
+      if (el.classList.contains("correct") || el.classList.contains("incorrect")) return;
 
-    .tile {
-      background-color: #ddd;
-      padding: 1.5rem;
-      border-radius: 10px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      user-select: none;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
+      if (correctWords.includes(word)) {
+        el.classList.add("correct");
+        score++;
+      } else {
+        el.classList.add("incorrect");
+      }
 
-    .tile.correct {
-      background-color: #9be29b;
-    }
-
-    .tile.incorrect {
-      background-color: #f29a9a;
-    }
-
-    .tile.disabled {
-      pointer-events: none;
-      opacity: 0.7;
-    }
-  </style>
-</head>
-<body>
-
-  <h2>Wähle die Begriffe, die durch Gamification gesteigert werden!</h2>
-  <div class="grid" id="wordGrid"></div>
-
-  <script>
-    const words = ["Engagement", "Langeweile", "Fokussierung", "Stress", "Lernfreude", "Ablenkung"];
-    const correctWords = ["Engagement", "Fokussierung", "Lernfreude"];
-
-    const grid = document.getElementById("wordGrid");
-
-    words.forEach(word => {
-      const tile = document.createElement("div");
-      tile.className = "tile";
-      tile.textContent = word;
-
-      tile.addEventListener("click", () => {
-        if (correctWords.includes(word)) {
-          tile.classList.add("correct");
-        } else {
-          tile.classList.add("incorrect");
-        }
-        tile.classList.add("disabled");
-      });
-
-      grid.appendChild(tile);
+      selectedCount++;
+      if (selectedCount >= 3) {
+        document.getElementById("scoreInput").value = score;
+        setTimeout(() => {
+          document.getElementById("submitForm").submit();
+        }, 500);
+      }
     });
-  </script>
 
-</body>
-</html>
+    container.appendChild(el);
+  });
+</script>
+{% endblock %}
