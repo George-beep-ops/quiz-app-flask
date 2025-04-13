@@ -15,6 +15,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      box-sizing: border-box;
     }
     header {
       flex: 0 0 60px;
@@ -28,16 +29,16 @@
       text-align: center;
     }
     main {
-      flex: 1;
+      flex: 1 1 auto;
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       padding: 1rem;
       text-align: center;
-      overflow: auto;
-      max-height: calc(100vh - 120px); /* Platz für Header + Footer */
       box-sizing: border-box;
+      max-height: calc(100vh - 120px); /* Header + Footer */
     }
     footer {
       flex: 0 0 60px;
@@ -45,12 +46,14 @@
       justify-content: space-between;
       align-items: center;
       padding: 0.5rem 1rem;
-      background-color: #fff;
+      background-color: #ffffff;
       box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+      box-sizing: border-box;
     }
     .logo {
       height: 30px;
-      max-width: 120px;
+      width: auto;
+      max-width: 45%;
     }
   </style>
   {% block extra_style %}{% endblock %}
