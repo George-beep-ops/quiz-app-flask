@@ -1,10 +1,49 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Minispiel 1 – Reaktionsaufgabe{% endblock %}
+{% block title %}Minispiel 1 – Reaktion{% endblock %}
+
+{% block extra_style %}
+<style>
+  h2 {
+    margin: 1rem;
+    font-size: 1.5rem;
+    text-align: center;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .tile {
+    background-color: #ddd;
+    padding: 1rem;
+    width: 140px;
+    height: 100px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    user-select: none;
+    text-align: center;
+  }
+  .tile.selected { background-color: #90ee90; }
+  .tile.incorrect { background-color: #ffcccb; }
+  .disabled { pointer-events: none; opacity: 0.5; }
+  #timer {
+    font-size: 1.2rem;
+    margin: 1rem;
+    font-weight: bold;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-  <h2>Wähle innerhalb von <strong>8 Sekunden</strong> zwei Begriffe, die durch Gamification gesteigert werden!</h2>
-  <div class="timer">⏳ Zeit läuft... <span id="countdown">8</span></div>
+  <h2>Wähle innerhalb von 8 Sekunden <strong>2 Begriffe</strong>, die durch Gamification gesteigert werden!</h2>
   <form id="gameForm" method="POST">
     <div class="grid">
       <div class="tile" data-word="lernvermögen">lernvermögen</div>
@@ -13,62 +52,54 @@
       <div class="tile" data-word="engagement">engagement</div>
     </div>
     <input type="hidden" name="score" id="scoreInput" value="0">
+    <button type="submit" style="display:none">Absenden</button>
   </form>
+  <div id="timer">⏳ Zeit läuft... 8</div>
 {% endblock %}
 
 {% block script %}
 <script>
   const correctWords = ["lernvermögen", "fokussierung", "engagement"];
   const tiles = document.querySelectorAll('.tile');
-  const countdownEl = document.getElementById("countdown");
-  const form = document.getElementById("gameForm");
-
+  const timerDisplay = document.getElementById('timer');
   let selected = [];
   let score = 0;
-  let timeLeft = 8;
-  let gameEnded = false;
+  let seconds = 8;
+  let countdown;
 
   tiles.forEach(tile => {
     tile.addEventListener('click', () => {
-      if (gameEnded) return;
-
       const word = tile.dataset.word;
       if (!selected.includes(word) && selected.length < 2) {
         selected.push(word);
         tile.classList.add('selected');
-
-        if (correctWords.includes(word)) {
-          tile.style.backgroundColor = '#90ee90'; // grün
-          score++;
-        } else {
-          tile.style.backgroundColor = '#ffcccb'; // rot
-        }
+        if (correctWords.includes(word)) score++;
+        else tile.classList.add('incorrect');
       }
-
       if (selected.length === 2) {
+        clearInterval(countdown);
         endGame();
       }
     });
   });
 
-  const timerInterval = setInterval(() => {
-    timeLeft--;
-    countdownEl.textContent = timeLeft;
-    if (timeLeft <= 0) {
-      clearInterval(timerInterval);
+  function endGame() {
+    document.getElementById('scoreInput').value = score;
+    document.querySelectorAll('.tile').forEach(tile => tile.classList.add('disabled'));
+    document.getElementById('gameForm').submit();
+  }
+
+  countdown = setInterval(() => {
+    seconds--;
+    timerDisplay.textContent = `⏳ Zeit läuft... ${seconds}`;
+    if (seconds <= 0) {
+      clearInterval(countdown);
       endGame();
     }
   }, 1000);
-
-  function endGame() {
-    if (gameEnded) return;
-    gameEnded = true;
-
-    document.getElementById('scoreInput').value = score;
-    form.submit();
-  }
 </script>
 {% endblock %}
+
 
 
 
