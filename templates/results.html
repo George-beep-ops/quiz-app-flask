@@ -5,6 +5,7 @@
 {% block content %}
   <h2>Danke fürs Mitmachen!</h2>
   <canvas id="rocketCanvas" width="400" height="400" style="margin-top: 2rem;"></canvas>
+  <div id="scoreDisplay" style="font-size: 1.6rem; font-weight: bold; display: none; margin-top: 1rem;"></div>
 {% endblock %}
 
 {% block script %}
@@ -14,6 +15,7 @@ const ctx = canvas.getContext("2d");
 let angle = 0;
 let explode = false;
 let particles = [];
+const score = {{ score | default(0) }};
 
 function drawRocket(x, y) {
   ctx.save();
@@ -78,6 +80,13 @@ function animate() {
     if (angle > 2 * Math.PI) {
       explode = true;
       createParticles(x, y);
+
+      // Punktanzeige verzögert anzeigen
+      setTimeout(() => {
+        const scoreDisplay = document.getElementById("scoreDisplay");
+        scoreDisplay.textContent = `Du hast ${score} Punkte erreicht! 👍`;
+        scoreDisplay.style.display = "block";
+      }, 1200);
     }
   } else {
     drawParticles();
