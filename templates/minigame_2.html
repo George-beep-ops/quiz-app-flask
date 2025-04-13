@@ -1,13 +1,24 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block title %}Minispiel 2 – Gefahr erkennen{% endblock %}
 
+{% block extra_style %}
+<style>
+  canvas {
+    background: white;
+    border: 2px solid #ccc;
+    margin-top: 1rem;
+    max-width: 90vw;
+    height: 300px;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
   <h2>Was ist eine mögliche Gefahr bei Gamification? Wähle bitte drei passende Begriffe!</h2>
-  <canvas id="gameCanvas" width="800" height="400"></canvas>
-  <form method="POST" id="submitForm" style="display: none;">
+  <canvas id="gameCanvas" width="800" height="300"></canvas>
+  <form method="POST" id="submitForm">
     <input type="hidden" name="score" id="scoreInput" value="0">
-    <button type="submit">Weiter</button>
   </form>
 {% endblock %}
 
@@ -17,24 +28,16 @@
   const ctx = canvas.getContext("2d");
 
   const targets = [
-    "zu wenige spiele",
-    "zu viele spiele",
-    "ablenkung",
-    "einsamkeit",
-    "traurigkeit",
-    "bedauern"
+    "zu wenige spiele", "zu viele spiele", "ablenkung",
+    "einsamkeit", "traurigkeit", "bedauern"
   ];
-
   const correctTargets = [
-    "zu wenige spiele",
-    "einsamkeit",
-    "traurigkeit",
-    "bedauern"
+    "zu wenige spiele", "einsamkeit", "traurigkeit", "bedauern"
   ];
 
   let floating = [];
   let score = 0;
-  let selected = 0;
+  let hits = 0;
   let gameRunning = true;
 
   class Word {
@@ -93,13 +96,14 @@
         w.hit = true;
         if (correctTargets.includes(w.text)) {
           score++;
-        }
-        selected++;
-        if (selected >= 3) {
-          endGame();
+          hits++;
         }
       }
     });
+
+    if (hits >= 3) {
+      endGame();
+    }
   });
 
   function endGame() {
@@ -110,6 +114,11 @@
 
   setup();
   gameLoop();
+
+  setTimeout(() => {
+    if (gameRunning) {
+      endGame();
+    }
+  }, 10000);
 </script>
 {% endblock %}
-
