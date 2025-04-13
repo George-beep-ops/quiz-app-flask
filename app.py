@@ -62,6 +62,10 @@ def minigame(num):
         except:
             pass
         session['score'] += punkte if punkte > 0 else minigame_points.get(num, 0)
+
+        # WICHTIG: Erhöhe den Fragenzähler nach dem Minispiel!
+        session['current'] = session.get('current', 0) + 1
+
         return redirect(url_for('question'))
     return render_template(f'minigame_{num}.html')
 
@@ -74,4 +78,3 @@ def results_page():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
-
