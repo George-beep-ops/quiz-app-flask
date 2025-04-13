@@ -3,27 +3,81 @@
 {% block title %}Ergebnisse{% endblock %}
 
 {% block content %}
-  <h2>Ergebnisse</h2>
-  <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 2rem; margin-top: 2rem;">
-    <div style="flex: 1; min-width: 300px;">
-      <h3>Punkteverteilung</h3>
-      <ul style="list-style: none; padding: 0;">
-        {% for r in results %}
-          <li style="margin: 0.5rem 0; background: #eee; padding: 0.5rem 1rem; border-radius: 8px;">
-            <strong>{{ r.name }}</strong>: {{ r.score }} Punkte
-          </li>
-        {% endfor %}
-      </ul>
-    </div>
-    <div style="flex: 1; min-width: 300px;">
-      <h3>Topliste</h3>
-      <ol>
-        {% for r in results|sort(attribute='score', reverse=True)[:5] %}
-          <li><strong>{{ r.name }}</strong> – {{ r.score }} Punkte</li>
-        {% endfor %}
-      </ol>
-    </div>
-  </div>
+  <h2>Danke fürs Mitmachen!</h2>
+  <canvas id="rocketCanvas" width="300" height="300" style="margin-top: 2rem;"></canvas>
+{% endblock %}
+
+{% block script %}
+<script>
+const canvas = document.getElementById("rocketCanvas");
+const ctx = canvas.getContext("2d");
+let angle = 0;
+let explode = false;
+let particles = [];
+
+function drawRocket(x, y) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = "#ff3333";
+  ctx.beginPath();
+  ctx.moveTo(0, -10);
+  ctx.lineTo(5, 5);
+  ctx.lineTo(-5, 5);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function createParticles(x, y) {
+  for (let i = 0; i < 30; i++) {
+    const angle = Math.random() * 2 * Math.PI;
+    const speed = Math.random() * 2 + 1;
+    particles.push({
+      x: x,
+      y: y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      alpha: 1
+    });
+  }
+}
+
+function drawParticles() {
+  particles.forEach(p => {
+    ctx.fillStyle = `rgba(255, 100, 0, ${p.alpha})`;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3, 0, 2 * Math.PI);
+    ctx.fill();
+    p.x += p.vx;
+    p.y += p.vy;
+    p.alpha -= 0.02;
+  });
+  particles = particles.filter(p => p.alpha > 0);
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (!explode) {
+    const radius = 100;
+    const x = canvas.width / 2 + Math.cos(angle) * radius;
+    const y = canvas.height / 2 + Math.sin(angle) * radius;
+    drawRocket(x, y);
+    angle += 0.05;
+
+    if (angle > 2 * Math.PI) {
+      explode = true;
+      createParticles(x, y);
+    }
+  } else {
+    drawParticles();
+  }
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+</script>
 {% endblock %}
 
 
