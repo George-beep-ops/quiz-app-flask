@@ -21,9 +21,12 @@
       background-color: #004080;
       color: white;
       padding: 1rem;
-      text-align: center;
       font-size: 1.3rem;
       font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
     }
     main {
       flex: 1;
@@ -42,9 +45,12 @@
       padding: 0.5rem 1rem;
       background: #ffffff;
       box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+      position: relative;
+      bottom: 0;
     }
     .logo {
       height: 28px;
+      max-width: 100px;
     }
   </style>
   {% block extra_style %}{% endblock %}
