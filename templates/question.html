@@ -1,56 +1,97 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <title>Frage 1</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 2rem;
-            background-color: #f9f9f9;
-        }
-        h1 {
-            font-size: 2.2rem;
-            margin-bottom: 2rem;
-        }
-        label {
-            font-size: 1.5rem;
-            margin-left: 0.5rem;
-        }
-        input[type="radio"] {
-            transform: scale(1.5);
-            margin: 1rem;
-        }
-        button {
-            margin-top: 2rem;
-            font-size: 1.5rem;
-            padding: 1rem 2rem;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Frage {{ index }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      justify-content: center;
+      align-items: center;
+    }
+    header {
+      background-color: #00549F;
+      color: white;
+      padding: 1.5rem 1rem;
+      font-size: 2rem;
+      width: 100%;
+    }
+    h2 {
+      font-size: 1.8rem;
+      margin: 2rem 1rem 1.5rem;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2rem;
+      width: 100%;
+      max-width: 400px;
+    }
+    label {
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    input[type="radio"] {
+      transform: scale(1.5);
+    }
+    button {
+      font-size: 1.3rem;
+      padding: 0.8rem 2rem;
+      background-color: #00549F;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 2rem;
+    }
+    button:hover {
+      background-color: #0077cc;
+    }
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      background: #fff;
+    }
+    .logo {
+      height: 40px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Funktioniert es?</h1>
-    <form method="POST">
-        <div>
-            <input type="radio" id="yes" name="answer" value="ja" required>
-            <label for="yes">Ja</label>
-        </div>
-        <div>
-            <input type="radio" id="no" name="answer" value="nein">
-            <label for="no">Nein</label>
-        </div>
-        <button type="submit">Antwort absenden</button>
-    </form>
+  <header>
+    Frage {{ index }} – Gamequiz
+  </header>
+
+  <h2>{{ q.question }}</h2>
+  <form method="POST">
+    {% for option in q.options %}
+      <label>
+        <input type="radio" name="answer" value="{{ option }}" required>
+        {{ option }}
+      </label>
+    {% endfor %}
+    <button type="submit">Antwort absenden</button>
+  </form>
+
+  <footer>
+    <img src="/static/logo_tuwien.png" alt="TU Wien" class="logo">
+    <img src="/static/logo_fraunhofer.png" alt="Fraunhofer" class="logo">
+  </footer>
 </body>
 </html>

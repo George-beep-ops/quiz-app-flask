@@ -3,92 +3,117 @@
 <head>
   <meta charset="UTF-8">
   <title>Ergebnisse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 2rem;
-      background-color: #f9f9f9;
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .container {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 2rem;
-    }
-
-    .chart-container {
-      flex: 1 1 60%;
-      min-width: 300px;
-    }
-
-    .ranking {
-      flex: 1 1 35%;
-      min-width: 200px;
-    }
-
-    ul {
-      list-style-type: none;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
       padding: 0;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
-
-    li {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
+    header {
+      background-color: #00549F;
+      color: white;
+      padding: 2rem 1rem;
+      font-size: 2rem;
+      font-weight: bold;
+    }
+    main {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    canvas {
+      max-width: 90vw;
+      max-height: 400px;
+    }
+    .toplist {
+      margin-top: 2rem;
+      font-size: 1.2rem;
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      background: #fff;
+    }
+    .logo {
+      height: 40px;
     }
   </style>
 </head>
 <body>
-  <h2>Ergebnisse</h2>
-
-  <div class="container">
-    <div class="chart-container">
-      <canvas id="scoreChart"></canvas>
-    </div>
-
-    <div class="ranking">
-      <h3>Topliste</h3>
-      <ul>
+  <header>
+    Ergebnisse – Gamequiz
+  </header>
+  <main>
+    <canvas id="scoreChart"></canvas>
+    <div class="toplist">
+      <h3>🏆 Topliste</h3>
+      <ol>
         {% for r in results %}
-          <li>{{ loop.index }}. {{ r.name }} – {{ r.score }} Punkte</li>
+          <li><strong>{{ r.name }}</strong>: {{ r.score }} Punkte</li>
         {% endfor %}
-      </ul>
+      </ol>
     </div>
-  </div>
+  </main>
+  <footer>
+    <img src="/static/logo_tuwien.png" alt="TU Wien" class="logo">
+    <img src="/static/logo_fraunhofer.png" alt="Fraunhofer" class="logo">
+  </footer>
 
   <script>
-    const results = {{ results|tojson }};
-    const labels = results.map(r => r.name);
-    const scores = results.map(r => r.score);
+    const names = {{ results | map(attribute='name') | list | tojson }};
+    const scores = {{ results | map(attribute='score') | list | tojson }};
 
-    const ctx = document.getElementById('scoreChart').getContext('2d');
-    new Chart(ctx, {
+    new Chart(document.getElementById('scoreChart'), {
       type: 'bar',
       data: {
-        labels: labels,
+        labels: names,
         datasets: [{
           label: 'Punkte',
           data: scores,
-          backgroundColor: 'rgba(54, 162, 235, 0.7)'
+          backgroundColor: '#00549F'
         }]
       },
       options: {
-        responsive: true,
+        indexAxis: 'y',
         scales: {
-          y: { beginAtZero: true }
+          x: {
+            beginAtZero: true
+          }
+        },
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          title: {
+            display: true,
+            text: 'Punktestand pro Teilnehmer'
+          }
         }
       }
     });
   </script>
 </body>
 </html>
+
 
 
 
