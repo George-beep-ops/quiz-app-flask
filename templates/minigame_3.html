@@ -6,9 +6,8 @@
   <h2>Schüttle das Handy, wenn das Wort <span style="color: green;">"richtig"</span> erscheint!</h2>
   <div id="wordBox" style="font-size: 2rem; font-weight: bold; padding: 2rem; background-color: white; border: 2px solid #333; border-radius: 12px; display: inline-block; min-width: 200px; transition: background-color 0.3s ease;">Bereit?</div>
 
-  <form method="POST" id="submitForm" style="margin-top: 2rem; display: none;">
+  <form method="POST" id="submitForm" style="display: none;">
     <input type="hidden" name="score" id="scoreInput" value="0">
-    <button type="submit">Weiter</button>
   </form>
 
   <div id="info" style="margin-top: 1rem; font-weight: bold;"></div>
@@ -20,6 +19,7 @@
   const wordBox = document.getElementById("wordBox");
   const info = document.getElementById("info");
   const scoreInput = document.getElementById("scoreInput");
+  const form = document.getElementById("submitForm");
   let score = 0;
   let currentWord = "";
   let index = 0;
@@ -35,17 +35,13 @@
     setTimeout(showNextWord, 2000);
   }
 
-  function endGame() {
-    wordBox.textContent = "Fertig!";
-    scoreInput.value = score;
-    document.getElementById("submitForm").style.display = "block";
-  }
-
   function detectShake(event) {
     const now = new Date().getTime();
     if ((now - lastShake) < 1000) return;
+
     const acc = event.accelerationIncludingGravity;
     const total = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
+
     if (total > 25 && shakeCount < 2) {
       lastShake = now;
       if (currentWord === "richtig") {
@@ -53,13 +49,17 @@
         info.textContent = "✔️ Punkt erhalten!";
         wordBox.style.backgroundColor = "#8f8";
       } else {
-        score--;
-        info.textContent = "❌ Falscher Begriff – Minuspunkt.";
+        info.textContent = "❌ Kein Punkt.";
         wordBox.style.backgroundColor = "#f88";
       }
+
       shakeCount++;
+
       if (shakeCount >= 2) {
-        setTimeout(endGame, 1500);
+        setTimeout(() => {
+          scoreInput.value = score;
+          form.submit();
+        }, 1500);
       }
     }
   }
