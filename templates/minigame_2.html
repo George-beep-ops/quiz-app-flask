@@ -1,23 +1,9 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block title %}Minispiel 2 – Gefahr erkennen{% endblock %}
 
-{% block extra_style %}
-<style>
-  canvas {
-    background: white;
-    border: 2px solid #ccc;
-    margin-top: 1rem;
-    max-width: 90vw;
-  }
-  button {
-    display: none;
-  }
-</style>
-{% endblock %}
-
 {% block content %}
-  <h2>Was ist eine mögliche Gefahr bei Gamification? Wähle bitte drei passende Begriffe!</h2>
+  <h2>Minispiel 2 – Was ist eine mögliche Gefahr?</h2>
   <canvas id="gameCanvas" width="800" height="400"></canvas>
   <form method="POST" id="submitForm">
     <input type="hidden" name="score" id="scoreInput" value="0">
@@ -48,17 +34,15 @@
 
   let floating = [];
   let score = 0;
-  let clicks = 0;
   let gameRunning = true;
 
   class Word {
     constructor(text) {
       this.text = text;
-      this.x = Math.random() * (canvas.width - 150);
+      this.x = Math.random() * (canvas.width - 100);
       this.y = Math.random() * canvas.height;
       this.speed = 0.5 + Math.random();
       this.hit = false;
-      this.color = "#333";
     }
 
     update() {
@@ -69,7 +53,7 @@
     }
 
     draw() {
-      ctx.fillStyle = this.color;
+      ctx.fillStyle = this.hit ? "#ccc" : "#333";
       ctx.font = "bold 20px Arial";
       ctx.fillText(this.text, this.x, this.y);
     }
@@ -84,6 +68,7 @@
   }
 
   function setup() {
+    floating = [];
     targets.forEach(t => floating.push(new Word(t)));
   }
 
@@ -108,15 +93,6 @@
         w.hit = true;
         if (correctTargets.includes(w.text)) {
           score++;
-          w.color = "#4CAF50"; // grün
-        } else {
-          w.color = "#F44336"; // rot
-        }
-        clicks++;
-        if (clicks >= 3) {
-          gameRunning = false;
-          document.getElementById("scoreInput").value = score;
-          document.getElementById("submitForm").submit();
         }
       }
     });
@@ -124,5 +100,11 @@
 
   setup();
   gameLoop();
+
+  setTimeout(() => {
+    gameRunning = false;
+    document.getElementById("scoreInput").value = score;
+    document.getElementById("submitForm").style.display = "block";
+  }, 10000); // 10 Sekunden Spielzeit
 </script>
 {% endblock %}
