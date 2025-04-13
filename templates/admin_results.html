@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin-Panel – Ergebnisse{% endblock %}
+
+{% block content %}
+<h2>Live-Auswertung</h2>
+<canvas id="barChart" width="600" height="300" style="margin-top: 2rem;"></canvas>
+<div style="margin-top: 2rem;">
+  <h3>🏆 Top 5 Spieler*innen</h3>
+  <ol id="toplist"></ol>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  let chartInstance = null;
+
+  async function fetchResults() {
+    const response = await fetch("/api/results");
+    return await response.json();
+  }
+
+  function updateChart(data) {
+    const ctx = document.getElementById("barChart").getContext("2d");
+    const pointCounts = {};
+
+    data.forEach(r => {
+      pointCounts[r.score] = (pointCounts[r.score] || 0) + 1;
+    });
+
+    const labels = Object.keys(pointCounts).sort((a, b) => a - b);
+    const counts = labels.map(l => pointCounts[l]);
+
+    if (chartInstance) chartInstance.destroy();
+
+    chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Anzahl Spieler*innen pro Punktzahl',
+          data: counts,
+          backgroundColor: '#00549F'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { stepSize: 1 }
+          }
+        }
+      }
+    });
+  }
+
+  function updateToplist(data) {
+    const topList = document.getElementById("toplist");
+    topList.innerHTML = "";
+    const sorted = data.sort((a, b) => b.score - a.score);
+    sorted.slice(0, 5).forEach(player => {
+      const li = document.createElement("li");
+      li.textContent = `${player.name} – ${player.score} Punkte`;
+      topList.appendChild(li);
+    });
+  }
+
+  async function refresh() {
+    const data = await fetchResults();
+    updateChart(data);
+    updateToplist(data);
+  }
+
+  // Initial & alle 5 Sekunden neu laden
+  refresh();
+  setInterval(refresh, 5000);
+</script>
+{% endblock %}
