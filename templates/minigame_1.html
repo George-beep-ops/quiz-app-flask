@@ -1,60 +1,48 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <title>Minispiel 1 – Reaktionsaufgabe</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 2rem;
-      background-color: #f5f5f5;
-    }
-    h2 {
-      margin-bottom: 1rem;
-      font-size: 1.8rem;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, 150px);
-      gap: 1rem;
-      justify-content: center;
-      margin-bottom: 2rem;
-    }
-    .tile {
-      background-color: #ddd;
-      padding: 1.5rem;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background-color 0.2s;
-      user-select: none;
-      min-height: 80px;
-    }
-    .tile.selected {
-      background-color: #90ee90;
-    }
-    .tile.incorrect {
-      background-color: #ffcccb;
-    }
-    .disabled {
-      pointer-events: none;
-      opacity: 0.5;
-    }
-    #timer {
-      font-size: 1.4rem;
-      font-weight: bold;
-      margin-top: 1rem;
-      color: #444;
-    }
-  </style>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Minispiel 1 – Reaktion{% endblock %}
+
+{% block extra_style %}
+<style>
+  h2 {
+    margin: 1rem;
+    font-size: 1.5rem;
+    text-align: center;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .tile {
+    background-color: #ddd;
+    padding: 1rem;
+    width: 140px;
+    height: 100px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    user-select: none;
+    text-align: center;
+  }
+  .tile.selected { background-color: #90ee90; }
+  .tile.incorrect { background-color: #ffcccb; }
+  .disabled { pointer-events: none; opacity: 0.5; }
+  #timer {
+    font-size: 1.2rem;
+    margin: 1rem;
+    font-weight: bold;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
   <h2>Wähle innerhalb von 8 Sekunden <strong>2 Begriffe</strong>, die durch Gamification gesteigert werden!</h2>
   <form id="gameForm" method="POST">
     <div class="grid">
@@ -66,61 +54,51 @@
     <input type="hidden" name="score" id="scoreInput" value="0">
     <button type="submit" style="display:none">Absenden</button>
   </form>
-
   <div id="timer">⏳ Zeit läuft... 8</div>
+{% endblock %}
 
-  <script>
-    const correctWords = ["lernvermögen", "fokussierung", "engagement"];
-    const tiles = document.querySelectorAll('.tile');
-    const timerDisplay = document.getElementById('timer');
-    let selected = [];
-    let score = 0;
-    let seconds = 8;
-    let countdown;
+{% block script %}
+<script>
+  const correctWords = ["lernvermögen", "fokussierung", "engagement"];
+  const tiles = document.querySelectorAll('.tile');
+  const timerDisplay = document.getElementById('timer');
+  let selected = [];
+  let score = 0;
+  let seconds = 8;
+  let countdown;
 
-    tiles.forEach(tile => {
-      tile.addEventListener('click', () => {
-        const word = tile.dataset.word;
-        if (!selected.includes(word) && selected.length < 2) {
-          selected.push(word);
-          tile.classList.add('selected');
-          if (correctWords.includes(word)) {
-            score++;
-          } else {
-            tile.classList.add('incorrect');
-          }
-        }
-        if (selected.length === 2) {
-          clearInterval(countdown);
-          endGame();
-        }
-      });
-    });
-
-    function endGame() {
-      document.getElementById('scoreInput').value = score;
-      document.querySelectorAll('.tile').forEach(tile => tile.classList.add('disabled'));
-      document.getElementById('gameForm').submit();
-    }
-
-    countdown = setInterval(() => {
-      seconds--;
-      timerDisplay.textContent = `⏳ Zeit läuft... ${seconds}`;
-      if (seconds <= 0) {
+  tiles.forEach(tile => {
+    tile.addEventListener('click', () => {
+      const word = tile.dataset.word;
+      if (!selected.includes(word) && selected.length < 2) {
+        selected.push(word);
+        tile.classList.add('selected');
+        if (correctWords.includes(word)) score++;
+        else tile.classList.add('incorrect');
+      }
+      if (selected.length === 2) {
         clearInterval(countdown);
         endGame();
       }
-    }, 1000);
-  </script>
+    });
+  });
 
-<footer>
-    <img src="/static/logo_tuwien.png" alt="TU Wien" class="logo">
-    <img src="/static/logo_fraunhofer.png" alt="Fraunhofer" class="logo">
-</footer>
+  function endGame() {
+    document.getElementById('scoreInput').value = score;
+    document.querySelectorAll('.tile').forEach(tile => tile.classList.add('disabled'));
+    document.getElementById('gameForm').submit();
+  }
 
-
-</body>
-</html>
+  countdown = setInterval(() => {
+    seconds--;
+    timerDisplay.textContent = `⏳ Zeit läuft... ${seconds}`;
+    if (seconds <= 0) {
+      clearInterval(countdown);
+      endGame();
+    }
+  }, 1000);
+</script>
+{% endblock %}
 
 
 
