@@ -42,40 +42,42 @@ async function fetchDataAndUpdate() {
   const counts = sortedScores.map(score => scoreCounts[score]);
 
   if (chart) {
-    chart.data.labels = counts;
-    chart.data.datasets[0].data = sortedScores;
+    chart.data.labels = sortedScores; // X-Achse: Punktzahl
+    chart.data.datasets[0].data = counts; // Y-Achse: Anzahl Spieler
     chart.update();
   } else {
     const ctx = document.getElementById("barChart").getContext("2d");
     chart = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: counts,
+        labels: sortedScores,
         datasets: [{
-          label: "Punkte",
-          data: sortedScores,
+          label: "Anzahl der Spieler",
+          data: counts,
           backgroundColor: "#0077cc"
         }]
       },
       options: {
-        indexAxis: 'y',  // 👉 Achsen tauschen: Balken horizontal anzeigen
         responsive: true,
         scales: {
           x: {
-            beginAtZero: true,
-            ticks: {
-              stepSize: 1,
-              precision: 0
-            },
-            title: {
-              display: true,
-              text: "Anzahl der Spieler"
-            }
-          },
-          y: {
             title: {
               display: true,
               text: "Punkte"
+            },
+            ticks: {
+              precision: 0
+            }
+          },
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: "Anzahl der Spieler"
+            },
+            ticks: {
+              stepSize: 1,
+              precision: 0
             }
           }
         }
@@ -97,7 +99,7 @@ fetchDataAndUpdate();
 setInterval(fetchDataAndUpdate, 5000);
 </script>
 
-<!-- Ergebnisse als JSON eingebettet -->
+<!-- Ergebnisse eingebettet -->
 <script data-results='{{ results | tojson | safe }}'></script>
 {% endblock %}
 
