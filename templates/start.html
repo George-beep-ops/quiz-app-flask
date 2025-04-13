@@ -1,107 +1,35 @@
---- start.html ---
 <!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
   <title>Quiz Start</title>
-</head>
-<body>
-  <h1>Willkommen zum Quiz!</h1>
-  <form method="POST">
-    <label for="nickname">Wähle einen Nickname:</label><br>
-    <input type="text" id="nickname" name="nickname" required><br><br>
-    <button type="submit">Spiel starten</button>
-  </form>
-</body>
-</html>
-
---- question.html ---
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <title>Frage {{ index }}</title>
-</head>
-<body>
-  <h2>Frage {{ index }}</h2>
-  <p>{{ q.question }}</p>
-  <form method="POST">
-    {% for opt in q.options %}
-      <input type="radio" id="{{ opt }}" name="answer" value="{{ opt }}" required>
-      <label for="{{ opt }}">{{ opt }}</label><br>
-    {% endfor %}<br>
-    <button type="submit">Weiter</button>
-  </form>
-</body>
-</html>
-
---- results.html ---
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <title>Ergebnisse</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    .container {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
+    body {
+      font-family: Arial, sans-serif;
       padding: 2rem;
+      text-align: center;
     }
-    .chart-container {
-      width: 60%;
+    input {
+      padding: 0.5rem;
+      font-size: 1rem;
+      width: 250px;
     }
-    .ranking {
-      width: 35%;
-    }
-    ul {
-      list-style-type: none;
-      padding: 0;
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
     }
   </style>
 </head>
 <body>
-  <h2>Ergebnisse</h2>
-  <div class="container">
-    <div class="chart-container">
-      <canvas id="scoreChart"></canvas>
-    </div>
-    <div class="ranking">
-      <h3>Topliste</h3>
-      <ul>
-        {% for r in results %}
-          <li>{{ loop.index }}. {{ r.name }} – {{ r.score }} Punkte</li>
-        {% endfor %}
-      </ul>
-    </div>
-  </div>
+  <h1>Willkommen zum Quiz!</h1>
+  <p>Bitte gib deinen Nickname ein:</p>
 
-  <script>
-    const results = {{ results|tojson }};
-    const labels = results.map(r => r.name);
-    const scores = results.map(r => r.score);
-
-    const ctx = document.getElementById('scoreChart').getContext('2d');
-    const chart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: 'Punkte',
-          data: scores,
-          backgroundColor: 'rgba(54, 162, 235, 0.7)'
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: { beginAtZero: true }
-        }
-      }
-    });
-  </script>
+  <form method="POST">
+    <input type="text" name="nickname" placeholder="Dein Nickname" required><br><br>
+    <button type="submit">Start</button>
+  </form>
 </body>
 </html>
+
 
 
