@@ -9,16 +9,19 @@
     border: 2px solid #ccc;
     margin-top: 1rem;
     max-width: 90vw;
-    height: 300px;
+  }
+  button {
+    display: none;
   }
 </style>
 {% endblock %}
 
 {% block content %}
   <h2>Was ist eine mögliche Gefahr bei Gamification? Wähle bitte drei passende Begriffe!</h2>
-  <canvas id="gameCanvas" width="800" height="300"></canvas>
+  <canvas id="gameCanvas" width="800" height="400"></canvas>
   <form method="POST" id="submitForm">
     <input type="hidden" name="score" id="scoreInput" value="0">
+    <button type="submit">Weiter</button>
   </form>
 {% endblock %}
 
@@ -28,11 +31,19 @@
   const ctx = canvas.getContext("2d");
 
   const targets = [
-    "zu wenige spiele", "zu viele spiele", "ablenkung",
-    "einsamkeit", "traurigkeit", "bedauern"
+    "zu wenige spiele",
+    "zu viele spiele",
+    "ablenkung",
+    "einsamkeit",
+    "traurigkeit",
+    "bedauern"
   ];
+
   const correctTargets = [
-    "zu wenige spiele", "einsamkeit", "traurigkeit", "bedauern"
+    "zu wenige spiele",
+    "einsamkeit",
+    "traurigkeit",
+    "bedauern"
   ];
 
   let floating = [];
@@ -43,10 +54,11 @@
   class Word {
     constructor(text) {
       this.text = text;
-      this.x = Math.random() * (canvas.width - 100);
+      this.x = Math.random() * (canvas.width - 150);
       this.y = Math.random() * canvas.height;
       this.speed = 0.5 + Math.random();
       this.hit = false;
+      this.color = "#333";
     }
 
     update() {
@@ -57,7 +69,7 @@
     }
 
     draw() {
-      ctx.fillStyle = this.hit ? "#ccc" : "#333";
+      ctx.fillStyle = this.color;
       ctx.font = "bold 20px Arial";
       ctx.fillText(this.text, this.x, this.y);
     }
@@ -87,7 +99,6 @@
 
   canvas.addEventListener("click", function(e) {
     if (!gameRunning) return;
-
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -95,32 +106,23 @@
     floating.forEach(w => {
       if (!w.hit && w.isClicked(x, y)) {
         w.hit = true;
-        clicks++;
         if (correctTargets.includes(w.text)) {
           score++;
+          w.color = "#4CAF50"; // grün
+        } else {
+          w.color = "#F44336"; // rot
         }
+        clicks++;
         if (clicks >= 3) {
-          endGame();
+          gameRunning = false;
+          document.getElementById("scoreInput").value = score;
+          document.getElementById("submitForm").submit();
         }
       }
     });
   });
 
-  function endGame() {
-    gameRunning = false;
-    document.getElementById("scoreInput").value = score;
-    document.getElementById("submitForm").submit();
-  }
-
   setup();
   gameLoop();
-
-  // Sicherheit: Nach 12 Sekunden abbrechen, falls kein Klick erfolgt
-  setTimeout(() => {
-    if (gameRunning) {
-      endGame();
-    }
-  }, 12000);
 </script>
 {% endblock %}
-
