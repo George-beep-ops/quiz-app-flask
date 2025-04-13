@@ -7,10 +7,10 @@
 
   <input type="text" id="inputField" placeholder="Begriffe eingeben..." style="padding: 1rem; font-size: 1rem; width: 80%; max-width: 400px; margin-bottom: 1rem;">
   <div id="status" style="font-weight: bold; margin: 1rem; font-size: 1.2rem;">⏳ Zeit läuft: <span id="timer">20</span>s</div>
+  <div id="extra" style="font-weight: bold; font-size: 1.2rem; color: green;"></div>
 
   <form method="POST" id="submitForm" style="display: none;">
     <input type="hidden" name="score" id="scoreInput" value="0">
-    <button type="submit">Weiter</button>
   </form>
 {% endblock %}
 
@@ -23,6 +23,7 @@
   let timer = 20;
 
   const timerDisplay = document.getElementById("timer");
+  const extraDisplay = document.getElementById("extra");
 
   const countdown = setInterval(() => {
     timer--;
@@ -46,8 +47,9 @@
 
   function checkIfFlat(event) {
     const orientation = Math.abs(event.accelerationIncludingGravity.z);
-    if (orientation > 9 && orientation < 10.5) {
+    if (orientation > 9 && orientation < 10.5 && !flatDetected) {
       flatDetected = true;
+      extraDisplay.textContent = "✅ Zusatzpunkt!";
     }
   }
 
@@ -58,10 +60,10 @@
       submitted = true;
       checkInput();
       if (flatDetected) {
-        score += 1; // Extrapunkt bei korrekt abgelegtem Handy
+        score += 1;
       }
       document.getElementById("scoreInput").value = score;
-      document.getElementById("submitForm").style.display = "block";
+      document.getElementById("submitForm").submit();
     }
   }
 </script>
