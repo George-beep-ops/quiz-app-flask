@@ -37,7 +37,7 @@
 
   let floating = [];
   let score = 0;
-  let hits = 0;
+  let clicks = 0;
   let gameRunning = true;
 
   class Word {
@@ -87,6 +87,7 @@
 
   canvas.addEventListener("click", function(e) {
     if (!gameRunning) return;
+
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -94,16 +95,15 @@
     floating.forEach(w => {
       if (!w.hit && w.isClicked(x, y)) {
         w.hit = true;
+        clicks++;
         if (correctTargets.includes(w.text)) {
           score++;
-          hits++;
+        }
+        if (clicks >= 3) {
+          endGame();
         }
       }
     });
-
-    if (hits >= 3) {
-      endGame();
-    }
   });
 
   function endGame() {
@@ -115,10 +115,12 @@
   setup();
   gameLoop();
 
+  // Sicherheit: Nach 12 Sekunden abbrechen, falls kein Klick erfolgt
   setTimeout(() => {
     if (gameRunning) {
       endGame();
     }
-  }, 10000);
+  }, 12000);
 </script>
 {% endblock %}
+
