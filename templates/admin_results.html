@@ -17,6 +17,7 @@
 
 {% block script %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
 let chart;
 
@@ -41,46 +42,62 @@ async function fetchDataAndUpdate() {
   const counts = sortedScores.map(score => scoreCounts[score]);
 
   if (chart) {
-    chart.data.labels = counts; // X-Achse: Anzahl Spieler
-    chart.data.datasets[0].data = sortedScores; // Y-Achse: Punkte
+    chart.data.labels = sortedScores;
+    chart.data.datasets[0].data = counts;
     chart.update();
   } else {
     const ctx = document.getElementById("barChart").getContext("2d");
     chart = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: counts,
+        labels: sortedScores,
         datasets: [{
-          label: "Punkte",
-          data: sortedScores,
+          label: "Anzahl der Spieler",
+          data: counts,
           backgroundColor: "#0077cc"
         }]
       },
       options: {
-        indexAxis: 'y',  // ❗ X/Y-Achse tauschen
         responsive: true,
+        plugins: {
+          legend: { display: false },
+          datalabels: {
+            anchor: 'end',
+            align: 'end',
+            formatter: (value) => `${value} Spieler`,
+            font: {
+              weight: 'bold',
+              size: 12
+            },
+            color: "#333"
+          }
+        },
         scales: {
           x: {
             title: {
-              display: true,
-              text: "Anzahl der Spieler"
+              display: false
             },
             ticks: {
-              precision: 0,
-              stepSize: 1
+              display: false
+            },
+            grid: {
+              display: false
             }
           },
           y: {
+            beginAtZero: true,
             title: {
               display: true,
               text: "Punkte"
             },
             ticks: {
-              precision: 0
+              precision: 0,
+              stepSize: 1
             }
           }
         }
-      }
+      },
+      plugins: [ChartDataLabels]
     });
   }
 
