@@ -61,14 +61,18 @@
     const timerBox = document.getElementById("timer");
 
     function getRandomName() {
+      if (allNames.length === 0) return null;
       return allNames.splice(Math.floor(Math.random() * allNames.length), 1)[0];
     }
 
     function nextWord() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       points = [];
-      if (allNames.length === 0) return;
       current = getRandomName();
+      if (!current) {
+        endGame();
+        return;
+      }
       wordBox.textContent = current;
     }
 
@@ -90,27 +94,30 @@
     }
 
     canvas.addEventListener("touchstart", function(e) {
+      if (!current) return;
       drawing = true;
       points = [];
       ctx.beginPath();
       const touch = e.touches[0];
-      ctx.moveTo(touch.clientX - canvas.offsetLeft, touch.clientY - canvas.offsetTop);
-      points.push({x: touch.clientX, y: touch.clientY});
+      const rect = canvas.getBoundingClientRect();
+      ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+      points.push({x: touch.clientX - rect.left, y: touch.clientY - rect.top});
     });
 
     canvas.addEventListener("touchmove", function(e) {
-      if (!drawing) return;
+      if (!drawing || !current) return;
       const touch = e.touches[0];
-      const x = touch.clientX - canvas.offsetLeft;
-      const y = touch.clientY - canvas.offsetTop;
+      const rect = canvas.getBoundingClientRect();
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
       ctx.lineTo(x, y);
       ctx.stroke();
-      points.push({x: touch.clientX, y: touch.clientY});
+      points.push({x, y});
     });
 
     canvas.addEventListener("touchend", function(e) {
       drawing = false;
-      if (points.length < 10) return;
+      if (points.length < 10 || !current) return;
       const gesture = classifyGesture(points);
       const isCorrect = correctNames.includes(current);
 
@@ -123,14 +130,9 @@
     function classifyGesture(pts) {
       const dx = Math.abs(pts[0].x - pts[pts.length - 1].x);
       const dy = Math.abs(pts[0].y - pts[pts.length - 1].y);
-      const straight = pts.filter((p, i) => i % 3 === 0).every((p, i, arr) => {
-        if (i === 0) return true;
-        return Math.abs(p.x - arr[i - 1].x) < 40 || Math.abs(p.y - arr[i - 1].y) < 40;
-      });
-
-      if (dx < 50 && dy < 50) return "circle";
-      if (straight) return "cross";
-      return "unknown";
+      const isCircle = dx < 50 && dy < 50;
+      const isCross = pts.length > 15 && !isCircle;
+      return isCircle ? "circle" : isCross ? "cross" : "unknown";
     }
 
     nextWord();
@@ -138,4 +140,3 @@
   </script>
 </body>
 </html>
-
