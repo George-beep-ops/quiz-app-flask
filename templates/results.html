@@ -15,7 +15,7 @@ const ctx = canvas.getContext("2d");
 let angle = 0;
 let explode = false;
 let particles = [];
-const score = {{ score | default(0) }};
+const score = {{ session['score'] | default(0) }};
 
 function drawRocket(x, y) {
   ctx.save();
