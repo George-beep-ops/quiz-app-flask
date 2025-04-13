@@ -1,57 +1,69 @@
 {% extends 'base.html' %}
 
-{% block title %}Admin-Auswertung{% endblock %}
+{% block title %}Admin – Ergebnisse Übersicht{% endblock %}
 
 {% block content %}
-  {% if session.admin_authenticated %}
-    <h2>Live-Auswertung</h2>
-    <div style="display: flex; flex-direction: row; justify-content: center; gap: 2rem; flex-wrap: wrap;">
-      <div>
-        <canvas id="barChart" width="400" height="300"></canvas>
-      </div>
-      <div>
-        <h3>Topliste</h3>
-        <ol>
-          {% for r in results %}
-            <li>{{ r.name }} – {{ r.score }} Punkte</li>
-          {% endfor %}
-        </ol>
-      </div>
+  <h2>Live-Auswertung</h2>
+  <div style="display: flex; flex-direction: row; justify-content: space-around; flex-wrap: wrap;">
+    <div>
+      <canvas id="barChart" width="400" height="300"></canvas>
     </div>
-  {% else %}
-    <h2>Admin-Zugang</h2>
-    <form method="POST" style="margin-top: 2rem;">
-      <label for="password">Passwort:</label><br><br>
-      <input type="password" name="password" required style="padding: 0.5rem; font-size: 1rem;"><br><br>
-      <button type="submit" class="button">Einloggen</button>
-      {% if error %}
-        <p style="color: red; margin-top: 1rem;">{{ error }}</p>
-      {% endif %}
-    </form>
-  {% endif %}
+    <div>
+      <h3>Topliste</h3>
+      <ol id="topList"></ol>
+    </div>
+  </div>
+
+  <!-- JSON-Daten über ein verstecktes Script-Tag -->
+  <script id="data-results" type="application/json">
+    {{ results | tojson }}
+  </script>
 {% endblock %}
 
 {% block script %}
-  {% if session.admin_authenticated %}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-      const ctx = document.getElementById('barChart').getContext('2d');
-      const chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: {{ distribution.keys()|list }},
-          datasets: [{
-            label: 'Teilnehmer:innen',
-            data: {{ distribution.values()|list }},
-            backgroundColor: '#00549F'
-          }]
-        },
-        options: {
-          scales: {
-            y: { beginAtZero: true }
-          }
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function () {
+  // Lese Daten aus dem versteckten JSON-Script-Tag
+  const dataResults = JSON.parse(document.getElementById("data-results").textContent);
+  const scoreCounts = {};
+
+  dataResults.forEach(entry => {
+    const score = entry.score;
+    scoreCounts[score] = (scoreCounts[score] || 0) + 1;
+  });
+
+  const sortedScores = Object.keys(scoreCounts).map(Number).sort((a, b) => a - b);
+
+  const ctx = document.getElementById("barChart").getContext("2d");
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: sortedScores,
+      datasets: [{
+        label: "Spieler mit X Punkten",
+        data: sortedScores.map(score => scoreCounts[score]),
+        backgroundColor: "#0077cc"
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          precision: 0
         }
-      });
-    </script>
-  {% endif %}
+      }
+    }
+  });
+
+  const sortedResults = dataResults.slice().sort((a, b) => b.score - a.score);
+  const ol = document.getElementById("topList");
+  sortedResults.forEach(r => {
+    const li = document.createElement("li");
+    li.textContent = `${r.name} – ${r.score} Punkte`;
+    ol.appendChild(li);
+  });
+})();
+</script>
 {% endblock %}
