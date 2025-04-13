@@ -9,61 +9,99 @@
       <canvas id="barChart" width="400" height="300"></canvas>
     </div>
     <div>
-      <h3>Topliste</h3>
+      <h3>🏆 Topliste</h3>
       <ol id="topList"></ol>
     </div>
   </div>
-
-  <!-- JSON-Daten über ein verstecktes Script-Tag -->
-  <script id="data-results" type="application/json">
-    {{ results | tojson }}
-  </script>
 {% endblock %}
 
 {% block script %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-(function () {
-  // Lese Daten aus dem versteckten JSON-Script-Tag
-  const dataResults = JSON.parse(document.getElementById("data-results").textContent);
+let chart;
+
+// Funktion zum Laden und Aktualisieren der Daten
+async function fetchDataAndUpdate() {
+  const response = await fetch(window.location.href);
+  const html = await response.text();
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  const raw = doc.querySelector("script[data-results]")?.dataset.results;
+
+  if (!raw) return;
+
+  const results = JSON.parse(raw);
   const scoreCounts = {};
 
-  dataResults.forEach(entry => {
+  results.forEach(entry => {
     const score = entry.score;
     scoreCounts[score] = (scoreCounts[score] || 0) + 1;
   });
 
   const sortedScores = Object.keys(scoreCounts).map(Number).sort((a, b) => a - b);
+  const counts = sortedScores.map(score => scoreCounts[score]);
 
-  const ctx = document.getElementById("barChart").getContext("2d");
-  new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: sortedScores,
-      datasets: [{
-        label: "Spieler mit X Punkten",
-        data: sortedScores.map(score => scoreCounts[score]),
-        backgroundColor: "#0077cc"
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true,
-          precision: 0
+  // Chart aktualisieren
+  if (chart) {
+    chart.data.labels = sortedScores;
+    chart.data.datasets[0].data = counts;
+    chart.update();
+  } else {
+    const ctx = document.getElementById("barChart").getContext("2d");
+    chart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: sortedScores,
+        datasets: [{
+          label: "Anzahl der Spieler",
+          data: counts,
+          backgroundColor: "#0077cc"
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1
+            },
+            title: {
+              display: true,
+              text: "Anzahl der Spieler"
+            }
+          },
+          x: {
+            ticks: {
+              precision: 0
+            },
+            title: {
+              display: true,
+              text: "Punkte"
+            }
+          }
         }
       }
-    }
-  });
+    });
+  }
 
-  const sortedResults = dataResults.slice().sort((a, b) => b.score - a.score);
+  // Topliste
+  const sortedResults = results.slice().sort((a, b) => b.score - a.score);
   const ol = document.getElementById("topList");
+  ol.innerHTML = "";
   sortedResults.forEach(r => {
     const li = document.createElement("li");
-    li.textContent = `${r.name} – ${r.score} Punkte`;
+    li.textContent = `🏆 ${r.name} – ${r.score} Punkte`;
     ol.appendChild(li);
   });
-})();
+}
+
+// Initial + alle 5 Sekunden aktualisieren
+fetchDataAndUpdate();
+setInterval(fetchDataAndUpdate, 5000);
 </script>
+
+<!-- Eingebettete Rohdaten im Data-Attribut -->
+<script data-results='{{ results | tojson | safe }}'></script>
 {% endblock %}
