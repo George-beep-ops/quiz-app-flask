@@ -22,50 +22,55 @@
   let flatDetected = false;
   let timer = 20;
 
+  const inputField = document.getElementById("inputField");
   const timerDisplay = document.getElementById("timer");
   const extraDisplay = document.getElementById("extra");
 
   const countdown = setInterval(() => {
     timer--;
     timerDisplay.textContent = timer;
-    if (timer <= 0) {
+
+    if (timer <= 0 && !submitted) {
       clearInterval(countdown);
-      checkAndSubmit();
+      // Bei Zeitablauf – weiter, egal ob Eingabe oder nicht
+      checkInput();  // zur Punktevergabe bei richtigen Begriffen
+      submitGame();
     }
   }, 1000);
 
   function checkInput() {
-    const input = document.getElementById("inputField").value.toLowerCase();
-    const given = input.split(",").map(word => word.trim());
+    const input = inputField.value.toLowerCase();
+    const given = input.split(",").map(word => word.trim()).filter(w => w !== "");
     score = 0;
     correctAnswers.forEach(answer => {
       if (given.includes(answer)) {
         score++;
       }
     });
+    return given.length >= 2;
   }
 
   function checkIfFlat(event) {
     const orientation = Math.abs(event.accelerationIncludingGravity.z);
-    if (orientation > 9 && orientation < 10.5 && !flatDetected) {
+    if (orientation > 9 && orientation < 10.5 && !submitted) {
       flatDetected = true;
-      extraDisplay.textContent = "✅ Zusatzpunkt!";
+      const hasTwoInputs = checkInput();
+      if (hasTwoInputs) {
+        score += 1;  // Zusatzpunkt fürs richtige Ablegen
+        extraDisplay.textContent = "✅ Zusatzpunkt!";
+        clearInterval(countdown); // stoppen, da schon erfolgreich
+        submitGame();
+      }
     }
+  }
+
+  function submitGame() {
+    submitted = true;
+    document.getElementById("scoreInput").value = score;
+    document.getElementById("submitForm").submit();
   }
 
   window.addEventListener("devicemotion", checkIfFlat);
-
-  function checkAndSubmit() {
-    if (!submitted) {
-      submitted = true;
-      checkInput();
-      if (flatDetected) {
-        score += 1;
-      }
-      document.getElementById("scoreInput").value = score;
-      document.getElementById("submitForm").submit();
-    }
-  }
 </script>
 {% endblock %}
 
