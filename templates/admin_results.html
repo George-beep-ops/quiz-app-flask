@@ -23,7 +23,6 @@ let chart;
 async function fetchDataAndUpdate() {
   const response = await fetch(window.location.href);
   const html = await response.text();
-
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
   const raw = doc.querySelector("script[data-results]")?.dataset.results;
@@ -42,41 +41,41 @@ async function fetchDataAndUpdate() {
   const counts = sortedScores.map(score => scoreCounts[score]);
 
   if (chart) {
-    chart.data.labels = sortedScores; // X-Achse: Punktzahl
-    chart.data.datasets[0].data = counts; // Y-Achse: Anzahl Spieler
+    chart.data.labels = counts; // X-Achse: Anzahl Spieler
+    chart.data.datasets[0].data = sortedScores; // Y-Achse: Punkte
     chart.update();
   } else {
     const ctx = document.getElementById("barChart").getContext("2d");
     chart = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: sortedScores,
+        labels: counts,
         datasets: [{
-          label: "Anzahl der Spieler",
-          data: counts,
+          label: "Punkte",
+          data: sortedScores,
           backgroundColor: "#0077cc"
         }]
       },
       options: {
+        indexAxis: 'y',  // ❗ X/Y-Achse tauschen
         responsive: true,
         scales: {
           x: {
             title: {
               display: true,
-              text: "Punkte"
-            },
-            ticks: {
-              precision: 0
-            }
-          },
-          y: {
-            beginAtZero: true,
-            title: {
-              display: true,
               text: "Anzahl der Spieler"
             },
             ticks: {
-              stepSize: 1,
+              precision: 0,
+              stepSize: 1
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: "Punkte"
+            },
+            ticks: {
               precision: 0
             }
           }
