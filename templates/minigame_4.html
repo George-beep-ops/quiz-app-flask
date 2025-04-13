@@ -1,146 +1,60 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <title>Minispiel 4 – Begriffe eingeben & Handy ablegen</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f5f5f5;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
-    header {
-      background-color: #00549F;
-      color: white;
-      padding: 1.5rem 1rem;
-      font-size: 1.8rem;
-      width: 100%;
-    }
-    h2 {
-      margin: 2rem 1rem 1rem;
-      font-size: 1.5rem;
-    }
-    input[type="text"] {
-      padding: 1rem;
-      font-size: 1.2rem;
-      width: 80%;
-      max-width: 400px;
-      margin-bottom: 1rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-    #status {
-      font-size: 1.2rem;
-      margin-top: 1rem;
-      color: #222;
-      font-weight: bold;
-    }
-    form {
-      display: none;
-      margin-top: 2rem;
-    }
-    button {
-      font-size: 1.3rem;
-      padding: 0.8rem 2rem;
-      background-color: #00549F;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0077cc;
-    }
-    footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      padding: 0.5rem 1rem;
-      background: #fff;
-    }
-    .logo {
-      height: 40px;
-    }
-  </style>
-</head>
-<body>
-  <header>Minispiel 4 – Begriffe eingeben & Handy ablegen</header>
+{% extends 'base.html' %}
 
-  <h2>Gib die zwei Begriffe aus der Präsentation ein (getrennt mit Komma) <br>und <strong>lege dein Handy innerhalb von 20 Sekunden waagerecht auf den Tisch</strong>.</h2>
+{% block title %}Minispiel 4 – Begriffe eingeben und Handy ablegen{% endblock %}
 
-  <input type="text" id="inputField" placeholder="Begriffe eingeben...">
-  <div id="status">⏳ Zeit läuft...</div>
+{% block content %}
+  <h2>Minispiel 4</h2>
+  <p>Gib die zwei Begriffe aus der Präsentation ein (getrennt mit Komma) und <strong>lege dein Handy innerhalb von 20 Sekunden waagerecht auf den Tisch</strong>.</p>
 
-  <form method="POST" id="submitForm">
+  <input type="text" id="inputField" placeholder="Begriffe eingeben..." style="padding: 1rem; font-size: 1rem; width: 80%; max-width: 400px; margin-bottom: 1rem;">
+  <div id="status" style="margin-top: 1.5rem; font-weight: bold; color: green;">Zeit läuft...</div>
+
+  <form method="POST" id="submitForm" style="display: none; margin-top: 1.5rem;">
     <input type="hidden" name="score" id="scoreInput" value="0">
     <button type="submit">Weiter</button>
   </form>
+{% endblock %}
 
-  <footer>
-    <img src="/static/logo_tuwien.png" alt="TU Wien" class="logo">
-    <img src="/static/logo_fraunhofer.png" alt="Fraunhofer" class="logo">
-  </footer>
+{% block script %}
+<script>
+  const correctAnswers = ["learning", "gamification"];
+  let score = 0;
+  let submitted = false;
+  let flatDetected = false;
 
-  <script>
-    const correctAnswers = ["learning", "gamification"];
-    let score = 0;
-    let submitted = false;
-    let flatDetected = false;
-
-    function checkInput() {
-      const input = document.getElementById("inputField").value.toLowerCase();
-      const given = input.split(",").map(word => word.trim());
-      score = 0;
-      correctAnswers.forEach(answer => {
-        if (given.includes(answer)) {
-          score++;
-        }
-      });
-    }
-
-    function checkIfFlat(event) {
-      const orientation = Math.abs(event.accelerationIncludingGravity.z);
-      if (orientation > 9 && orientation < 10.5) {
-        flatDetected = true;
-        if (!submitted) {
-          submitted = true;
-          checkInput();
-          document.getElementById("scoreInput").value = score;
-          document.getElementById("submitForm").style.display = "block";
-          document.getElementById("status").textContent = "✔️ Erfolgreich erkannt! Punkte werden übertragen.";
-        }
+  function checkInput() {
+    const input = document.getElementById("inputField").value.toLowerCase();
+    const given = input.split(",").map(word => word.trim());
+    score = 0;
+    correctAnswers.forEach(answer => {
+      if (given.includes(answer)) {
+        score++;
       }
-    }
+    });
+  }
 
-    window.addEventListener("devicemotion", checkIfFlat);
-
-    setTimeout(() => {
-      if (!submitted && !flatDetected) {
-        document.getElementById("status").textContent = "⏰ Zeit abgelaufen – Handy wurde nicht korrekt abgelegt.";
+  function checkIfFlat(event) {
+    const orientation = Math.abs(event.accelerationIncludingGravity.z);
+    if (orientation > 9 && orientation < 10.5) {
+      flatDetected = true;
+      if (!submitted) {
+        submitted = true;
+        checkInput();
+        document.getElementById("scoreInput").value = score;
         document.getElementById("submitForm").style.display = "block";
+        document.getElementById("status").textContent = "✔️ Erfolgreich! Punkte werden übertragen.";
       }
-    }, 20000);
-  </script>
+    }
+  }
 
+  window.addEventListener("devicemotion", checkIfFlat);
 
-<footer>
-  <img src="/static/logo_tuwien.png" alt="TU Wien" class="logo">
-  <img src="/static/logo_fraunhofer.png" alt="Fraunhofer" class="logo">
-</footer>
-
-
-
-</body>
-</html>
+  setTimeout(() => {
+    if (!submitted && !flatDetected) {
+      document.getElementById("status").textContent = "⏰ Zeit abgelaufen – Handy wurde nicht korrekt abgelegt.";
+      document.getElementById("submitForm").style.display = "block";
+    }
+  }, 20000);
+</script>
+{% endblock %}
 
