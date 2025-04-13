@@ -20,7 +20,6 @@
 <script>
 let chart;
 
-// Funktion zum Laden und Aktualisieren der Daten
 async function fetchDataAndUpdate() {
   const response = await fetch(window.location.href);
   const html = await response.text();
@@ -42,40 +41,38 @@ async function fetchDataAndUpdate() {
   const sortedScores = Object.keys(scoreCounts).map(Number).sort((a, b) => a - b);
   const counts = sortedScores.map(score => scoreCounts[score]);
 
-  // Chart aktualisieren
   if (chart) {
-    chart.data.labels = sortedScores;
-    chart.data.datasets[0].data = counts;
+    chart.data.labels = counts;
+    chart.data.datasets[0].data = sortedScores;
     chart.update();
   } else {
     const ctx = document.getElementById("barChart").getContext("2d");
     chart = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: sortedScores,
+        labels: counts,
         datasets: [{
-          label: "Anzahl der Spieler",
-          data: counts,
+          label: "Punkte",
+          data: sortedScores,
           backgroundColor: "#0077cc"
         }]
       },
       options: {
+        indexAxis: 'y',  // 👉 Achsen tauschen: Balken horizontal anzeigen
         responsive: true,
         scales: {
-          y: {
+          x: {
             beginAtZero: true,
             ticks: {
-              stepSize: 1
+              stepSize: 1,
+              precision: 0
             },
             title: {
               display: true,
               text: "Anzahl der Spieler"
             }
           },
-          x: {
-            ticks: {
-              precision: 0
-            },
+          y: {
             title: {
               display: true,
               text: "Punkte"
@@ -86,7 +83,6 @@ async function fetchDataAndUpdate() {
     });
   }
 
-  // Topliste
   const sortedResults = results.slice().sort((a, b) => b.score - a.score);
   const ol = document.getElementById("topList");
   ol.innerHTML = "";
@@ -97,11 +93,11 @@ async function fetchDataAndUpdate() {
   });
 }
 
-// Initial + alle 5 Sekunden aktualisieren
 fetchDataAndUpdate();
 setInterval(fetchDataAndUpdate, 5000);
 </script>
 
-<!-- Eingebettete Rohdaten im Data-Attribut -->
+<!-- Ergebnisse als JSON eingebettet -->
 <script data-results='{{ results | tojson | safe }}'></script>
 {% endblock %}
+
