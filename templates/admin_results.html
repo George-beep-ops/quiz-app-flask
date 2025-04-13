@@ -1,80 +1,57 @@
 {% extends 'base.html' %}
 
-{% block title %}Admin-Panel – Ergebnisse{% endblock %}
+{% block title %}Admin-Auswertung{% endblock %}
 
 {% block content %}
-<h2>Live-Auswertung</h2>
-<canvas id="barChart" width="600" height="300" style="margin-top: 2rem;"></canvas>
-<div style="margin-top: 2rem;">
-  <h3>🏆 Top 5 Spieler*innen</h3>
-  <ol id="toplist"></ol>
-</div>
+  {% if session.admin_authenticated %}
+    <h2>Live-Auswertung</h2>
+    <div style="display: flex; flex-direction: row; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+      <div>
+        <canvas id="barChart" width="400" height="300"></canvas>
+      </div>
+      <div>
+        <h3>Topliste</h3>
+        <ol>
+          {% for r in results %}
+            <li>{{ r.name }} – {{ r.score }} Punkte</li>
+          {% endfor %}
+        </ol>
+      </div>
+    </div>
+  {% else %}
+    <h2>Admin-Zugang</h2>
+    <form method="POST" style="margin-top: 2rem;">
+      <label for="password">Passwort:</label><br><br>
+      <input type="password" name="password" required style="padding: 0.5rem; font-size: 1rem;"><br><br>
+      <button type="submit" class="button">Einloggen</button>
+      {% if error %}
+        <p style="color: red; margin-top: 1rem;">{{ error }}</p>
+      {% endif %}
+    </form>
+  {% endif %}
 {% endblock %}
 
 {% block script %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  let chartInstance = null;
-
-  async function fetchResults() {
-    const response = await fetch("/api/results");
-    return await response.json();
-  }
-
-  function updateChart(data) {
-    const ctx = document.getElementById("barChart").getContext("2d");
-    const pointCounts = {};
-
-    data.forEach(r => {
-      pointCounts[r.score] = (pointCounts[r.score] || 0) + 1;
-    });
-
-    const labels = Object.keys(pointCounts).sort((a, b) => a - b);
-    const counts = labels.map(l => pointCounts[l]);
-
-    if (chartInstance) chartInstance.destroy();
-
-    chartInstance = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: 'Anzahl Spieler*innen pro Punktzahl',
-          data: counts,
-          backgroundColor: '#00549F'
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { stepSize: 1 }
+  {% if session.admin_authenticated %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      const ctx = document.getElementById('barChart').getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: {{ distribution.keys()|list }},
+          datasets: [{
+            label: 'Teilnehmer:innen',
+            data: {{ distribution.values()|list }},
+            backgroundColor: '#00549F'
+          }]
+        },
+        options: {
+          scales: {
+            y: { beginAtZero: true }
           }
         }
-      }
-    });
-  }
-
-  function updateToplist(data) {
-    const topList = document.getElementById("toplist");
-    topList.innerHTML = "";
-    const sorted = data.sort((a, b) => b.score - a.score);
-    sorted.slice(0, 5).forEach(player => {
-      const li = document.createElement("li");
-      li.textContent = `${player.name} – ${player.score} Punkte`;
-      topList.appendChild(li);
-    });
-  }
-
-  async function refresh() {
-    const data = await fetchResults();
-    updateChart(data);
-    updateToplist(data);
-  }
-
-  // Initial & alle 5 Sekunden neu laden
-  refresh();
-  setInterval(refresh, 5000);
-</script>
+      });
+    </script>
+  {% endif %}
 {% endblock %}
