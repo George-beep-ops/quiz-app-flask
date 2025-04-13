@@ -5,7 +5,6 @@
 {% block content %}
   <h2>Wähle innerhalb von <strong>8 Sekunden</strong> zwei Begriffe, die durch Gamification gesteigert werden!</h2>
   <div class="timer">⏳ Zeit läuft... <span id="countdown">8</span></div>
-
   <form id="gameForm" method="POST">
     <div class="grid">
       <div class="tile" data-word="lernvermögen">lernvermögen</div>
@@ -14,53 +13,7 @@
       <div class="tile" data-word="engagement">engagement</div>
     </div>
     <input type="hidden" name="score" id="scoreInput" value="0">
-    <button type="submit" style="display: none;">Absenden</button>
   </form>
-{% endblock %}
-
-{% block style %}
-<style>
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-    max-width: 600px;
-    margin: 2rem auto;
-  }
-
-  .tile {
-    background-color: #eee;
-    border-radius: 10px;
-    padding: 2rem;
-    font-weight: bold;
-    font-size: 1.5rem;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    user-select: none;
-  }
-
-  .tile.selected {
-    background-color: #7CFC00; /* grün */
-    color: white;
-  }
-
-  .tile.incorrect {
-    background-color: #FF6B6B; /* rot */
-    color: white;
-  }
-
-  .tile.disabled {
-    pointer-events: none;
-    opacity: 0.6;
-  }
-
-  .timer {
-    font-size: 1.3rem;
-    font-weight: bold;
-    margin-top: 1rem;
-  }
-</style>
 {% endblock %}
 
 {% block script %}
@@ -68,35 +21,32 @@
   const correctWords = ["lernvermögen", "fokussierung", "engagement"];
   const tiles = document.querySelectorAll('.tile');
   const countdownEl = document.getElementById("countdown");
+  const form = document.getElementById("gameForm");
+
   let selected = [];
   let score = 0;
   let timeLeft = 8;
   let gameEnded = false;
 
-  function endGame() {
-    if (gameEnded) return;
-    gameEnded = true;
-    document.getElementById('scoreInput').value = score;
-    tiles.forEach(tile => tile.classList.add('disabled'));
-    document.getElementById('gameForm').submit();
-  }
-
   tiles.forEach(tile => {
-    tile.addEventListener('click', (e) => {
-      e.preventDefault();
+    tile.addEventListener('click', () => {
+      if (gameEnded) return;
+
       const word = tile.dataset.word;
       if (!selected.includes(word) && selected.length < 2) {
         selected.push(word);
+        tile.classList.add('selected');
+
         if (correctWords.includes(word)) {
-          tile.classList.add('selected');
+          tile.style.backgroundColor = '#90ee90'; // grün
           score++;
         } else {
-          tile.classList.add('incorrect');
+          tile.style.backgroundColor = '#ffcccb'; // rot
         }
       }
+
       if (selected.length === 2) {
-        clearInterval(timerInterval);
-        setTimeout(endGame, 500); // kleines Delay für Farbeffekte
+        endGame();
       }
     });
   });
@@ -109,9 +59,16 @@
       endGame();
     }
   }, 1000);
+
+  function endGame() {
+    if (gameEnded) return;
+    gameEnded = true;
+
+    document.getElementById('scoreInput').value = score;
+    form.submit();
+  }
 </script>
 {% endblock %}
-
 
 
 
