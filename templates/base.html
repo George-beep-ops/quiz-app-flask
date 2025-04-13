@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>{% block title %}Gamequiz{% endblock %}</title>
+  <title>{% block title %}Quizgame – Learning and Gamification{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     html, body {
@@ -18,6 +18,15 @@
       justify-content: start;
       box-sizing: border-box;
     }
+    header {
+      width: 100%;
+      background-color: #004080;
+      color: white;
+      padding: 0.75rem;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
     main {
       flex: 1;
       display: flex;
@@ -30,26 +39,28 @@
       width: 100%;
       display: flex;
       justify-content: space-between;
+      align-items: center;
       padding: 0.5rem 1rem;
       background: #fff;
       box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
     }
     .logo {
-      height: 30px;
+      height: 28px;
     }
   </style>
   {% block extra_style %}{% endblock %}
 </head>
 <body>
+  <header>Quizgame – Learning and Gamification</header>
   <main>
     {% block content %}{% endblock %}
   </main>
   <footer>
     <img src="{{ url_for('static', filename='logo_tuwien.png') }}" alt="TU Wien" class="logo">
     <img src="{{ url_for('static', filename='logo_fraunhofer.png') }}" alt="Fraunhofer" class="logo">
-
   </footer>
   {% block script %}{% endblock %}
 </body>
 </html>
+
 
