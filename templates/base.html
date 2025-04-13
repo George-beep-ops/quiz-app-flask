@@ -3,49 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <title>{% block title %}Quizgame – Learning and Gamification{% endblock %}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100vh;
+      width: 100vw;
       font-family: Arial, sans-serif;
       background-color: #f5f5f5;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      box-sizing: border-box;
     }
     header {
-      flex: 0 0 auto;
-      width: 100%;
+      flex: 0 0 60px;
       background-color: #004080;
       color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: bold;
       display: flex;
       align-items: center;
       justify-content: center;
+      text-align: center;
     }
     main {
-      flex: 1 1 auto;
+      flex: 1;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       padding: 1rem;
       text-align: center;
-      overflow-y: auto;
+      overflow: auto;
+      max-height: calc(100vh - 120px); /* Platz für Header + Footer */
+      box-sizing: border-box;
     }
     footer {
-      flex: 0 0 auto;
-      width: 100%;
+      flex: 0 0 60px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 0.5rem 1rem;
-      background: #ffffff;
+      background-color: #fff;
       box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
     }
     .logo {
