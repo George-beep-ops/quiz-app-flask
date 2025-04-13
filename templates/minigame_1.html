@@ -1,98 +1,119 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <title>Minispiel 1 – Reaktionsaufgabe</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 2rem;
-        }
-        h2 {
-            margin-bottom: 1rem;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, 150px);
-            gap: 1rem;
-            justify-content: center;
-            margin-bottom: 2rem;
-        }
-        .tile {
-            background-color: #ddd;
-            padding: 1.5rem;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            user-select: none;
-        }
-        .tile.selected {
-            background-color: #90ee90;
-        }
-        .tile.incorrect {
-            background-color: #ffcccb;
-        }
-        .disabled {
-            pointer-events: none;
-            opacity: 0.5;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Minispiel 1 – Reaktionsaufgabe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 2rem;
+    }
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: #00549F;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+    .tile {
+      background-color: #e0e0e0;
+      padding: 1.5rem;
+      border-radius: 12px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      user-select: none;
+    }
+    .tile.selected {
+      background-color: #7BAF20;
+      color: white;
+    }
+    .tile.incorrect {
+      background-color: #ff6f6f;
+      color: white;
+    }
+    .disabled {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      background: #fff;
+    }
+    .logo {
+      height: 40px;
+    }
+  </style>
 </head>
 <body>
-    <h2>Wähle innerhalb von 5 Sekunden <strong>2 Begriffe</strong>, die durch Gamification gesteigert werden!</h2>
-    <form id="gameForm" method="POST">
-        <div class="grid">
-            <div class="tile" data-word="lernvermögen">lernvermögen</div>
-            <div class="tile" data-word="stress">stress</div>
-            <div class="tile" data-word="fokussierung">fokussierung</div>
-            <div class="tile" data-word="engagement">engagement</div>
-        </div>
-        <input type="hidden" name="score" id="scoreInput" value="0">
-        <button type="submit" style="display:none">Absenden</button>
-    </form>
+  <h2>Wähle <strong>2 Begriffe</strong>, die durch Gamification gesteigert werden! (5 Sekunden Zeit)</h2>
+  <form id="gameForm" method="POST">
+    <div class="grid">
+      <div class="tile" data-word="lernvermögen">lernvermögen</div>
+      <div class="tile" data-word="stress">stress</div>
+      <div class="tile" data-word="fokussierung">fokussierung</div>
+      <div class="tile" data-word="engagement">engagement</div>
+    </div>
+    <input type="hidden" name="score" id="scoreInput" value="0">
+    <button type="submit" style="display: none;">Absenden</button>
+  </form>
 
-    <script>
-        const correctWords = ["lernvermögen", "fokussierung", "engagement"];
-        const tiles = document.querySelectorAll('.tile');
-        let selected = [];
-        let score = 0;
-        let gameEnded = false;
+  <footer>
+    <img src="/static/logo_tuwien.png" alt="TU Wien" class="logo">
+    <img src="/static/logo_fraunhofer.png" alt="Fraunhofer" class="logo">
+  </footer>
 
-        tiles.forEach(tile => {
-            tile.addEventListener('click', () => {
-                if (gameEnded) return;
-                const word = tile.dataset.word;
-                if (!selected.includes(word) && selected.length < 2) {
-                    selected.push(word);
-                    tile.classList.add('selected');
-                    if (correctWords.includes(word)) {
-                        score++;
-                    } else {
-                        tile.classList.add('incorrect');
-                    }
-                }
-                if (selected.length === 2) {
-                    endGame();
-                }
-            });
-        });
+  <script>
+    const correctWords = ["lernvermögen", "fokussierung", "engagement"];
+    const tiles = document.querySelectorAll('.tile');
+    let selected = [];
+    let score = 0;
 
-        function endGame() {
-            if (gameEnded) return;
-            gameEnded = true;
-            document.getElementById('scoreInput').value = score;
-            document.querySelectorAll('.tile').forEach(tile => tile.classList.add('disabled'));
-            document.getElementById('gameForm').submit();
+    tiles.forEach(tile => {
+      tile.addEventListener('click', () => {
+        const word = tile.dataset.word;
+        if (!selected.includes(word) && selected.length < 2) {
+          selected.push(word);
+          tile.classList.add('selected');
+          if (correctWords.includes(word)) {
+            score++;
+          } else {
+            tile.classList.add('incorrect');
+          }
         }
+        if (selected.length === 2) {
+          endGame();
+        }
+      });
+    });
 
-        // 5 Sekunden Timer
-        setTimeout(() => {
-            endGame();
-        }, 5000);
-    </script>
+    function endGame() {
+      document.getElementById('scoreInput').value = score;
+      document.querySelectorAll('.tile').forEach(tile => tile.classList.add('disabled'));
+      document.getElementById('gameForm').submit();
+    }
+
+    // 5 Sekunden Timer
+    setTimeout(endGame, 5000);
+  </script>
 </body>
 </html>
+
 
 

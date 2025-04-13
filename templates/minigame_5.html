@@ -6,35 +6,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       text-align: center;
       background-color: #f2f2f2;
-      padding: 1rem;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
     }
-    h2 {
-      margin-bottom: 1rem;
+    header {
+      background-color: #00549F;
+      color: white;
+      padding: 1.2rem;
+      width: 100%;
+      font-size: 1.8rem;
     }
     #word {
-      font-size: 1.5rem;
-      margin: 1rem;
+      font-size: 1.6rem;
+      margin: 1.5rem;
+      font-weight: bold;
     }
     #timer {
+      font-size: 1.4rem;
       font-weight: bold;
+      color: #444;
       margin-bottom: 1rem;
     }
     canvas {
       border: 2px solid #444;
       background: #fff;
       touch-action: none;
+      margin-bottom: 1rem;
     }
     #submitForm {
-      margin-top: 1rem;
       display: none;
+      margin: 1rem auto;
+    }
+    button {
+      font-size: 1.3rem;
+      padding: 0.8rem 2rem;
+      background-color: #00549F;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      background: #fff;
+    }
+    .logo {
+      height: 40px;
     }
   </style>
 </head>
 <body>
-  <h2>Zeichne einen <strong>Kreis</strong> bei richtigen Namen und ein <strong>Kreuz</strong> bei falschen!</h2>
+  <header>Minispiel 5 – Richtig? Kreis! Falsch? Kreuz!</header>
   <div id="word">Lade...</div>
   <div id="timer">20</div>
   <canvas id="drawCanvas" width="300" height="300"></canvas>
@@ -43,6 +79,11 @@
     <input type="hidden" name="score" id="scoreInput" value="0">
     <button type="submit">Weiter</button>
   </form>
+
+  <footer>
+    <img src="/static/logo_tuwien.png" alt="TU Wien" class="logo">
+    <img src="/static/logo_fraunhofer.png" alt="Fraunhofer" class="logo">
+  </footer>
 
   <script>
     const correctNames = ["jan", "jonathan", "fisal", "nils", "moritz"];
@@ -61,18 +102,14 @@
     const timerBox = document.getElementById("timer");
 
     function getRandomName() {
-      if (allNames.length === 0) return null;
       return allNames.splice(Math.floor(Math.random() * allNames.length), 1)[0];
     }
 
     function nextWord() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       points = [];
+      if (allNames.length === 0) return;
       current = getRandomName();
-      if (!current) {
-        endGame();
-        return;
-      }
       wordBox.textContent = current;
     }
 
@@ -94,30 +131,27 @@
     }
 
     canvas.addEventListener("touchstart", function(e) {
-      if (!current) return;
       drawing = true;
       points = [];
       ctx.beginPath();
       const touch = e.touches[0];
-      const rect = canvas.getBoundingClientRect();
-      ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
-      points.push({x: touch.clientX - rect.left, y: touch.clientY - rect.top});
+      ctx.moveTo(touch.clientX - canvas.offsetLeft, touch.clientY - canvas.offsetTop);
+      points.push({x: touch.clientX, y: touch.clientY});
     });
 
     canvas.addEventListener("touchmove", function(e) {
-      if (!drawing || !current) return;
+      if (!drawing) return;
       const touch = e.touches[0];
-      const rect = canvas.getBoundingClientRect();
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
+      const x = touch.clientX - canvas.offsetLeft;
+      const y = touch.clientY - canvas.offsetTop;
       ctx.lineTo(x, y);
       ctx.stroke();
-      points.push({x, y});
+      points.push({x: touch.clientX, y: touch.clientY});
     });
 
     canvas.addEventListener("touchend", function(e) {
       drawing = false;
-      if (points.length < 10 || !current) return;
+      if (points.length < 10) return;
       const gesture = classifyGesture(points);
       const isCorrect = correctNames.includes(current);
 
@@ -130,9 +164,14 @@
     function classifyGesture(pts) {
       const dx = Math.abs(pts[0].x - pts[pts.length - 1].x);
       const dy = Math.abs(pts[0].y - pts[pts.length - 1].y);
-      const isCircle = dx < 50 && dy < 50;
-      const isCross = pts.length > 15 && !isCircle;
-      return isCircle ? "circle" : isCross ? "cross" : "unknown";
+      const straight = pts.filter((p, i) => i % 3 === 0).every((p, i, arr) => {
+        if (i === 0) return true;
+        return Math.abs(p.x - arr[i - 1].x) < 40 || Math.abs(p.y - arr[i - 1].y) < 40;
+      });
+
+      if (dx < 50 && dy < 50) return "circle";
+      if (straight) return "cross";
+      return "unknown";
     }
 
     nextWord();
