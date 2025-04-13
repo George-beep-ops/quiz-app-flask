@@ -4,30 +4,34 @@
 
 {% block content %}
   <h2>Schüttle das Handy, wenn das Wort <span style="color: green;">"richtig"</span> erscheint!</h2>
-  <div id="wordBox" style="font-size: 2rem; font-weight: bold; padding: 2rem; background-color: white; border: 2px solid #333; border-radius: 12px; display: inline-block; min-width: 200px;">Bereit?</div>
+  <div id="wordBox"
+       style="font-size: 2rem; font-weight: bold; padding: 2rem; background-color: white;
+              border: 2px solid #333; border-radius: 12px; display: inline-block; min-width: 200px;">
+    Bereit?
+  </div>
 
   <form method="POST" id="submitForm" style="display: none;">
     <input type="hidden" name="score" id="scoreInput" value="0">
   </form>
 
-  <div id="info" style="margin-top: 1.5rem; font-size: 1.4rem; font-weight: bold;"></div>
+  <div id="info" style="margin-top: 1rem; font-size: 1.2rem;"></div>
 {% endblock %}
 
 {% block script %}
 <script>
-  const words = ["falsch", "richtig", "falsch", "nein", "ja aber nein", "richtig"];
-  let currentWord = "Bereit?";
-  let score = 0;
-  let shakeCount = 0;
-  let lastShake = 0;
-  let index = 0;
-
   const wordBox = document.getElementById("wordBox");
   const info = document.getElementById("info");
   const scoreInput = document.getElementById("scoreInput");
   const form = document.getElementById("submitForm");
 
-  // Zeige nach 5 Sekunden die Wörter in Endlosschleife
+  const words = ["falsch", "richtig", "nein", "richtig", "ja aber nein", "falsch"];
+  let score = 0;
+  let shakeCount = 0;
+  let lastShake = 0;
+  let currentWord = "";
+  let index = 0;
+
+  // Endlosschleife starten nach 5 Sekunden "Bereit"
   setTimeout(() => {
     showNextWord();
   }, 5000);
@@ -37,34 +41,31 @@
 
     currentWord = words[index];
     wordBox.textContent = currentWord;
-    info.textContent = ""; // leere Info bei jedem neuen Wort
-
-    index = (index + 1) % words.length; // Endlosschleife
+    info.textContent = "";
+    index = (index + 1) % words.length;
 
     setTimeout(showNextWord, 2000);
   }
 
   function detectShake(event) {
     const now = new Date().getTime();
-    if ((now - lastShake) < 1000 || shakeCount >= 2) return;
+    if ((now - lastShake) < 1000) return;
 
     const acc = event.accelerationIncludingGravity;
     const total = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
 
-    if (total > 25) {
+    if (total > 25 && shakeCount < 2) {
       lastShake = now;
       if (currentWord === "richtig") {
         score++;
-        info.textContent = "➡️ Punkt erhalten!";
-        info.style.color = "green";
+        info.innerHTML = '<span style="color: green;">✔️ Punkt erhalten!</span>';
       } else {
-        info.textContent = "❌ Kein Punkt.";
-        info.style.color = "red";
+        info.innerHTML = '<span style="color: red;">❌ Kein Punkt.</span>';
       }
 
       shakeCount++;
 
-      if (shakeCount >= 2) {
+      if (shakeCount === 2) {
         setTimeout(() => {
           scoreInput.value = score;
           form.submit();
@@ -80,3 +81,4 @@
   }
 </script>
 {% endblock %}
+
