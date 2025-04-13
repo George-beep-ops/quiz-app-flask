@@ -1,179 +1,110 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <title>Minispiel 2 – Gefahr erkennen</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-    }
-    header {
-      background-color: #00549F;
-      color: white;
-      font-size: 1.8rem;
-      padding: 1.2rem;
-      text-align: center;
-      width: 100%;
-    }
-    canvas {
-      background: white;
-      border: 2px solid #ccc;
-      margin-top: 1rem;
-      max-width: 90vw;
-    }
-    #submitForm {
-      text-align: center;
-      margin: 1.5rem auto;
-    }
-    button {
-      font-size: 1.3rem;
-      padding: 0.8rem 2rem;
-      background-color: #00549F;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0077cc;
-    }
-    footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      padding: 0.5rem 1rem;
-      background: #fff;
-    }
-    .logo {
-      height: 40px;
-    }
-  </style>
-</head>
-<body>
-  <header>Minispiel 2 – Was ist eine mögliche Gefahr?</header>
+{% extends 'base.html' %}
+
+{% block title %}Minispiel 2 – Gefahr erkennen{% endblock %}
+
+{% block content %}
+  <h2>Minispiel 2 – Was ist eine mögliche Gefahr?</h2>
   <canvas id="gameCanvas" width="800" height="400"></canvas>
   <form method="POST" id="submitForm">
     <input type="hidden" name="score" id="scoreInput" value="0">
     <button type="submit">Weiter</button>
   </form>
-  <footer>
-    <img src="/static/logo_tuwien.png" alt="TU Wien" class="logo">
-    <img src="/static/logo_fraunhofer.png" alt="Fraunhofer" class="logo">
-  </footer>
+{% endblock %}
 
-  <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
+{% block script %}
+<script>
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
 
-    const targets = [
-      "zu wenige spiele",
-      "zu viele spiele",
-      "ablenkung",
-      "einsamkeit",
-      "traurigkeit",
-      "bedauern"
-    ];
+  const targets = [
+    "zu wenige spiele",
+    "zu viele spiele",
+    "ablenkung",
+    "einsamkeit",
+    "traurigkeit",
+    "bedauern"
+  ];
 
-    const correctTargets = [
-      "zu wenige spiele",
-      "einsamkeit",
-      "traurigkeit",
-      "bedauern"
-    ];
+  const correctTargets = [
+    "zu wenige spiele",
+    "einsamkeit",
+    "traurigkeit",
+    "bedauern"
+  ];
 
-    let floating = [];
-    let score = 0;
-    let gameRunning = true;
+  let floating = [];
+  let score = 0;
+  let gameRunning = true;
 
-    class Word {
-      constructor(text) {
-        this.text = text;
-        this.x = Math.random() * (canvas.width - 100);
-        this.y = Math.random() * canvas.height;
-        this.speed = 0.5 + Math.random();
-        this.hit = false;
-      }
+  class Word {
+    constructor(text) {
+      this.text = text;
+      this.x = Math.random() * (canvas.width - 100);
+      this.y = Math.random() * canvas.height;
+      this.speed = 0.5 + Math.random();
+      this.hit = false;
+    }
 
-      update() {
-        if (!this.hit) {
-          this.y += this.speed;
-          if (this.y > canvas.height) this.y = 0;
-        }
-      }
-
-      draw() {
-        ctx.fillStyle = this.hit ? "#ccc" : "#333";
-        ctx.font = "bold 20px Arial";
-        ctx.fillText(this.text, this.x, this.y);
-      }
-
-      isClicked(x, y) {
-        const width = ctx.measureText(this.text).width;
-        return (
-          x >= this.x && x <= this.x + width &&
-          y >= this.y - 20 && y <= this.y
-        );
+    update() {
+      if (!this.hit) {
+        this.y += this.speed;
+        if (this.y > canvas.height) this.y = 0;
       }
     }
 
-    function setup() {
-      targets.forEach(t => floating.push(new Word(t)));
+    draw() {
+      ctx.fillStyle = this.hit ? "#ccc" : "#333";
+      ctx.font = "bold 20px Arial";
+      ctx.fillText(this.text, this.x, this.y);
     }
 
-    function gameLoop() {
-      if (!gameRunning) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      floating.forEach(w => {
-        w.update();
-        w.draw();
-      });
-      requestAnimationFrame(gameLoop);
+    isClicked(x, y) {
+      const width = ctx.measureText(this.text).width;
+      return (
+        x >= this.x && x <= this.x + width &&
+        y >= this.y - 20 && y <= this.y
+      );
     }
+  }
 
-    canvas.addEventListener("click", function(e) {
-      if (!gameRunning) return;
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+  function setup() {
+    floating = [];
+    targets.forEach(t => floating.push(new Word(t)));
+  }
 
-      floating.forEach(w => {
-        if (!w.hit && w.isClicked(x, y)) {
-          w.hit = true;
-          if (correctTargets.includes(w.text)) {
-            score++;
-          }
-        }
-      });
+  function gameLoop() {
+    if (!gameRunning) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    floating.forEach(w => {
+      w.update();
+      w.draw();
     });
+    requestAnimationFrame(gameLoop);
+  }
 
-    setup();
-    gameLoop();
+  canvas.addEventListener("click", function(e) {
+    if (!gameRunning) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
-    setTimeout(() => {
-      gameRunning = false;
-      document.getElementById("scoreInput").value = score;
-      document.getElementById("submitForm").style.display = "block";
-    }, 10000); // 10 Sekunden Spielzeit
-  </script>
+    floating.forEach(w => {
+      if (!w.hit && w.isClicked(x, y)) {
+        w.hit = true;
+        if (correctTargets.includes(w.text)) {
+          score++;
+        }
+      }
+    });
+  });
 
-<footer>
-    <img src="/static/logo_tuwien.png" alt="TU Wien" class="logo">
-    <img src="/static/logo_fraunhofer.png" alt="Fraunhofer" class="logo">
-</footer>
+  setup();
+  gameLoop();
 
-
-
-</body>
-</html>
+  setTimeout(() => {
+    gameRunning = false;
+    document.getElementById("scoreInput").value = score;
+    document.getElementById("submitForm").style.display = "block";
+  }, 10000); // 10 Sekunden Spielzeit
+</script>
+{% endblock %}
