@@ -1,110 +1,85 @@
-{% extends 'base.html' %}
-
-{% block title %}Minispiel 2 – Gefahr erkennen{% endblock %}
-
-{% block content %}
-  <h2>Minispiel 2 – Was ist eine mögliche Gefahr?</h2>
-  <canvas id="gameCanvas" width="800" height="400"></canvas>
-  <form method="POST" id="submitForm">
-    <input type="hidden" name="score" id="scoreInput" value="0">
-    <button type="submit">Weiter</button>
-  </form>
-{% endblock %}
-
-{% block script %}
-<script>
-  const canvas = document.getElementById("gameCanvas");
-  const ctx = canvas.getContext("2d");
-
-  const targets = [
-    "zu wenige spiele",
-    "zu viele spiele",
-    "ablenkung",
-    "einsamkeit",
-    "traurigkeit",
-    "bedauern"
-  ];
-
-  const correctTargets = [
-    "zu wenige spiele",
-    "einsamkeit",
-    "traurigkeit",
-    "bedauern"
-  ];
-
-  let floating = [];
-  let score = 0;
-  let gameRunning = true;
-
-  class Word {
-    constructor(text) {
-      this.text = text;
-      this.x = Math.random() * (canvas.width - 100);
-      this.y = Math.random() * canvas.height;
-      this.speed = 0.5 + Math.random();
-      this.hit = false;
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Kachel-Auswahl</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      margin: 0;
+      text-align: center;
+      background-color: #f5f5f5;
     }
 
-    update() {
-      if (!this.hit) {
-        this.y += this.speed;
-        if (this.y > canvas.height) this.y = 0;
-      }
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
     }
 
-    draw() {
-      ctx.fillStyle = this.hit ? "#ccc" : "#333";
-      ctx.font = "bold 20px Arial";
-      ctx.fillText(this.text, this.x, this.y);
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      max-width: 600px;
+      margin: 0 auto;
     }
 
-    isClicked(x, y) {
-      const width = ctx.measureText(this.text).width;
-      return (
-        x >= this.x && x <= this.x + width &&
-        y >= this.y - 20 && y <= this.y
-      );
+    .tile {
+      background-color: #ddd;
+      padding: 1.5rem;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-  }
 
-  function setup() {
-    floating = [];
-    targets.forEach(t => floating.push(new Word(t)));
-  }
+    .tile.correct {
+      background-color: #9be29b;
+    }
 
-  function gameLoop() {
-    if (!gameRunning) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    floating.forEach(w => {
-      w.update();
-      w.draw();
-    });
-    requestAnimationFrame(gameLoop);
-  }
+    .tile.incorrect {
+      background-color: #f29a9a;
+    }
 
-  canvas.addEventListener("click", function(e) {
-    if (!gameRunning) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    .tile.disabled {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
 
-    floating.forEach(w => {
-      if (!w.hit && w.isClicked(x, y)) {
-        w.hit = true;
-        if (correctTargets.includes(w.text)) {
-          score++;
+  <h2>Wähle die Begriffe, die durch Gamification gesteigert werden!</h2>
+  <div class="grid" id="wordGrid"></div>
+
+  <script>
+    const words = ["Engagement", "Langeweile", "Fokussierung", "Stress", "Lernfreude", "Ablenkung"];
+    const correctWords = ["Engagement", "Fokussierung", "Lernfreude"];
+
+    const grid = document.getElementById("wordGrid");
+
+    words.forEach(word => {
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      tile.textContent = word;
+
+      tile.addEventListener("click", () => {
+        if (correctWords.includes(word)) {
+          tile.classList.add("correct");
+        } else {
+          tile.classList.add("incorrect");
         }
-      }
+        tile.classList.add("disabled");
+      });
+
+      grid.appendChild(tile);
     });
-  });
+  </script>
 
-  setup();
-  gameLoop();
-
-  setTimeout(() => {
-    gameRunning = false;
-    document.getElementById("scoreInput").value = score;
-    document.getElementById("submitForm").style.display = "block";
-  }, 10000); // 10 Sekunden Spielzeit
-</script>
-{% endblock %}
+</body>
+</html>
