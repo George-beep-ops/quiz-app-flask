@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Minispiel 1 – Reaktionsaufgabe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 2rem;
+        }
+        h2 {
+            margin-bottom: 1rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 150px);
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        .tile {
+            background-color: #ddd;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            user-select: none;
+        }
+        .tile.selected {
+            background-color: #90ee90;
+        }
+        .tile.incorrect {
+            background-color: #ffcccb;
+        }
+        .disabled {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <h2>Wähle innerhalb von 3 Sekunden <strong>2 Begriffe</strong>, die durch Gamification gesteigert werden!</h2>
+    <form id="gameForm" method="POST">
+        <div class="grid">
+            <div class="tile" data-word="lernvermögen">lernvermögen</div>
+            <div class="tile" data-word="stress">stress</div>
+            <div class="tile" data-word="fokussierung">fokussierung</div>
+            <div class="tile" data-word="engagement">engagement</div>
+        </div>
+        <input type="hidden" name="score" id="scoreInput" value="0">
+        <button type="submit" style="display:none">Absenden</button>
+    </form>
+
+    <script>
+        const correctWords = ["lernvermögen", "fokussierung", "engagement"];
+        const tiles = document.querySelectorAll('.tile');
+        let selected = [];
+        let score = 0;
+
+        tiles.forEach(tile => {
+            tile.addEventListener('click', () => {
+                const word = tile.dataset.word;
+                if (!selected.includes(word) && selected.length < 2) {
+                    selected.push(word);
+                    tile.classList.add('selected');
+                    if (correctWords.includes(word)) {
+                        score++;
+                    } else {
+                        tile.classList.add('incorrect');
+                    }
+                }
+                if (selected.length === 2) {
+                    endGame();
+                }
+            });
+        });
+
+        function endGame() {
+            document.getElementById('scoreInput').value = score;
+            document.querySelectorAll('.tile').forEach(tile => tile.classList.add('disabled'));
+            document.getElementById('gameForm').submit();
+        }
+
+        // 3 Sekunden Timer
+        setTimeout(() => {
+            endGame();
+        }, 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Minispiel 5 – Zeichenaufgabe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f2f2f2;
+      padding: 1rem;
+    }
+    h2 {
+      margin-bottom: 1rem;
+    }
+    #word {
+      font-size: 1.5rem;
+      margin: 1rem;
+    }
+    #timer {
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    canvas {
+      border: 2px solid #444;
+      background: #fff;
+      touch-action: none;
+    }
+    #submitForm {
+      margin-top: 1rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>Zeichne einen <strong>Kreis</strong> bei richtigen Namen und ein <strong>Kreuz</strong> bei falschen!</h2>
+  <div id="word">Lade...</div>
+  <div id="timer">20</div>
+  <canvas id="drawCanvas" width="300" height="300"></canvas>
+
+  <form method="POST" id="submitForm">
+    <input type="hidden" name="score" id="scoreInput" value="0">
+    <button type="submit">Weiter</button>
+  </form>
+
+  <script>
+    const correctNames = ["jan", "jonathan", "fisal", "nils", "moritz"];
+    const allNames = ["jan", "jonathan", "fisal", "nils", "moritz", "andreas", "daniel", "fabian", "georg", "michael"];
+
+    let canvas = document.getElementById("drawCanvas");
+    let ctx = canvas.getContext("2d");
+    let drawing = false;
+    let points = [];
+    let score = 0;
+    let current = "";
+    let timer = 20;
+    let interval;
+
+    const wordBox = document.getElementById("word");
+    const timerBox = document.getElementById("timer");
+
+    function getRandomName() {
+      return allNames.splice(Math.floor(Math.random() * allNames.length), 1)[0];
+    }
+
+    function nextWord() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      points = [];
+      if (allNames.length === 0) return;
+      current = getRandomName();
+      wordBox.textContent = current;
+    }
+
+    function endGame() {
+      document.getElementById("scoreInput").value = score;
+      document.getElementById("submitForm").style.display = "block";
+      wordBox.textContent = "Fertig!";
+    }
+
+    function startTimer() {
+      interval = setInterval(() => {
+        timer--;
+        timerBox.textContent = timer;
+        if (timer <= 0) {
+          clearInterval(interval);
+          endGame();
+        }
+      }, 1000);
+    }
+
+    canvas.addEventListener("touchstart", function(e) {
+      drawing = true;
+      points = [];
+      ctx.beginPath();
+      const touch = e.touches[0];
+      ctx.moveTo(touch.clientX - canvas.offsetLeft, touch.clientY - canvas.offsetTop);
+      points.push({x: touch.clientX, y: touch.clientY});
+    });
+
+    canvas.addEventListener("touchmove", function(e) {
+      if (!drawing) return;
+      const touch = e.touches[0];
+      const x = touch.clientX - canvas.offsetLeft;
+      const y = touch.clientY - canvas.offsetTop;
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      points.push({x: touch.clientX, y: touch.clientY});
+    });
+
+    canvas.addEventListener("touchend", function(e) {
+      drawing = false;
+      if (points.length < 10) return;
+      const gesture = classifyGesture(points);
+      const isCorrect = correctNames.includes(current);
+
+      if ((gesture === "circle" && isCorrect) || (gesture === "cross" && !isCorrect)) {
+        score++;
+      }
+      nextWord();
+    });
+
+    function classifyGesture(pts) {
+      const dx = Math.abs(pts[0].x - pts[pts.length - 1].x);
+      const dy = Math.abs(pts[0].y - pts[pts.length - 1].y);
+      const straight = pts.filter((p, i) => i % 3 === 0).every((p, i, arr) => {
+        if (i === 0) return true;
+        return Math.abs(p.x - arr[i - 1].x) < 40 || Math.abs(p.y - arr[i - 1].y) < 40;
+      });
+
+      if (dx < 50 && dy < 50) return "circle";
+      if (straight) return "cross";
+      return "unknown";
+    }
+
+    nextWord();
+    startTimer();
+  </script>
+</body>
+</html>
+

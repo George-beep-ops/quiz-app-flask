@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Minispiel 2 – Gefahr erkennen</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+      background: #f0f0f0;
+    }
+    h2 {
+      text-align: center;
+      margin-top: 1rem;
+    }
+    canvas {
+      display: block;
+      margin: 1rem auto;
+      background: white;
+      border: 2px solid #ccc;
+    }
+    #submitForm {
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>Was ist eine mögliche Gefahr von Gamification? Klicke die passenden Begriffe!</h2>
+  <canvas id="gameCanvas" width="800" height="500"></canvas>
+  <form method="POST" id="submitForm">
+    <input type="hidden" name="score" id="scoreInput" value="0">
+    <button type="submit">Weiter</button>
+  </form>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const targets = [
+      "zu wenige spiele",
+      "zu viele spiele",
+      "ablenkung",
+      "einsamkeit",
+      "traurigkeit",
+      "bedauern"
+    ];
+
+    const correctTargets = [
+      "zu wenige spiele",
+      "einsamkeit",
+      "traurigkeit",
+      "bedauern"
+    ];
+
+    let floating = [];
+    let score = 0;
+    let gameRunning = true;
+
+    class Word {
+      constructor(text) {
+        this.text = text;
+        this.x = Math.random() * (canvas.width - 100);
+        this.y = Math.random() * canvas.height;
+        this.speed = 0.5 + Math.random();
+        this.hit = false;
+      }
+
+      update() {
+        if (!this.hit) {
+          this.y += this.speed;
+          if (this.y > canvas.height) this.y = 0;
+        }
+      }
+
+      draw() {
+        ctx.fillStyle = this.hit ? "#ccc" : "#333";
+        ctx.font = "bold 20px Arial";
+        ctx.fillText(this.text, this.x, this.y);
+      }
+
+      isClicked(x, y) {
+        const width = ctx.measureText(this.text).width;
+        return (
+          x >= this.x && x <= this.x + width &&
+          y >= this.y - 20 && y <= this.y
+        );
+      }
+    }
+
+    function setup() {
+      targets.forEach(t => floating.push(new Word(t)));
+    }
+
+    function gameLoop() {
+      if (!gameRunning) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      floating.forEach(w => {
+        w.update();
+        w.draw();
+      });
+      requestAnimationFrame(gameLoop);
+    }
+
+    canvas.addEventListener("click", function(e) {
+      if (!gameRunning) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      floating.forEach(w => {
+        if (!w.hit && w.isClicked(x, y)) {
+          w.hit = true;
+          if (correctTargets.includes(w.text)) {
+            score++;
+          }
+        }
+      });
+    });
+
+    setup();
+    gameLoop();
+
+    setTimeout(() => {
+      gameRunning = false;
+      document.getElementById("scoreInput").value = score;
+      document.getElementById("submitForm").style.display = "block";
+    }, 10000); // 10 Sekunden Spielzeit
+  </script>
+</body>
+</html>

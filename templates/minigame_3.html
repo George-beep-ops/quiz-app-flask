@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Minispiel 3 – Reaktion per Bewegung</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background-color: #f5f5f5;
+    }
+    h2 {
+      margin-bottom: 1rem;
+    }
+    #wordBox {
+      font-size: 2rem;
+      font-weight: bold;
+      padding: 2rem;
+      background-color: white;
+      border: 2px solid #333;
+      border-radius: 12px;
+      display: inline-block;
+      min-width: 200px;
+    }
+    #info {
+      margin-top: 2rem;
+    }
+    #submitForm {
+      margin-top: 2rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>Schüttle das Handy, wenn das Wort <span style="color: green;">"richtig"</span> erscheint!</h2>
+  <div id="wordBox">Bereit?</div>
+
+  <form method="POST" id="submitForm">
+    <input type="hidden" name="score" id="scoreInput" value="0">
+    <button type="submit">Weiter</button>
+  </form>
+
+  <div id="info"></div>
+
+  <script>
+    const words = ["falsch", "richtig", "falsch", "nein", "ja aber nein", "richtig"];
+    const wordBox = document.getElementById("wordBox");
+    const info = document.getElementById("info");
+    const scoreInput = document.getElementById("scoreInput");
+    let score = 0;
+    let currentWord = "";
+    let index = 0;
+    let lastShake = 0;
+
+    function showNextWord() {
+      if (index >= words.length) {
+        endGame();
+        return;
+      }
+      currentWord = words[index];
+      wordBox.textContent = currentWord;
+      index++;
+      setTimeout(showNextWord, 1500);
+    }
+
+    function endGame() {
+      wordBox.textContent = "Fertig!";
+      scoreInput.value = score;
+      document.getElementById("submitForm").style.display = "block";
+    }
+
+    function detectShake(event) {
+      const now = new Date().getTime();
+      if ((now - lastShake) < 1000) return;
+      const acc = event.accelerationIncludingGravity;
+      const total = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
+      if (total > 25) {
+        lastShake = now;
+        if (currentWord === "richtig") {
+          score++;
+          info.textContent = "✔️ Punkt erhalten!";
+        } else {
+          info.textContent = "❌ Falscher Zeitpunkt.";
+        }
+      }
+    }
+
+    if (window.DeviceMotionEvent) {
+      window.addEventListener("devicemotion", detectShake, false);
+    } else {
+      alert("Dein Gerät unterstützt leider keine Bewegungserkennung.");
+    }
+
+    setTimeout(showNextWord, 1000);
+  </script>
+</body>
+</html>
