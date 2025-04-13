@@ -5,7 +5,7 @@
 {% block content %}
   <h2>Danke fürs Mitmachen!</h2>
   <canvas id="rocketCanvas" width="400" height="400" style="margin-top: 2rem;"></canvas>
-  <div id="scoreDisplay" data-score="{{ session['score'] | default(0) }}" style="font-size: 1.6rem; font-weight: bold; display: none; margin-top: 0.5rem;"></div>
+  <div id="scoreDisplay" data-score="{{ session['score'] | default(0) }}" style="font-size: 1.6rem; font-weight: bold; display: none; margin-top: 0.2rem;"></div>
 {% endblock %}
 
 {% block script %}
