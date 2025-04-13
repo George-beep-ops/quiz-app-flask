@@ -1,15 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
+    <meta charset="UTF-8">
     <title>Frage 1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 2rem;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 2rem;
+        }
+        label {
+            font-size: 1.5rem;
+            margin-left: 0.5rem;
+        }
+        input[type="radio"] {
+            transform: scale(1.5);
+            margin: 1rem;
+        }
+        button {
+            margin-top: 2rem;
+            font-size: 1.5rem;
+            padding: 1rem 2rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
     <h1>Funktioniert es?</h1>
     <form method="POST">
-        <input type="radio" id="yes" name="answer" value="ja" required>
-        <label for="yes">Ja</label><br>
-        <input type="radio" id="no" name="answer" value="nein">
-        <label for="no">Nein</label><br><br>
+        <div>
+            <input type="radio" id="yes" name="answer" value="ja" required>
+            <label for="yes">Ja</label>
+        </div>
+        <div>
+            <input type="radio" id="no" name="answer" value="nein">
+            <label for="no">Nein</label>
+        </div>
         <button type="submit">Antwort absenden</button>
     </form>
 </body>
