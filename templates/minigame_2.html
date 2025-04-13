@@ -4,33 +4,36 @@
 
 {% block extra_style %}
 <style>
-  .container {
-    position: relative;
-    width: 100%;
-    height: 60vh;
+  .game-wrapper {
     margin-top: 1rem;
+    height: 60vh;
+    width: 100%;
+    position: relative;
     overflow: hidden;
-    background-color: #f9f9f9;
+    background-color: #f0f0f0;
+    border-radius: 10px;
     border: 2px solid #ccc;
-    border-radius: 12px;
   }
 
   .word-tile {
     position: absolute;
-    padding: 0.5rem 1rem;
-    background-color: #ddd;
-    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
     font-weight: bold;
-    font-size: 0.9rem;
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    white-space: nowrap;
     cursor: pointer;
-    user-select: none;
-    transition: background-color 0.3s, transform 0.2s;
+    transition: background-color 0.3s ease;
   }
 
-  .word-tile.correct { background-color: #90ee90 !important; }
-  .word-tile.incorrect { background-color: #ffcccb !important; }
+  .word-tile.correct {
+    background-color: #90ee90 !important;
+  }
 
-  button { display: none; } /* Kein Button notwendig */
+  .word-tile.incorrect {
+    background-color: #ffcccb !important;
+  }
 </style>
 {% endblock %}
 
@@ -39,78 +42,76 @@
 
 <form method="POST" id="submitForm">
   <input type="hidden" name="score" id="scoreInput" value="0">
-  <div class="container" id="container"></div>
+  <div class="game-wrapper" id="gameArea"></div>
 </form>
 {% endblock %}
 
 {% block script %}
 <script>
-  const allWords = [
+  const gameArea = document.getElementById("gameArea");
+
+  const words = [
     "zu wenige spiele", "zu viele spiele", "ablenkung",
     "einsamkeit", "traurigkeit", "bedauern"
   ];
 
-  const correctWords = [
+  const correct = [
     "zu wenige spiele", "einsamkeit", "traurigkeit", "bedauern"
   ];
 
-  let selectedCount = 0;
   let score = 0;
-  const container = document.getElementById("container");
+  let selectedCount = 0;
 
-  allWords.forEach((word, index) => {
-    const el = document.createElement("div");
-    el.classList.add("word-tile");
-    el.textContent = word;
+  // Erzeuge Kacheln mit Bewegung
+  words.forEach(word => {
+    const tile = document.createElement("div");
+    tile.className = "word-tile";
+    tile.textContent = word;
+    gameArea.appendChild(tile);
 
-    const x = Math.random() * 80 + 5; // x-Position (%)
-    const y = Math.random() * 50 + 10; // y-Position (%)
-    el.style.left = x + "%";
-    el.style.top = y + "%";
+    // zufällige Startposition
+    let x = Math.random() * (gameArea.clientWidth - 120);
+    let y = Math.random() * (gameArea.clientHeight - 40);
+    let dx = (Math.random() - 0.5) * 2;
+    let dy = (Math.random() - 0.5) * 2;
 
-    const dx = (Math.random() - 0.5) * 1.5;
-    const dy = (Math.random() - 0.5) * 1.5;
+    tile.style.left = x + "px";
+    tile.style.top = y + "px";
 
-    let posX = x;
-    let posY = y;
-
-    // Bewegung
     function animate() {
-      if (selectedCount >= 3) return;
-      posX += dx;
-      posY += dy;
+      x += dx;
+      y += dy;
 
-      if (posX < 0 || posX > 90) posX -= dx * 2;
-      if (posY < 0 || posY > 80) posY -= dy * 2;
+      // Bounce an Kanten
+      if (x <= 0 || x >= gameArea.clientWidth - tile.offsetWidth) dx *= -1;
+      if (y <= 0 || y >= gameArea.clientHeight - tile.offsetHeight) dy *= -1;
 
-      el.style.left = posX + "%";
-      el.style.top = posY + "%";
-      requestAnimationFrame(animate);
+      tile.style.left = x + "px";
+      tile.style.top = y + "px";
+
+      if (selectedCount < 3) requestAnimationFrame(animate);
     }
 
     animate();
 
-    // Klick-Logik
-    el.addEventListener("click", () => {
-      if (el.classList.contains("correct") || el.classList.contains("incorrect")) return;
+    tile.addEventListener("click", () => {
+      if (tile.classList.contains("correct") || tile.classList.contains("incorrect")) return;
 
-      if (correctWords.includes(word)) {
-        el.classList.add("correct");
+      if (correct.includes(word)) {
+        tile.classList.add("correct");
         score++;
       } else {
-        el.classList.add("incorrect");
+        tile.classList.add("incorrect");
       }
 
       selectedCount++;
-      if (selectedCount >= 3) {
+      if (selectedCount === 3) {
         document.getElementById("scoreInput").value = score;
         setTimeout(() => {
           document.getElementById("submitForm").submit();
         }, 500);
       }
     });
-
-    container.appendChild(el);
   });
 </script>
 {% endblock %}
