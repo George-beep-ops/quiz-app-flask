@@ -4,8 +4,8 @@
 
 {% block content %}
   <h2>Danke fürs Mitmachen!</h2>
-  <canvas id="rocketCanvas" width="500" height="500" style="margin-top: 2rem;"></canvas>
-  <div id="scoreDisplay" style="font-size: 1.8rem; font-weight: bold; display: none; margin-top: 1rem;"></div>
+  <canvas id="rocketCanvas" width="400" height="400" style="margin-top: 2rem;"></canvas>
+  <div id="scoreDisplay" data-score="{{ session['score'] | default(0) }}" style="font-size: 1.6rem; font-weight: bold; display: none; margin-top: 1rem;"></div>
 {% endblock %}
 
 {% block script %}
@@ -15,17 +15,18 @@ const ctx = canvas.getContext("2d");
 let angle = 0;
 let explode = false;
 let particles = [];
-let speed = 0.02;  // Startgeschwindigkeit der Rakete
-const score = {{ score | default(0) }};
+
+const scoreDisplay = document.getElementById("scoreDisplay");
+const score = Number(scoreDisplay.dataset.score); // ✅ Keine Syntaxfehler möglich
 
 function drawRocket(x, y) {
   ctx.save();
   ctx.translate(x, y);
   ctx.fillStyle = "#ff3333";
   ctx.beginPath();
-  ctx.moveTo(0, -25);
-  ctx.lineTo(15, 15);
-  ctx.lineTo(-15, 15);
+  ctx.moveTo(0, -20);
+  ctx.lineTo(10, 10);
+  ctx.lineTo(-10, 10);
   ctx.closePath();
   ctx.fill();
   ctx.restore();
@@ -35,14 +36,13 @@ function createParticles(x, y) {
   for (let i = 0; i < 100; i++) {
     const angle = Math.random() * 2 * Math.PI;
     const speed = Math.random() * 6 + 2;
-    const colors = ["#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "#ffffff"];
+    const colors = ["#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500"];
     particles.push({
       x: x,
       y: y,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       alpha: 1,
-      radius: Math.random() * 6 + 2,
       color: colors[Math.floor(Math.random() * colors.length)]
     });
   }
@@ -52,11 +52,11 @@ function drawParticles() {
   particles.forEach(p => {
     ctx.fillStyle = `rgba(${hexToRgb(p.color)}, ${p.alpha})`;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
+    ctx.arc(p.x, p.y, 4, 0, 2 * Math.PI);
     ctx.fill();
     p.x += p.vx;
     p.y += p.vy;
-    p.alpha -= 0.015;
+    p.alpha -= 0.012;
   });
   particles = particles.filter(p => p.alpha > 0);
 }
@@ -73,18 +73,15 @@ function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if (!explode) {
-    const radius = 160;
+    const radius = 140;
     const x = canvas.width / 2 + Math.cos(angle) * radius;
     const y = canvas.height / 2 + Math.sin(angle) * radius;
     drawRocket(x, y);
-    angle += speed;
-    speed += 0.002;  // wird immer schneller
-
+    angle += 0.06; // schneller werdend
     if (angle > 2 * Math.PI) {
       explode = true;
       createParticles(x, y);
       setTimeout(() => {
-        const scoreDisplay = document.getElementById("scoreDisplay");
         scoreDisplay.textContent = `Du hast ${score} Punkte erreicht! 👍`;
         scoreDisplay.style.display = "block";
       }, 1200);
@@ -99,7 +96,6 @@ function animate() {
 animate();
 </script>
 {% endblock %}
-
 
 
 
