@@ -25,10 +25,10 @@ def index():
 def question():
     i = session.get('current', 0)
 
-    # Bei POST: Antwort überprüfen
+    # Bei POST: Antwort der vorherigen Frage prüfen
     if request.method == 'POST':
         answer = request.form.get('answer')
-        if i > 0:  # Vorherige Frage auswerten
+        if i > 0:
             correct = questions[i - 1]['correct']
             if answer == correct:
                 session['score'] += 1
@@ -39,31 +39,32 @@ def question():
         results.append({'name': nickname, 'score': session['score']})
         return redirect(url_for('results_page'))
 
-    # Nach jeder 2. Frage ein Minigame
+    # Minigame nach jeder 2. Frage, aber ohne current zu erhöhen
     if i > 0 and i % 2 == 0:
         return redirect(url_for('minigame', num=i // 2))
 
-    # Nächste Frage anzeigen
-    session['current'] = i + 1
+    # Frage anzeigen und Zähler erhöhen
     q = questions[i]
+    session['current'] = i + 1
     return render_template('question.html', q=q, index=i + 1)
 
 @app.route('/minigame/<int:num>', methods=['GET', 'POST'])
 def minigame(num):
     if request.method == 'POST':
-        punkte = 0
         try:
             punkte = int(request.form.get('score', 0))
         except:
-            pass
-        session['score'] += punkte if punkte > 0 else minigame_points.get(num, 0)
-        session['current'] += 1  # Weiter zur nächsten Frage
+            punkte = minigame_points.get(num, 0)
+        session['score'] += punkte
+
+        # NICHT nochmal den Zähler erhöhen – das übernimmt question()
         return redirect(url_for('question'))
+
     return render_template(f'minigame_{num}.html')
 
 @app.route('/results')
 def results_page():
-    score = session.get('score', 0)  # Score aus Session holen
+    score = session.get('score', 0)
     return render_template('results.html', score=score)
 
 @app.route('/admin_results', methods=['GET'])
@@ -82,4 +83,5 @@ def favicon():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
+
 
