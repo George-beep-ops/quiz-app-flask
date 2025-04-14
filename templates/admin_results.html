@@ -6,7 +6,7 @@
   <h2>Live-Auswertung</h2>
   <div style="display: flex; flex-direction: row; justify-content: space-around; flex-wrap: wrap;">
     <div>
-      <canvas id="barChart" width="400" height="300"></canvas>
+      <canvas id="barChart" width="500" height="300"></canvas>
     </div>
     <div>
       <h3>🏆 Topliste</h3>
@@ -33,31 +33,33 @@ async function fetchDataAndUpdate() {
   const results = JSON.parse(raw);
   const scoreCounts = {};
 
+  // Zähle wie viele Spieler jede Punktzahl erreicht haben
   results.forEach(entry => {
     const score = entry.score;
     scoreCounts[score] = (scoreCounts[score] || 0) + 1;
   });
 
+  // Sortierte Punktzahlen
   const sortedScores = Object.keys(scoreCounts).map(Number).sort((a, b) => a - b);
-  const labels = sortedScores.map(score => `${score} Punkte`);
-  const barHeights = sortedScores.map(score => score); // Score selbst = Höhe des Balkens
-  const numPlayers = sortedScores.map(score => scoreCounts[score]); // Datalabel unter Balken
+
+  // Die Punktzahlen sind die Balkenhöhen (y-Achse)
+  const barHeights = sortedScores.map(score => score);
+
+  // Spieleranzahl (Labels unter Balken)
+  const playerCounts = sortedScores.map(score => `${scoreCounts[score]} Spieler`);
 
   if (chart) {
-    chart.data.labels = labels;
+    chart.data.labels = playerCounts;
     chart.data.datasets[0].data = barHeights;
-    chart.options.plugins.datalabels.formatter = (_, context) => {
-      return `${numPlayers[context.dataIndex]} Spieler`;
-    };
     chart.update();
   } else {
     const ctx = document.getElementById("barChart").getContext("2d");
     chart = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: labels,
+        labels: playerCounts,
         datasets: [{
-          label: "Punktehöhe",
+          label: "Erreichte Punkte",
           data: barHeights,
           backgroundColor: "#0077cc"
         }]
@@ -73,17 +75,15 @@ async function fetchDataAndUpdate() {
               weight: 'bold',
               size: 12
             },
-            color: "#333",
-            formatter: (_, context) => {
-              return `${numPlayers[context.dataIndex]} Spieler`;
-            }
+            color: "#000",
+            formatter: value => `${value} Punkte`
           }
         },
         scales: {
           x: {
             title: {
               display: true,
-              text: "Punktewert"
+              text: "Spieleranzahl pro Punktzahl"
             },
             ticks: {
               precision: 0
@@ -94,7 +94,7 @@ async function fetchDataAndUpdate() {
             max: 20,
             title: {
               display: true,
-              text: "Punkte (Balkenhöhe)"
+              text: "Punkte"
             },
             ticks: {
               stepSize: 1,
@@ -107,7 +107,7 @@ async function fetchDataAndUpdate() {
     });
   }
 
-  // Topliste
+  // Topliste aktualisieren
   const sortedResults = results.slice().sort((a, b) => b.score - a.score);
   const ol = document.getElementById("topList");
   ol.innerHTML = "";
