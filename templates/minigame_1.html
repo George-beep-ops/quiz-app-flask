@@ -47,7 +47,8 @@
 
 {% block content %}
   <h2><strong>Minispiel 2 - Reagiere!</strong> <br> Tippe innerhalb von 8 Sekunden <strong>2 Begriffe</strong> an, die durch Gamification <strong>gesteigert</strong> werden!</h2>
-  <form id="gameForm" method="POST" action="{{ url_for('minigame', num=1) }}">
+  <form id="gameForm" method="POST" action="/next">
+
     <div class="grid">
       <div class="tile" data-word="lernvermögen">lernvermögen</div>
       <div class="tile" data-word="stress">stress</div>

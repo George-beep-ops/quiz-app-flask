@@ -53,7 +53,8 @@
 {% block content %}
 <h2 style="margin-top: 1rem;"><strong>Minispiel 2 – Gefahr erkennen!</strong><br>Was ist eine mögliche Gefahr bei Gamification?<br>Wähle bitte <strong>zwei passende Begriffe!</strong></h2>
 
-<form method="POST" id="submitForm">
+<form id="gameForm" method="POST" action="/next">
+
   <input type="hidden" name="score" id="scoreInput" value="0">
 </form>
 

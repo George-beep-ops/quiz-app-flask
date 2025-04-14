@@ -44,7 +44,8 @@
     <div class="message"><strong>Minispiel 5 erscheint bald!</strong></div>
     <div class="subtext">In <span id="countdown">3</span> Sekunden geht es zu der letzten Frage!</div>
   </div>
-  <form id="autoForm" method="POST">
+  <form id="gameForm" method="POST" action="/next">
+
     <input type="hidden" name="score" value="0">
   </form>
 {% endblock %}
