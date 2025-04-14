@@ -30,11 +30,13 @@
   let lastShake = 0;
   let currentWord = "";
   let index = 0;
+  let shakeAllowed = false;
 
-  // Endlosschleife starten nach 5 Sekunden "Bereit"
+  // Endlosschleife starten nach 4 Sekunden "Bereit"
   setTimeout(() => {
+    shakeAllowed = true;
     showNextWord();
-  }, 5000);
+  }, 4000);
 
   function showNextWord() {
     if (shakeCount >= 2) return;
@@ -48,6 +50,8 @@
   }
 
   function detectShake(event) {
+    if (!shakeAllowed) return;
+
     const now = new Date().getTime();
     if ((now - lastShake) < 1000) return;
 
@@ -81,4 +85,3 @@
   }
 </script>
 {% endblock %}
-
