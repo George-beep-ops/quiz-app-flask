@@ -42,7 +42,6 @@
     margin-top: 64vh;
     text-align: center;
   }
-
 </style>
 {% endblock %}
 
@@ -71,6 +70,7 @@
 
   let score = 0;
   let selectedCount = 0;
+  let maxSelections = 3;
 
   words.forEach(word => {
     const tile = document.createElement("div");
@@ -96,12 +96,16 @@
       tile.style.left = x + "px";
       tile.style.top = y + "px";
 
-      if (selectedCount < 3) requestAnimationFrame(animate);
+      if (selectedCount < maxSelections) requestAnimationFrame(animate);
     }
 
     animate();
 
     tile.addEventListener("click", () => {
+      // Keine weitere Auswahl möglich, wenn schon 3 gewählt wurden
+      if (selectedCount >= maxSelections) return;
+
+      // Verhindere doppelte Auswahl
       if (tile.classList.contains("correct") || tile.classList.contains("incorrect")) return;
 
       if (correct.includes(word)) {
@@ -112,7 +116,7 @@
       }
 
       selectedCount++;
-      if (selectedCount === 3) {
+      if (selectedCount === maxSelections) {
         document.getElementById("scoreInput").value = score;
         setTimeout(() => {
           document.getElementById("submitForm").submit();
