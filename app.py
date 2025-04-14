@@ -5,7 +5,10 @@ import os
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
+# Punktevergabe für Minispiele (Fallback bei Fehlern)
 minigame_points = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+
+# Ergebnisse (nur im RAM gespeichert)
 results = []
 
 @app.route('/', methods=['GET', 'POST'])
@@ -14,15 +17,15 @@ def index():
         nickname = request.form['nickname']
         session['nickname'] = nickname
         session['score'] = 0
-        session['question_index'] = 0
-        session['minigame_index'] = 1
+        session['current'] = 0
         return redirect(url_for('question'))
     return render_template('start.html')
 
 @app.route('/question', methods=['GET', 'POST'])
 def question():
-    i = session.get('question_index', 0)
+    i = session.get('current', 0)
 
+    # Bei POST: Antwort der vorherigen Frage prüfen
     if request.method == 'POST':
         answer = request.form.get('answer')
         if i > 0:
@@ -30,17 +33,19 @@ def question():
             if answer == correct:
                 session['score'] += 1
 
-    # Nach jeder 2. beantworteten Frage → Minispiel
-    if i > 0 and i % 2 == 0:
-        return redirect(url_for('minigame', num=session['minigame_index']))
-
+    # Quiz beendet?
     if i >= len(questions):
         nickname = session.get('nickname', 'Unbekannt')
         results.append({'name': nickname, 'score': session['score']})
         return redirect(url_for('results_page'))
 
+    # Minigame nach jeder 2. Frage, aber ohne current zu erhöhen
+    if i > 0 and i % 2 == 0:
+        return redirect(url_for('minigame', num=i // 2))
+
+    # Frage anzeigen und Zähler erhöhen
     q = questions[i]
-    session['question_index'] = i + 1
+    session['current'] = i + 1
     return render_template('question.html', q=q, index=i + 1)
 
 @app.route('/minigame/<int:num>', methods=['GET', 'POST'])
@@ -52,8 +57,7 @@ def minigame(num):
             punkte = minigame_points.get(num, 0)
         session['score'] += punkte
 
-        # nur minigame index erhöhen, nicht question index!
-        session['minigame_index'] = num + 1
+        # NICHT nochmal den Zähler erhöhen – das übernimmt question()
         return redirect(url_for('question'))
 
     return render_template(f'minigame_{num}.html')
@@ -70,10 +74,12 @@ def admin_results():
     sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
     return render_template('admin_results.html', results=sorted_results)
 
+# Favicon-Fehler verhindern (leere Antwort)
 @app.route('/favicon.ico')
 def favicon():
     return '', 204
 
+# Für Render: Portbindung
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
