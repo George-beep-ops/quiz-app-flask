@@ -4,6 +4,11 @@
 
 {% block content %}
   <h2>Schüttle das Handy, wenn das Wort <span style="color: green;">"richtig"</span> erscheint!</h2>
+
+  <div id="permissionOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 1000;">
+    <button id="startButton" style="font-size: 1.5rem; padding: 1rem 2rem; background-color: #0077cc; color: white; border: none; border-radius: 8px;">Spiel starten</button>
+  </div>
+
   <div id="wordBox"
        style="font-size: 2rem; font-weight: bold; padding: 2rem; background-color: white;
               border: 2px solid #333; border-radius: 12px; display: inline-block; min-width: 200px;">
@@ -19,22 +24,18 @@
 
 {% block script %}
 <script>
+  const words = ["falsch", "richtig", "nein", "richtig", "ja aber nein", "falsch"];
   const wordBox = document.getElementById("wordBox");
   const info = document.getElementById("info");
   const scoreInput = document.getElementById("scoreInput");
   const form = document.getElementById("submitForm");
 
-  const words = ["falsch", "richtig", "nein", "richtig", "ja aber nein", "falsch"];
   let score = 0;
   let shakeCount = 0;
   let lastShake = 0;
   let currentWord = "";
   let index = 0;
-
-  // Endlosschleife starten nach 5 Sekunden "Bereit"
-  setTimeout(() => {
-    showNextWord();
-  }, 5000);
+  let gameStarted = false;
 
   function showNextWord() {
     if (shakeCount >= 2) return;
@@ -74,11 +75,32 @@
     }
   }
 
-  if (window.DeviceMotionEvent) {
-    window.addEventListener("devicemotion", detectShake, false);
-  } else {
-    alert("Dein Gerät unterstützt leider keine Bewegungserkennung.");
+  function enableMotionDetection() {
+    if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+      DeviceMotionEvent.requestPermission()
+        .then(permissionState => {
+          if (permissionState === "granted") {
+            window.addEventListener("devicemotion", detectShake, false);
+            startGame();
+          } else {
+            alert("Bewegungserkennung wurde abgelehnt.");
+          }
+        }).catch(console.error);
+    } else {
+      // Für Android oder alte Browser
+      window.addEventListener("devicemotion", detectShake, false);
+      startGame();
+    }
   }
+
+  function startGame() {
+    if (gameStarted) return;
+    gameStarted = true;
+    document.getElementById("permissionOverlay").style.display = "none";
+    setTimeout(showNextWord, 5000); // 5 Sekunden „Bereit?“
+  }
+
+  document.getElementById("startButton").addEventListener("click", enableMotionDetection);
 </script>
 {% endblock %}
 
