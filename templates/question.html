@@ -4,7 +4,7 @@
 
 {% block content %}
   <h2>{{ q.question }}</h2>
-  <form method="POST" action="/next" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+  <form method="POST" action="{{ url_for('next_step') }}" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
     <div style="display: flex; flex-direction: column; gap: 1.2rem; margin-top: 1.5rem; width: 100%; max-width: 500px;">
       {% for option in q.options %}
         <label style="display: flex; align-items: center; font-size: 1.3rem; gap: 0.8rem; background-color: #f0f0f0; padding: 0.8rem 1rem; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
@@ -23,6 +23,8 @@
       border-radius: 6px;
       cursor: pointer;
       transition: background-color 0.2s ease;
-    ">Antwort absenden</button>
+    " onmouseover="this.style.backgroundColor='#003060'" onmouseout="this.style.backgroundColor='#004080'">
+      Antwort absenden
+    </button>
   </form>
 {% endblock %}

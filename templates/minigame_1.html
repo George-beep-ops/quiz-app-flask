@@ -46,9 +46,9 @@
 {% endblock %}
 
 {% block content %}
-  <h2><strong>Minispiel 2 - Reagiere!</strong> <br> Tippe innerhalb von 8 Sekunden <strong>2 Begriffe</strong> an, die durch Gamification <strong>gesteigert</strong> werden!</h2>
-  <form id="gameForm" method="POST" action="/next">
+  <h2><strong>Minispiel 1 – Reagiere!</strong><br>Tippe innerhalb von 8 Sekunden <strong>2 Begriffe</strong> an, die durch Gamification <strong>gesteigert</strong> werden!</h2>
 
+  <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
     <div class="grid">
       <div class="tile" data-word="lernvermögen">lernvermögen</div>
       <div class="tile" data-word="stress">stress</div>
@@ -56,8 +56,9 @@
       <div class="tile" data-word="engagement">engagement</div>
     </div>
     <input type="hidden" name="score" id="scoreInput" value="0">
-    <button type="submit" style="display:none">Absenden</button>
+    <button type="submit" style="display: none;">Absenden</button>
   </form>
+
   <div id="timer">⏳ Zeit läuft... 8</div>
 {% endblock %}
 
@@ -83,10 +84,7 @@
 
       selectedCount++;
       if (selectedCount === 2) {
-        // Alle weiteren deaktivieren
         tiles.forEach(t => t.classList.add("disabled"));
-
-        // Ergebnis übermitteln
         document.getElementById("scoreInput").value = score;
         setTimeout(() => {
           document.getElementById("gameForm").submit();
@@ -95,7 +93,7 @@
     });
   });
 
-  // Timer
+  // Timer: automatischer Abbruch nach 8 Sekunden
   let timeLeft = 8;
   const timerEl = document.getElementById("timer");
   const countdown = setInterval(() => {
@@ -110,6 +108,4 @@
   }, 1000);
 </script>
 {% endblock %}
-
-
 

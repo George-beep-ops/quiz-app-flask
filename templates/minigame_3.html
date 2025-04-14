@@ -3,15 +3,15 @@
 {% block title %}Minispiel 3 – Reaktion per Bewegung{% endblock %}
 
 {% block content %}
-  <h2><strong>Minispiel 3 - Geschick gefragt!</strong> <br> Schüttle das Handy, wenn das Wort <strong>"richtig"</strong> erscheint!</h2>
+  <h2><strong>Minispiel 3 – Geschick gefragt!</strong><br>Schüttle das Handy, wenn das Wort <strong>"richtig"</strong> erscheint!</h2>
+
   <div id="wordBox"
        style="font-size: 2rem; font-weight: bold; padding: 2rem; background-color: white;
               border: 2px solid #333; border-radius: 12px; display: inline-block; min-width: 200px;">
     Bereit?
   </div>
 
-  <form id="gameForm" method="POST" action="/next">
-
+  <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
     <input type="hidden" name="score" id="scoreInput" value="0">
   </form>
 
@@ -23,7 +23,7 @@
   const wordBox = document.getElementById("wordBox");
   const info = document.getElementById("info");
   const scoreInput = document.getElementById("scoreInput");
-  const form = document.getElementById("submitForm");
+  const form = document.getElementById("gameForm");
 
   const words = ["falsch", "richtig", "nein", "richtig", "ja aber nein", "falsch"];
   let score = 0;
@@ -33,7 +33,7 @@
   let index = 0;
   let shakeAllowed = false;
 
-  // Endlosschleife starten nach 4 Sekunden "Bereit"
+  // Starte das Spiel nach 3,5 Sekunden – vorher kein Schütteln erlaubt
   setTimeout(() => {
     shakeAllowed = true;
     showNextWord();
@@ -51,7 +51,7 @@
   }
 
   function detectShake(event) {
-    if (!shakeAllowed) return;
+    if (!shakeAllowed || shakeCount >= 2) return;
 
     const now = new Date().getTime();
     if ((now - lastShake) < 1000) return;
@@ -59,7 +59,7 @@
     const acc = event.accelerationIncludingGravity;
     const total = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
 
-    if (total > 25 && shakeCount < 2) {
+    if (total > 25) {
       lastShake = now;
       if (currentWord === "richtig") {
         score++;

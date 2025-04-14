@@ -44,8 +44,8 @@
     <div class="message"><strong>Minispiel 5 erscheint bald!</strong></div>
     <div class="subtext">In <span id="countdown">3</span> Sekunden geht es zu der letzten Frage!</div>
   </div>
-  <form id="gameForm" method="POST" action="/next">
 
+  <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
     <input type="hidden" name="score" value="0">
   </form>
 {% endblock %}
@@ -60,8 +60,9 @@
     countdownEl.textContent = seconds;
     if (seconds <= 0) {
       clearInterval(interval);
-      document.getElementById("autoForm").submit();
+      document.getElementById("gameForm").submit();
     }
   }, 1000);
 </script>
 {% endblock %}
+

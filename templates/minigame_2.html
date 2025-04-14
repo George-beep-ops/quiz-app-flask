@@ -53,8 +53,7 @@
 {% block content %}
 <h2 style="margin-top: 1rem;"><strong>Minispiel 2 – Gefahr erkennen!</strong><br>Was ist eine mögliche Gefahr bei Gamification?<br>Wähle bitte <strong>zwei passende Begriffe!</strong></h2>
 
-<form id="gameForm" method="POST" action="/next">
-
+<form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
   <input type="hidden" name="score" id="scoreInput" value="0">
 </form>
 
@@ -64,7 +63,7 @@
 {% block script %}
 <script>
   const gameArea = document.getElementById("gameArea");
-  const form = document.getElementById("submitForm");
+  const form = document.getElementById("gameForm");
   const scoreInput = document.getElementById("scoreInput");
 
   const words = [
@@ -130,7 +129,6 @@
 
       selectedCount++;
       if (selectedCount === 2) {
-        // Alle deaktivieren
         document.querySelectorAll(".word-tile").forEach(t => t.classList.add("disabled"));
         setTimeout(submitGame, 800);
       }
