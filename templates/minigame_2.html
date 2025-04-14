@@ -46,7 +46,7 @@
 {% endblock %}
 
 {% block content %}
-<h2 style="margin-top: 1rem;"><strong>Minispiel 2 - Gefahr erkennen:</strong> <br> Was ist eine mögliche Gefahr bei Gamification? Wähle bitte <strong>drei</strong> passende Begriffe!</h2>
+<h2 style="margin-top: 1rem;"><strong>Minispiel 2 – Gefahr erkennen:</strong> <br>Was ist eine mögliche Gefahr bei Gamification? Wähle bitte <strong>zwei passende Begriffe!</strong></h2>
 
 <form method="POST" id="submitForm">
   <input type="hidden" name="score" id="scoreInput" value="0">
@@ -70,7 +70,7 @@
 
   let score = 0;
   let selectedCount = 0;
-  let maxSelections = 3;
+  let gameFinished = false;
 
   words.forEach(word => {
     const tile = document.createElement("div");
@@ -87,6 +87,8 @@
     tile.style.top = y + "px";
 
     function animate() {
+      if (gameFinished) return;
+
       x += dx;
       y += dy;
 
@@ -96,17 +98,13 @@
       tile.style.left = x + "px";
       tile.style.top = y + "px";
 
-      if (selectedCount < maxSelections) requestAnimationFrame(animate);
+      requestAnimationFrame(animate);
     }
 
     animate();
 
     tile.addEventListener("click", () => {
-      // Keine weitere Auswahl möglich, wenn schon 3 gewählt wurden
-      if (selectedCount >= maxSelections) return;
-
-      // Verhindere doppelte Auswahl
-      if (tile.classList.contains("correct") || tile.classList.contains("incorrect")) return;
+      if (gameFinished || tile.classList.contains("correct") || tile.classList.contains("incorrect")) return;
 
       if (correct.includes(word)) {
         tile.classList.add("correct");
@@ -116,11 +114,13 @@
       }
 
       selectedCount++;
-      if (selectedCount === maxSelections) {
+
+      if (selectedCount === 2) {
+        gameFinished = true;
         document.getElementById("scoreInput").value = score;
         setTimeout(() => {
           document.getElementById("submitForm").submit();
-        }, 500);
+        }, 600);
       }
     });
   });
