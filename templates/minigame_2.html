@@ -51,7 +51,7 @@
 {% endblock %}
 
 {% block content %}
-<h2 style="margin-top: 1rem;"><strong>Minispiel 2 – Gefahr erkennen!</strong><br>Was ist eine mögliche Gefahr bei Gamification?<br>Wähle bitte <strong>zwei passende Begriffe!</strong></h2>
+<h2 style="margin-top: 1rem;"><strong>Minispiel 2 – Gefahr erkennen!</strong><br>Was ist eine mögliche Gefahr bei Gamification?<br>Wähle bitte <strong>drei passende Begriffe!</strong></h2>
 
 <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
   <input type="hidden" name="score" id="scoreInput" value="0">
@@ -128,7 +128,7 @@
       }
 
       selectedCount++;
-      if (selectedCount === 2) {
+      if (selectedCount === 3) {
         document.querySelectorAll(".word-tile").forEach(t => t.classList.add("disabled"));
         setTimeout(submitGame, 800);
       }
