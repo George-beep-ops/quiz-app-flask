@@ -56,10 +56,12 @@ def minigame(num):
         except:
             punkte = minigame_points.get(num, 0)
         session['score'] += punkte
-        session['current'] += 1  # WICHTIG: Fortschritt nach Minigame
+
+        # ACHTUNG: current NICHT erhöhen!
         return redirect(url_for('question'))
 
     return render_template(f'minigame_{num}.html')
+
 
 @app.route('/results')
 def results_page():
