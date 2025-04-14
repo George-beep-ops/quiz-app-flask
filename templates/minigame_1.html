@@ -33,7 +33,10 @@
   }
   .tile.selected { background-color: #90ee90; }
   .tile.incorrect { background-color: #ffcccb; }
-  .disabled { pointer-events: none; opacity: 0.5; }
+  .disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
   #timer {
     font-size: 1.2rem;
     margin: 1rem;
@@ -43,7 +46,7 @@
 {% endblock %}
 
 {% block content %}
-  <h2>Wähle innerhalb von 8 Sekunden <strong>2 Begriffe</strong>, die durch Gamification gesteigert werden!</h2>
+  <h2>Für Moritz verändert: Tippe innerhalb von 8 Sekunden <strong>2 Begriffe</strong> an, die durch Gamification gesteigert werden!</h2>
   <form id="gameForm" method="POST" action="{{ url_for('minigame', num=1) }}">
     <div class="grid">
       <div class="tile" data-word="lernvermögen">lernvermögen</div>
@@ -60,46 +63,52 @@
 {% block script %}
 <script>
   const correctWords = ["lernvermögen", "fokussierung", "engagement"];
-  const tiles = document.querySelectorAll('.tile');
-  const timerDisplay = document.getElementById('timer');
-  let selected = [];
   let score = 0;
-  let seconds = 8;
-  let countdown;
+  let selectedCount = 0;
+  const tiles = document.querySelectorAll(".tile");
 
   tiles.forEach(tile => {
-    tile.addEventListener('click', () => {
+    tile.addEventListener("click", () => {
+      if (tile.classList.contains("selected") || tile.classList.contains("incorrect")) return;
+      if (selectedCount >= 2) return;
+
       const word = tile.dataset.word;
-      if (!selected.includes(word) && selected.length < 2) {
-        selected.push(word);
-        tile.classList.add('selected');
-        if (correctWords.includes(word)) score++;
-        else tile.classList.add('incorrect');
+      if (correctWords.includes(word)) {
+        tile.classList.add("selected");
+        score++;
+      } else {
+        tile.classList.add("incorrect");
       }
-      if (selected.length === 2) {
-        clearInterval(countdown);
-        endGame();
+
+      selectedCount++;
+      if (selectedCount === 2) {
+        // Alle weiteren deaktivieren
+        tiles.forEach(t => t.classList.add("disabled"));
+
+        // Ergebnis übermitteln
+        document.getElementById("scoreInput").value = score;
+        setTimeout(() => {
+          document.getElementById("gameForm").submit();
+        }, 800);
       }
     });
   });
 
-  function endGame() {
-    document.getElementById('scoreInput').value = score;
-    document.querySelectorAll('.tile').forEach(tile => tile.classList.add('disabled'));
-    document.getElementById('gameForm').submit();
-  }
-
-  countdown = setInterval(() => {
-    seconds--;
-    timerDisplay.textContent = `⏳ Zeit läuft... ${seconds}`;
-    if (seconds <= 0) {
+  // Timer
+  let timeLeft = 8;
+  const timerEl = document.getElementById("timer");
+  const countdown = setInterval(() => {
+    timeLeft--;
+    timerEl.textContent = `⏳ Zeit läuft... ${timeLeft}`;
+    if (timeLeft <= 0 && selectedCount < 2) {
       clearInterval(countdown);
-      endGame();
+      tiles.forEach(t => t.classList.add("disabled"));
+      document.getElementById("scoreInput").value = score;
+      document.getElementById("gameForm").submit();
     }
   }, 1000);
 </script>
 {% endblock %}
-
 
 
 
