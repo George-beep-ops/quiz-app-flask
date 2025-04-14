@@ -39,21 +39,26 @@ async function fetchDataAndUpdate() {
   });
 
   const sortedScores = Object.keys(scoreCounts).map(Number).sort((a, b) => a - b);
-  const counts = sortedScores.map(score => scoreCounts[score]);
+  const labels = sortedScores.map(score => `${score} Punkte`);
+  const barHeights = sortedScores.map(score => score); // Score selbst = Höhe des Balkens
+  const numPlayers = sortedScores.map(score => scoreCounts[score]); // Datalabel unter Balken
 
   if (chart) {
-    chart.data.labels = sortedScores;
-    chart.data.datasets[0].data = counts;
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = barHeights;
+    chart.options.plugins.datalabels.formatter = (_, context) => {
+      return `${numPlayers[context.dataIndex]} Spieler`;
+    };
     chart.update();
   } else {
     const ctx = document.getElementById("barChart").getContext("2d");
     chart = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: sortedScores,
+        labels: labels,
         datasets: [{
-          label: "Anzahl der Spieler",
-          data: counts,
+          label: "Punktehöhe",
+          data: barHeights,
           backgroundColor: "#0077cc"
         }]
       },
@@ -64,35 +69,36 @@ async function fetchDataAndUpdate() {
           datalabels: {
             anchor: 'end',
             align: 'end',
-            formatter: (value) => `${value} Spieler`,
             font: {
               weight: 'bold',
               size: 12
             },
-            color: "#333"
+            color: "#333",
+            formatter: (_, context) => {
+              return `${numPlayers[context.dataIndex]} Spieler`;
+            }
           }
         },
         scales: {
           x: {
             title: {
-              display: false
+              display: true,
+              text: "Punktewert"
             },
             ticks: {
-              display: false
-            },
-            grid: {
-              display: false
+              precision: 0
             }
           },
           y: {
             beginAtZero: true,
+            max: 20,
             title: {
               display: true,
-              text: "Punkte"
+              text: "Punkte (Balkenhöhe)"
             },
             ticks: {
-              precision: 0,
-              stepSize: 1
+              stepSize: 1,
+              precision: 0
             }
           }
         }
@@ -101,6 +107,7 @@ async function fetchDataAndUpdate() {
     });
   }
 
+  // Topliste
   const sortedResults = results.slice().sort((a, b) => b.score - a.score);
   const ol = document.getElementById("topList");
   ol.innerHTML = "";
@@ -118,4 +125,3 @@ setInterval(fetchDataAndUpdate, 5000);
 <!-- Ergebnisse eingebettet -->
 <script data-results='{{ results | tojson | safe }}'></script>
 {% endblock %}
-
