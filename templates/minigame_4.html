@@ -89,7 +89,7 @@
     const parts = input.split(",").map(w => w.trim());
     const now = new Date().getTime();
 
-    if (parts.length >= 2 && parts[1].length > 0 && (now - lastTypingTime) > 1000) {
+    if (parts.length >= 2 && parts[1].length > 0 && (now - lastTypingTime) > 2000) {
       allowFlatCheck = true;
     }
   }, 200);
