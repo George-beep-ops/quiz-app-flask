@@ -21,6 +21,8 @@
   let submitted = false;
   let flatDetected = false;
   let timer = 20;
+  let allowFlatCheck = false;
+  let lastTypingTime = 0;
 
   const inputField = document.getElementById("inputField");
   const timerDisplay = document.getElementById("timer");
@@ -32,15 +34,14 @@
 
     if (timer <= 0 && !submitted) {
       clearInterval(countdown);
-      // Bei Zeitablauf – weiter, egal ob Eingabe oder nicht
-      checkInput();  // zur Punktevergabe bei richtigen Begriffen
+      checkInput();  // Punkte vergeben
       submitGame();
     }
   }, 1000);
 
   function checkInput() {
     const input = inputField.value.toLowerCase();
-    const given = input.split(",").map(word => word.trim()).filter(w => w !== "");
+    const given = input.split(",").map(w => w.trim()).filter(w => w !== "");
     score = 0;
     correctAnswers.forEach(answer => {
       if (given.includes(answer)) {
@@ -51,14 +52,23 @@
   }
 
   function checkIfFlat(event) {
-    const orientation = Math.abs(event.accelerationIncludingGravity.z);
-    if (orientation > 9 && orientation < 10.5 && !submitted) {
-      flatDetected = true;
+    if (!allowFlatCheck || submitted) return;
+
+    const acc = event.accelerationIncludingGravity;
+    const x = acc.x;
+    const y = acc.y;
+    const z = acc.z;
+
+    // Nur wenn waagerecht (fast ausschließlich Z-Kraft)
+    const isFlat = Math.abs(x) < 1 && Math.abs(y) < 1 && Math.abs(z) > 9.5;
+
+    if (isFlat) {
       const hasTwoInputs = checkInput();
       if (hasTwoInputs) {
-        score += 1;  // Zusatzpunkt fürs richtige Ablegen
+        flatDetected = true;
+        score += 1; // Zusatzpunkt
         extraDisplay.textContent = "✅ Zusatzpunkt!";
-        clearInterval(countdown); // stoppen, da schon erfolgreich
+        clearInterval(countdown);
         submitGame();
       }
     }
@@ -70,7 +80,23 @@
     document.getElementById("submitForm").submit();
   }
 
-  window.addEventListener("devicemotion", checkIfFlat);
+  inputField.addEventListener("input", () => {
+    lastTypingTime = new Date().getTime();
+  });
+
+  setInterval(() => {
+    const input = inputField.value;
+    const parts = input.split(",").map(w => w.trim());
+    const now = new Date().getTime();
+
+    if (parts.length >= 2 && parts[1].length > 0 && (now - lastTypingTime) > 1000) {
+      allowFlatCheck = true;
+    }
+  }, 200);
+
+  if (window.DeviceMotionEvent) {
+    window.addEventListener("devicemotion", checkIfFlat);
+  }
 </script>
 {% endblock %}
 
