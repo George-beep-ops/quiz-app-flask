@@ -41,8 +41,8 @@
 {% block content %}
   <div class="loader-container">
     <div class="loader-icon">⚙️</div>
-    <div class="message">Minispiel 5 erscheint bald!</div>
-    <div class="subtext">In <span id="countdown">3</span> Sekunden geht es zu den letzten Fragen</div>
+    <div class="message"><strong>Minispiel 5 erscheint bald!</strong></div>
+    <div class="subtext">In <span id="countdown">3</span> Sekunden geht es zu der letzten Frage!</div>
   </div>
   <form id="autoForm" method="POST">
     <input type="hidden" name="score" value="0">
@@ -61,6 +61,6 @@
       clearInterval(interval);
       document.getElementById("autoForm").submit();
     }
-  }, 200);
+  }, 1000);
 </script>
 {% endblock %}
