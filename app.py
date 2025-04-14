@@ -73,6 +73,11 @@ def admin_results():
     sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
     return render_template('admin_results.html', results=sorted_results)
 
+# Favicon-Fehler verhindern (leere Antwort)
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204
+
 # Für Render: Portbindung
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
