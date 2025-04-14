@@ -28,7 +28,7 @@ def question():
     # Bei POST: Antwort der vorherigen Frage prüfen
     if request.method == 'POST':
         answer = request.form.get('answer')
-        if i > 0:
+        if i > 0 and i <= len(questions):
             correct = questions[i - 1]['correct']
             if answer == correct:
                 session['score'] += 1
@@ -39,11 +39,11 @@ def question():
         results.append({'name': nickname, 'score': session['score']})
         return redirect(url_for('results_page'))
 
-    # Minigame nach jeder 2. Frage, aber ohne current zu erhöhen
+    # Minigame nach jeder 2. Frage
     if i > 0 and i % 2 == 0:
         return redirect(url_for('minigame', num=i // 2))
 
-    # Frage anzeigen und Zähler erhöhen
+    # Frage anzeigen und Index erhöhen
     q = questions[i]
     session['current'] = i + 1
     return render_template('question.html', q=q, index=i + 1)
@@ -56,8 +56,7 @@ def minigame(num):
         except:
             punkte = minigame_points.get(num, 0)
         session['score'] += punkte
-
-        # NICHT nochmal den Zähler erhöhen – das übernimmt question()
+        session['current'] += 1  # WICHTIG: Fortschritt nach Minigame
         return redirect(url_for('question'))
 
     return render_template(f'minigame_{num}.html')
