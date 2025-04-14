@@ -1,50 +1,55 @@
 {% extends "base.html" %}
 
-{% block title %}Startseite{% endblock %}
-
-{% block extra_style %}
-<style>
-  h1 {
-    font-size: 2rem;
-    margin: 1.5rem 0;
-  }
-  form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
-  input[type="text"] {
-    padding: 0.6rem;
-    font-size: 1rem;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    width: 80%;
-    max-width: 400px;
-  }
-  button {
-    padding: 0.6rem 1.2rem;
-    font-size: 1rem;
-    background-color: #004080;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  button:hover {
-    background-color: #003060;
-  }
-</style>
-{% endblock %}
+{% block title %}Quiz Start{% endblock %}
 
 {% block content %}
-  <h1>Willkommen zum Quiz!</h1>
-  <form method="POST">
-    <input type="text" name="nickname" placeholder="Dein Name oder Spitzname" required>
-    <button type="submit">Quiz starten</button>
+  <h2>Willkommen beim Quizgame!</h2>
+  <p>Bitte gib deinen Namen ein und erlaube die Bewegungserkennung:</p>
+
+  <form method="POST" id="startForm" style="display: none;">
+    <input type="text" name="nickname" placeholder="Dein Name" required
+           style="padding: 1rem; font-size: 1rem; width: 80%; max-width: 400px;">
+    <br><br>
+    <button type="submit" style="padding: 0.7rem 1.5rem; font-size: 1.1rem;">Start</button>
   </form>
+
+  <button id="motionBtn" style="margin-top: 2rem; font-size: 1rem; padding: 0.5rem 1rem; display: none;">
+    Bewegungserkennung aktivieren
+  </button>
 {% endblock %}
 
+{% block script %}
+<script>
+  function setupPermission() {
+    if (typeof DeviceMotionEvent !== "undefined" &&
+        typeof DeviceMotionEvent.requestPermission === "function") {
+
+      const motionBtn = document.getElementById("motionBtn");
+      const form = document.getElementById("startForm");
+
+      motionBtn.style.display = "inline-block";
+
+      motionBtn.addEventListener("click", () => {
+        DeviceMotionEvent.requestPermission().then(response => {
+          if (response === "granted") {
+            motionBtn.style.display = "none";
+            form.style.display = "block";
+            sessionStorage.setItem("motionGranted", "true");
+          } else {
+            alert("Die Bewegungserkennung ist notwendig für die Minispiele.");
+          }
+        }).catch(console.error);
+      });
+
+    } else {
+      // Android oder Desktop
+      document.getElementById("startForm").style.display = "block";
+    }
+  }
+
+  setupPermission();
+</script>
+{% endblock %}
 
 
 
