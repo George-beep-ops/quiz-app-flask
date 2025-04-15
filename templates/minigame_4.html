@@ -25,6 +25,8 @@
   let timer = 20;
   let allowFlatCheck = false;
   let lastTypingTime = 0;
+  let flatStartTime = null;
+  let flatTimerActive = false;
 
   const inputField = document.getElementById("inputField");
   const timerDisplay = document.getElementById("timer");
@@ -64,18 +66,29 @@
     const y = acc.y;
     const z = acc.z;
 
-    // Nur wenn waagerecht (±5°)
     const isFlat = Math.abs(x) < 1 && Math.abs(y) < 1 && Math.abs(z) > 9.5;
 
+    const now = new Date().getTime();
+
     if (isFlat) {
-      const hasTwoInputs = checkInput();
-      if (hasTwoInputs) {
-        flatDetected = true;
-        score += 1; // Zusatzpunkt
-        extraDisplay.textContent = "✅ Zusatzpunkt!";
-        clearInterval(countdown);
-        submitGame();
+      if (!flatTimerActive) {
+        flatStartTime = now;
+        flatTimerActive = true;
+      } else {
+        if (now - flatStartTime >= 1000) {
+          const hasTwoInputs = checkInput();
+          if (hasTwoInputs && !submitted) {
+            flatDetected = true;
+            score += 1;
+            extraDisplay.textContent = "✅ Zusatzpunkt!";
+            clearInterval(countdown);
+            submitGame();
+          }
+        }
       }
+    } else {
+      flatStartTime = null;
+      flatTimerActive = false;
     }
   }
 
@@ -89,7 +102,6 @@
     lastTypingTime = new Date().getTime();
   });
 
-  // Überprüfe alle 200ms ob Eingabe fertig und still
   setInterval(() => {
     const input = inputField.value;
     const parts = input.split(",").map(w => w.trim());
@@ -105,4 +117,3 @@
   }
 </script>
 {% endblock %}
-
