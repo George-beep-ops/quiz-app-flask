@@ -14,13 +14,13 @@
   }
   canvas {
     display: block;
-    width: 100vw;
-    height: 100vh;
+    margin: 0 auto;
     background-color: #ffffff;
     border: 3px solid #ccc;
     touch-action: none;
   }
 </style>
+
 {% endblock %}
 
 {% block content %}
@@ -34,12 +34,15 @@
 <script>
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+
+// Für Retina-Displays (scharfes Rendering)
 const dpr = window.devicePixelRatio || 1;
 canvas.width = window.innerWidth * dpr;
 canvas.height = window.innerHeight * dpr;
-canvas.style.width = window.innerWidth + 'px';
-canvas.style.height = window.innerHeight + 'px';
-ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+canvas.style.width = window.innerWidth + "px";
+canvas.style.height = window.innerHeight + "px";
+ctx.scale(dpr, dpr);
+
 
 
 const carImg = new Image();
