@@ -43,15 +43,15 @@ carImg.src = "{{ url_for('static', filename='car.png') }}";
 const finishImg = new Image();
 finishImg.src = "{{ url_for('static', filename='ziellinie.png') }}";
 
-const initialCarWidth = canvas.width * 0.11;
-const initialCarHeight = canvas.height * 0.2;
+const initialCarWidth = canvas.width * 0.15;
+const initialCarHeight = canvas.height * 0.15;
 const aspectRatio = initialCarWidth / initialCarHeight;
 
 const car = {
   width: initialCarWidth,
   height: initialCarHeight,
   x: canvas.width / 2 - initialCarWidth / 2,
-  y: canvas.height * 0.75 - initialCarHeight / 2
+  y: canvas.height * 0.5 - initialCarHeight / 2
 };
 
 const labels = [...Array(30).keys()].map(i => "Begriff " + (i + 1));
@@ -87,7 +87,7 @@ const finishLine = {
   y: -canvas.height * 0.25,
   targetY: canvas.height / 2.5,
   width: canvas.width * 0.8,
-  height: canvas.height * 0.08
+  height: canvas.height * 0.8
 };
 
 function drawLights() {
