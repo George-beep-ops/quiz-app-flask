@@ -35,7 +35,7 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// Retina-Optimierung: internes Canvas größer, aber sichtbare Fläche gleich
+// Retina-Optimierung
 const dpr = window.devicePixelRatio || 1;
 canvas.width = window.innerWidth * dpr;
 canvas.height = window.innerHeight * dpr;
@@ -53,14 +53,14 @@ const finishImg = new Image();
 finishImg.src = "{{ url_for('static', filename='ziellinie.png') }}";
 
 const initialCarWidth = logicalWidth * 0.15;
-const initialCarHeight = logicalHeight * 0.15;
+const initialCarHeight = logicalHeight * 0.11;
 const aspectRatio = initialCarWidth / initialCarHeight;
 
 const car = {
   width: initialCarWidth,
   height: initialCarHeight,
   x: logicalWidth / 2 - initialCarWidth / 2,
-  y: logicalHeight * 0.3 - initialCarHeight / 2
+  y: logicalHeight * 0.7 - initialCarHeight / 2
 };
 
 const labels = [...Array(30).keys()].map(i => "Begriff " + (i + 1));
@@ -91,6 +91,7 @@ let hits = 0;
 let score = 0;
 let gameOver = false;
 let animationPhase = false;
+let submitted = false;
 
 const finishLine = {
   y: -logicalHeight * 0.25,
@@ -196,13 +197,11 @@ function drawFinishAnimation() {
   ctx.drawImage(finishImg, logicalWidth / 2 - finishLine.width / 2, finishLine.y, finishLine.width, finishLine.height);
   ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
 
-  if (finishLine.y >= finishLine.targetY && car.y + car.height > 0) {
-    car.y -= 4;
-  }
-  if (car.y + car.height < 0) {
-  setTimeout(() => {
-    document.getElementById("gameForm").submit();
-  }, 300);
+  if (!submitted && finishLine.y >= finishLine.targetY && car.y + car.height < 0) {
+    submitted = true;
+    setTimeout(() => {
+      document.getElementById("gameForm").submit();
+    }, 300);
   }
 }
 
@@ -228,6 +227,7 @@ function update() {
   requestAnimationFrame(update);
 }
 
+// Touch- und Maussteuerung
 canvas.addEventListener("touchstart", e => {
   touchActive = true;
   touchX = e.touches[0].clientX;
@@ -236,7 +236,6 @@ canvas.addEventListener("touchmove", e => {
   if (touchActive) touchX = e.touches[0].clientX;
 });
 canvas.addEventListener("touchend", () => touchActive = false);
-
 canvas.addEventListener("mousedown", e => {
   touchActive = true;
   touchX = e.clientX;
