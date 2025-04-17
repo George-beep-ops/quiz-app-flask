@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Minispiel 5 – Vorschau{% endblock %}
+
+{% block extra_style %}
+<style>
+  .loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 4rem;
+  }
+
+  .loader-icon {
+    font-size: 4rem;
+    animation: rotate 2s linear infinite;
+    color: #555;
+  }
+
+  @keyframes rotate {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .message {
+    font-size: 1.6rem;
+    font-weight: bold;
+    margin-top: 1.5rem;
+    color: #444;
+  }
+
+  .subtext {
+    font-size: 1.2rem;
+    color: #666;
+    margin-top: 0.5rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="loader-container">
+    <div class="loader-icon">⚙️</div>
+    <div class="message"><strong>Minispiel 5 erscheint bald!</strong></div>
+    <div class="subtext">In <span id="countdown">3</span> Sekunden geht es zu der letzten Frage!</div>
+  </div>
+
+  <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
+    <input type="hidden" name="score" value="0">
+  </form>
+{% endblock %}
+
+{% block script %}
+<script>
+  let seconds = 3;
+  const countdownEl = document.getElementById("countdown");
+
+  const interval = setInterval(() => {
+    seconds--;
+    countdownEl.textContent = seconds;
+    if (seconds <= 0) {
+      clearInterval(interval);
+      document.getElementById("gameForm").submit();
+    }
+  }, 1000);
+</script>
+{% endblock %}
+
