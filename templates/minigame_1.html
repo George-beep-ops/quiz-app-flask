@@ -60,7 +60,7 @@ const car = {
   width: initialCarWidth,
   height: initialCarHeight,
   x: logicalWidth / 2 - initialCarWidth / 2,
-  y: logicalHeight * 0.5 - initialCarHeight / 2
+  y: logicalHeight * 0.3 - initialCarHeight / 2
 };
 
 const labels = [...Array(30).keys()].map(i => "Begriff " + (i + 1));
@@ -200,7 +200,9 @@ function drawFinishAnimation() {
     car.y -= 4;
   }
   if (car.y + car.height < 0) {
+  setTimeout(() => {
     document.getElementById("gameForm").submit();
+  }, 300);
   }
 }
 
