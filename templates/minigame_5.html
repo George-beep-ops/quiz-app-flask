@@ -14,7 +14,8 @@
   }
   canvas {
     display: block;
-    margin: 0 auto;
+    width: 100vw;
+    height: 100vh;
     background-color: #ffffff;
     border: 3px solid #ccc;
     touch-action: none;
@@ -39,10 +40,8 @@ canvas.height = window.innerHeight;
 const carImg = new Image();
 carImg.src = "{{ url_for('static', filename='car.png') }}";
 
-
 const finishImg = new Image();
 finishImg.src = "{{ url_for('static', filename='ziellinie.png') }}";
-
 
 const initialCarWidth = canvas.width * 0.11;
 const initialCarHeight = canvas.height * 0.2;
@@ -61,7 +60,7 @@ const getNewObject = label => ({
   x: Math.random() * (canvas.width - 80),
   y: -Math.random() * canvas.height * 2,
   speed: 1.5 + Math.random() * 1.5,
-  radius: 40,
+  radius: canvas.width * 0.05,
   label,
   good: goodWords.includes(label),
   hit: false,
@@ -92,14 +91,14 @@ const finishLine = {
 };
 
 function drawLights() {
-  const totalWidth = 300;
+  const totalWidth = canvas.width * 0.5;
   const spacing = totalWidth / 5;
   const baseX = canvas.width / 2 - totalWidth / 2;
   const baseY = canvas.height / 3;
 
   if (showText) {
     ctx.fillStyle = "#333";
-    ctx.font = "36px sans-serif";
+    ctx.font = `${canvas.width * 0.05}px sans-serif`;
     ctx.textAlign = "center";
     ctx.fillText("Bereit?", canvas.width / 2, baseY - 60);
   }
@@ -107,12 +106,12 @@ function drawLights() {
   for (let i = 0; i < 5; i++) {
     ctx.fillStyle = "#333";
     ctx.beginPath();
-    ctx.arc(baseX + i * spacing, baseY, 20, 0, Math.PI * 2);
+    ctx.arc(baseX + i * spacing, baseY, canvas.width * 0.025, 0, Math.PI * 2);
     ctx.fill();
     ctx.closePath();
 
     ctx.beginPath();
-    ctx.arc(baseX + i * spacing, baseY + 40, 20, 0, Math.PI * 2);
+    ctx.arc(baseX + i * spacing, baseY + canvas.height * 0.05, canvas.width * 0.025, 0, Math.PI * 2);
     ctx.fillStyle = lights[i] ? "#ff0000" : "#222";
     ctx.fill();
     ctx.closePath();
@@ -152,7 +151,7 @@ function drawBubblesAndCar() {
       ctx.closePath();
 
       ctx.fillStyle = "#000";
-      ctx.font = "13px sans-serif";
+      ctx.font = `${canvas.width * 0.025}px sans-serif`;
       ctx.textAlign = "center";
       ctx.fillText(obj.label, 0, 5);
       ctx.restore();
