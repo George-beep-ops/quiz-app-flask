@@ -73,7 +73,6 @@ const car = {
 
 const labels = [...Array(30).keys()].map(i => "Begriff " + (i + 1));
 const goodWords = labels.slice(0, 15);
-
 const BUBBLE_SPEED = 2;
 
 function doesOverlap(x, y, radius, others) {
@@ -123,9 +122,6 @@ let showText = true;
 let lightIndex = 4;
 let timer = 0;
 
-let touchActive = false;
-let touchX = 0;
-
 let hits = 0;
 let score = 0;
 let gameOver = false;
@@ -133,12 +129,11 @@ let animationPhase = false;
 let animationDone = false;
 
 const finishLine = {
-  y: -logicalHeight * 0.25, // Startpunkt weit oben
-  targetY: logicalHeight * 0.25, // Mitte des Bildschirms
+  y: -logicalHeight * 0.25,
+  targetY: logicalHeight * 0.25,
   width: logicalWidth * 1.2,
   height: logicalHeight * 0.6
 };
-
 
 function drawLights() {
   const totalWidth = logicalWidth * 0.7;
@@ -170,11 +165,6 @@ function drawLights() {
 }
 
 function drawBubblesAndCar() {
-  if (touchActive) {
-    car.x = touchX - car.width / 2;
-    car.x = Math.max(0, Math.min(logicalWidth - car.width, car.x));
-  }
-
   for (let i = 0; i < objects.length; i++) {
     const obj = objects[i];
     obj.y += obj.speed;
@@ -209,7 +199,8 @@ function drawBubblesAndCar() {
       ctx.restore();
     }
 
-    if (!obj.hit && obj.x + obj.radius * 2 > car.x && obj.x < car.x + car.width && obj.y + obj.radius * 2 > car.y && obj.y < car.y + car.height) {
+    if (!obj.hit && obj.x + obj.radius * 2 > car.x && obj.x < car.x + car.width &&
+        obj.y + obj.radius * 2 > car.y && obj.y < car.y + car.height) {
       obj.hit = true;
       hits++;
       if (obj.good) score++;
@@ -225,35 +216,23 @@ function drawBubblesAndCar() {
 }
 
 function drawFinishAnimation() {
-  // === Ziellinie bewegen ===
   if (finishLine.y < finishLine.targetY) {
-    finishLine.y += 3; // Geschwindigkeit Ziellinie
+    finishLine.y += 3;
   }
 
-  // === Fortschritt vom Auto zur Ziellinie ===
   const targetPoint = finishLine.y + finishLine.height / 2;
   const startPoint = logicalHeight * 0.8;
   const progress = 1 - Math.max(0, Math.min((car.y - targetPoint) / (startPoint - targetPoint), 1));
 
-  // === Auto-Größe dynamisch skalieren ===
   car.width = initialCarWidth + (maxCarWidth - initialCarWidth) * progress;
   car.height = initialCarHeight + (maxCarHeight - initialCarHeight) * progress;
   car.x = logicalWidth / 2 - car.width / 2;
 
-  // === Auto nach oben bewegen ===
   car.y -= 2.5;
 
-  // === Zeichnen ===
-  ctx.drawImage(
-    finishImg,
-    logicalWidth / 2 - finishLine.width / 2,
-    finishLine.y,
-    finishLine.width,
-    finishLine.height
-  );
+  ctx.drawImage(finishImg, logicalWidth / 2 - finishLine.width / 2, finishLine.y, finishLine.width, finishLine.height);
   ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
 
-  // === Wenn Auto ganz oben rausgefahren ist: nächste Frage ===
   if (car.y + car.height < 0 && !animationDone) {
     animationDone = true;
     setTimeout(() => {
@@ -262,19 +241,13 @@ function drawFinishAnimation() {
   }
 }
 
-
-
-  ctx.drawImage(finishImg, logicalWidth / 2 - finishLine.width / 2, finishLine.y, finishLine.width, finishLine.height);
-  ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
-
-
 function update() {
   ctx.clearRect(0, 0, logicalWidth, logicalHeight);
   timer++;
 
   if (showLights) {
     drawLights();
-    if (timer === 120 + 5*45) showText = false;
+    if (timer === 120 + 5 * 45) showText = false;
     if (timer >= 120 && (timer - 120) % 45 === 0 && lightIndex >= 0) {
       lights[lightIndex] = true;
       lightIndex--;
@@ -291,22 +264,16 @@ function update() {
   requestAnimationFrame(update);
 }
 
-canvas.addEventListener("touchstart", e => {
-  touchActive = true;
-  touchX = e.touches[0].clientX;
+// === Touch & Maussteuerung deaktivieren ===
+// (entfernt)
+
+// === Bewegungssensor aktivieren ===
+window.addEventListener("deviceorientation", function(event) {
+  const gamma = event.gamma || 0;
+  const sensitivity = 0.5; // ggf. anpassen
+  car.x += gamma * sensitivity;
+  car.x = Math.max(0, Math.min(logicalWidth - car.width, car.x));
 });
-canvas.addEventListener("touchmove", e => {
-  if (touchActive) touchX = e.touches[0].clientX;
-});
-canvas.addEventListener("touchend", () => touchActive = false);
-canvas.addEventListener("mousedown", e => {
-  touchActive = true;
-  touchX = e.clientX;
-});
-canvas.addEventListener("mousemove", e => {
-  if (touchActive) touchX = e.clientX;
-});
-canvas.addEventListener("mouseup", () => touchActive = false);
 
 update();
 </script>
