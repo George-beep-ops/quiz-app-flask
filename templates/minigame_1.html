@@ -59,14 +59,14 @@ const finishImg = new Image();
 finishImg.src = "{{ url_for('static', filename='ziellinie.png') }}";
 
 const initialCarWidth = logicalWidth * 0.15;
-const initialCarHeight = logicalHeight * 0.13;
+const initialCarHeight = logicalHeight * 0.11;
 const aspectRatio = initialCarWidth / initialCarHeight;
 
 const car = {
   width: initialCarWidth,
   height: initialCarHeight,
   x: logicalWidth / 2 - initialCarWidth / 2,
-  y: logicalHeight * 0.3 - initialCarHeight / 2
+  y: logicalHeight * 0.45 - initialCarHeight / 2
 };
 
 const labels = [...Array(30).keys()].map(i => "Begriff " + (i + 1));
