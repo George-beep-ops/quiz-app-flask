@@ -10,14 +10,17 @@
     height: 100%;
     background: #f5f5f5;
     overflow: hidden;
+    overscroll-behavior: none;
     font-family: sans-serif;
   }
+
   canvas {
     display: block;
     width: 100vw;
     height: 100vh;
     background-color: #ffffff;
     touch-action: none;
+    border: none;
   }
 </style>
 {% endblock %}
@@ -31,18 +34,21 @@
 
 {% block script %}
 <script>
+document.body.style.overflow = "hidden";
+document.documentElement.style.overflow = "hidden";
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// Retina-Optimierung
 const dpr = window.devicePixelRatio || 1;
+canvas.width = window.innerWidth * dpr;
+canvas.height = window.innerHeight * dpr;
+canvas.style.width = window.innerWidth + "px";
+canvas.style.height = window.innerHeight + "px";
+ctx.scale(dpr, dpr);
+
 const logicalWidth = window.innerWidth;
 const logicalHeight = window.innerHeight;
-canvas.width = logicalWidth * dpr;
-canvas.height = logicalHeight * dpr;
-canvas.style.width = logicalWidth + "px";
-canvas.style.height = logicalHeight + "px";
-ctx.scale(dpr, dpr);
 
 const carImg = new Image();
 carImg.src = "{{ url_for('static', filename='car.png') }}";
@@ -50,12 +56,15 @@ carImg.src = "{{ url_for('static', filename='car.png') }}";
 const finishImg = new Image();
 finishImg.src = "{{ url_for('static', filename='ziellinie.png') }}";
 
-const aspectRatio = 1.8; // Breite zu Höhe Verhältnis des Autos
-let car = {
-  width: logicalWidth * 0.15,
-  height: logicalWidth * 0.15 / aspectRatio,
-  x: logicalWidth / 2 - (logicalWidth * 0.15) / 2,
-  y: logicalHeight * 0.3
+const initialCarWidth = logicalWidth * 0.15;
+const initialCarHeight = logicalHeight * 0.15;
+const aspectRatio = initialCarWidth / initialCarHeight;
+
+const car = {
+  width: initialCarWidth,
+  height: initialCarHeight,
+  x: logicalWidth / 2 - initialCarWidth / 2,
+  y: logicalHeight * 0.3 - initialCarHeight / 2
 };
 
 const labels = [...Array(30).keys()].map(i => "Begriff " + (i + 1));
@@ -89,22 +98,22 @@ let animationPhase = false;
 
 const finishLine = {
   y: -logicalHeight * 0.25,
-  targetY: logicalHeight / 2.5,
-  width: logicalWidth * 0.9,
+  targetY: logicalHeight / 7.5,
+  width: logicalWidth * 0.8,
   height: logicalHeight * 0.25
 };
 
 function drawLights() {
-  const totalWidth = logicalWidth * 0.6;
+  const totalWidth = logicalWidth * 0.5;
   const spacing = totalWidth / 5;
   const baseX = logicalWidth / 2 - totalWidth / 2;
   const baseY = logicalHeight / 3;
 
   if (showText) {
     ctx.fillStyle = "#333";
-    ctx.font = `${logicalWidth * 0.06}px sans-serif`;
+    ctx.font = `${logicalWidth * 0.05}px sans-serif`;
     ctx.textAlign = "center";
-    ctx.fillText("Bereit?", logicalWidth / 2, baseY - 40);
+    ctx.fillText("Bereit?", logicalWidth / 2, baseY - 60);
   }
 
   for (let i = 0; i < 5; i++) {
@@ -161,7 +170,8 @@ function drawBubblesAndCar() {
       ctx.restore();
     }
 
-    if (!obj.hit && obj.x + obj.radius * 2 > car.x && obj.x < car.x + car.width && obj.y + obj.radius * 2 > car.y && obj.y < car.y + car.height) {
+    if (!obj.hit && obj.x + obj.radius * 2 > car.x && obj.x < car.x + car.width &&
+        obj.y + obj.radius * 2 > car.y && obj.y < car.y + car.height) {
       obj.hit = true;
       hits++;
       if (obj.good) score++;
@@ -199,7 +209,7 @@ function drawFinishAnimation() {
   if (car.y + car.height < 0) {
     setTimeout(() => {
       document.getElementById("gameForm").submit();
-    }, 200);
+    }, 300);
   }
 }
 
@@ -226,6 +236,7 @@ function update() {
   requestAnimationFrame(update);
 }
 
+// Touch & Maussteuerung
 canvas.addEventListener("touchstart", e => {
   touchActive = true;
   touchX = e.touches[0].clientX;
