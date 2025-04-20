@@ -109,7 +109,7 @@ let animationPhase = false;
 
 const finishLine = {
   y: -logicalHeight * 0.25,
-  targetY: logicalHeight / 0.65,
+  targetY: logicalHeight / 0.45,
   width: logicalWidth * 0.9,
   height: logicalHeight * 0.45
 };
@@ -255,22 +255,12 @@ function drawBubblesAndCar() {
   ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
 
 
-// Berechne Entfernung zur Flagge
-const distanceToFinish = Math.max(finishLine.y - car.y, 0);
-
-// Dynamisch berechne Zielgröße, je näher an der Flagge, desto größer
-const maxCarWidth = logicalWidth * 0.25;
-const minCarWidth = initialCarWidth;
-const growthFactor = (1 - distanceToFinish / logicalHeight);
-const targetWidth = minCarWidth + (maxCarWidth - minCarWidth) * growthFactor;
-
-// Glatte Annäherung an Zielgröße
-if (car.width < targetWidth) {
-  car.width += 1.2;
-  car.height = car.width / aspectRatio;
-  car.x = logicalWidth / 2 - car.width / 2;
-}
-
+function drawFinishAnimation() {
+  if (car.width < logicalWidth * 0.18) {
+    car.width += 2;
+    car.height = car.width / aspectRatio;
+    car.x = logicalWidth / 2 - car.width / 2;
+  }
   if (car.y > logicalHeight / 2 - car.height / 2) {
     car.y -= 2.8;
   }
