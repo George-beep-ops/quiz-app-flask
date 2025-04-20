@@ -117,7 +117,7 @@ const finishLine = {
 function drawLights() {
   const totalWidth = logicalWidth * 0.7; // vorher z. B. 0.5
   const spacing = totalWidth / 5;
-  const baseX = logicalWidth / 2 - totalWidth / 2 + logicalWidth * 0.03; // 0.03 = 3% nach rechts
+  const baseX = logicalWidth / 2 - totalWidth / 2 + logicalWidth * 0.06; // 0.03 = 3% nach rechts
   const baseY = logicalHeight / 3;
   const lightRadius = logicalWidth * 0.04; // größerer Radius
 
@@ -231,20 +231,23 @@ function update() {
   timer++;
 
   if (showLights) {
-    drawLights();
-    if (timer === 180) showText = false;
-    if (timer >= 180 && (timer - 180) % 120 === 0 && lightIndex >= 0) {
-      lights[lightIndex] = true;
-      lightIndex--;
-    }
-    if (lightIndex < 0 && timer >= 180 + 5 * 120) {
-      showLights = false;
-    }
-  } else if (!gameOver) {
-    drawBubblesAndCar();
-  } else if (animationPhase) {
-    drawFinishAnimation();
+  drawLights();
+
+  // "Bereit?"-Text 1 Sekunde anzeigen (statt 3 Sekunden)
+  if (timer === 60) showText = false;
+
+  // Alle 30 Frames (0.5 Sekunden bei 60fps) ein Licht aktivieren
+  if (timer >= 60 && (timer - 60) % 30 === 0 && lightIndex >= 0) {
+    lights[lightIndex] = true;
+    lightIndex--;
   }
+
+  // Nach dem letzten Licht: warte nochmal kurz, dann starte das Spiel
+  if (lightIndex < 0 && timer >= 60 + 5 * 30 + 30) {
+    showLights = false;
+  }
+}
+
 
   requestAnimationFrame(update);
 }
