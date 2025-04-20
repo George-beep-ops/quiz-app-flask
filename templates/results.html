@@ -2,104 +2,50 @@
 
 {% block title %}Ergebnisse{% endblock %}
 
-{% block extra_style %}
-<style>
-  #rocketCanvas {
-    display: block;
-    width: 100vw;
-    height: 100vh;
-    background: #000;
-    margin: 0;
-    padding: 0;
-  }
-  #scoreDisplay {
-    position: absolute;
-    top: 8%;
-    width: 100%;
-    text-align: center;
-    font-size: 2rem;
-    font-weight: bold;
-    color: #fff;
-    display: none;
-    z-index: 10;
-    pointer-events: none;
-  }
-</style>
-{% endblock %}
-
 {% block content %}
-<div id="scoreDisplay" data-score="{{ session['score'] | default(0) }}"></div>
-<canvas id="rocketCanvas"></canvas>
+  <h2 style="margin-bottom: 1rem;">Thanks for participating!</h2>
+  <canvas id="rocketCanvas" width="400" height="500" style="margin-top: 1rem;"></canvas>
+  <div id="scoreDisplay"
+       data-score="{{ session['score'] | default(0) }}"
+       style="position: fixed; bottom: 1rem; width: 100%; text-align: center; font-size: 1.4rem; font-weight: bold; display: none;">
+  </div>
 {% endblock %}
 
 {% block script %}
 <script>
+// ==== Canvas Setup ====
 const canvas = document.getElementById("rocketCanvas");
 const ctx = canvas.getContext("2d");
-const scoreDisplay = document.getElementById("scoreDisplay");
-const score = Number(scoreDisplay.dataset.score);
-
-// Fullscreen + Retina-Support
-const dpr = window.devicePixelRatio || 1;
-function resizeCanvas() {
-  canvas.width = window.innerWidth * dpr;
-  canvas.height = window.innerHeight * dpr;
-  canvas.style.width = window.innerWidth + "px";
-  canvas.style.height = window.innerHeight + "px";
-  ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
-  ctx.scale(dpr, dpr);
-}
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 let explode = false;
 let particles = [];
-let rocketY = window.innerHeight;
-let rocketX = window.innerWidth / 2;
-let rocketVX = (Math.random() - 0.5) * 2;
-let rocketVY = -3.5;
+let rocketY = canvas.height;
+let rocketX = canvas.width / 2;
+let rocketVX = (Math.random() - 0.5) * 3;
+let rocketVY = -4;
 
-function drawRocket(x, y) {
-  ctx.save();
-  ctx.translate(x, y);
+const scoreDisplay = document.getElementById("scoreDisplay");
+const score = Number(scoreDisplay.dataset.score);
 
-  // Body
-  ctx.fillStyle = "#ddd";
-  ctx.beginPath();
-  ctx.moveTo(0, -30);
-  ctx.lineTo(10, 10);
-  ctx.lineTo(-10, 10);
-  ctx.closePath();
-  ctx.fill();
+// ==== Rocket SVG as Image ====
+const rocketImg = new Image();
+rocketImg.src = "https://www.svgrepo.com/show/448130/rocket-flying.svg"; // verspielte Rakete
 
-  // Flame
-  ctx.beginPath();
-  ctx.moveTo(-5, 10);
-  ctx.lineTo(0, 20 + Math.random() * 8);
-  ctx.lineTo(5, 10);
-  ctx.fillStyle = `rgba(255, ${Math.floor(Math.random()*255)}, 0, 0.9)`;
-  ctx.fill();
-
-  // Window
-  ctx.beginPath();
-  ctx.arc(0, -15, 4, 0, Math.PI * 2);
-  ctx.fillStyle = "#0cf";
-  ctx.fill();
-
-  ctx.restore();
-}
-
+// ==== Partikel-Explosion ====
 function createParticles(x, y) {
-  const colors = ["#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "#FFFFFF", "#FFC0CB", "#FFD700", "#8A2BE2"];
-  for (let i = 0; i < 400; i++) {
+  for (let i = 0; i < 250; i++) {
     const angle = Math.random() * 2 * Math.PI;
-    const speed = Math.random() * 12 + 2;
+    const speed = Math.random() * 10 + 2;
+    const colors = ["#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "#FFFFFF", "#FFD700"];
     particles.push({
-      x, y,
+      x,
+      y,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       alpha: 1,
-      radius: Math.random() * 6 + 3,
+      radius: Math.random() * 6 + 2,
       color: colors[Math.floor(Math.random() * colors.length)]
     });
   }
@@ -111,35 +57,54 @@ function drawParticles() {
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
     ctx.fill();
-    p.x += p.vx * 0.8;
-    p.y += p.vy * 0.8;
-    p.alpha -= 0.006;
+    p.x += p.vx;
+    p.y += p.vy;
+    p.alpha -= 0.008;
   });
-  particles = particles.filter(p => p.alpha > 0);
+
+  // Reset fade-out Particles (endlos verglühend)
+  particles.forEach((p, i) => {
+    if (p.alpha <= 0) {
+      const angle = Math.random() * 2 * Math.PI;
+      const speed = Math.random() * 10 + 2;
+      p.x = canvas.width / 2;
+      p.y = canvas.height / 2;
+      p.vx = Math.cos(angle) * speed;
+      p.vy = Math.sin(angle) * speed;
+      p.alpha = 1;
+    }
+  });
 }
 
 function hexToRgb(hex) {
-  const bigint = parseInt(hex.replace('#',''), 16);
+  const bigint = parseInt(hex.replace('#', ''), 16);
   const r = (bigint >> 16) & 255;
   const g = (bigint >> 8) & 255;
   const b = bigint & 255;
   return `${r}, ${g}, ${b}`;
 }
 
+// ==== Animation ====
 function animate() {
-  ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if (!explode) {
-    drawRocket(rocketX, rocketY);
-    rocketX += rocketVX + Math.sin(rocketY / 12) * 1.5;
+    // wellenförmiger Flug
+    rocketX += rocketVX + Math.sin(rocketY / 40) * 1.4;
     rocketY += rocketVY;
-    if (rocketY < window.innerHeight * 0.4) {
+
+    ctx.save();
+    ctx.translate(rocketX, rocketY);
+    ctx.drawImage(rocketImg, -25, -30, 50, 60); // zentriert gezeichnet
+    ctx.restore();
+
+    if (rocketY < canvas.height * 0.4) {
       explode = true;
       createParticles(rocketX, rocketY);
       setTimeout(() => {
-        scoreDisplay.textContent = `You have reached ${score} Points! 🚀`;
+        scoreDisplay.textContent = `You have reached ${score} Points! 👍`;
         scoreDisplay.style.display = "block";
-      }, 800);
+      }, 1000);
     }
   } else {
     drawParticles();
@@ -148,7 +113,6 @@ function animate() {
   requestAnimationFrame(animate);
 }
 
-animate();
+rocketImg.onload = () => animate(); // nur starten wenn Raketenbild geladen
 </script>
 {% endblock %}
-

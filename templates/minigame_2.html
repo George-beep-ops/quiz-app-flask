@@ -6,7 +6,7 @@
 <style>
   .game-wrapper-full {
     position: fixed;
-    top: 140px;
+    top: 160px;
     left: 0;
     width: 100vw;
     height: 60vh;
@@ -43,6 +43,18 @@
     opacity: 0.6;
   }
 
+  .description-block {
+    padding: 1rem;
+    text-align: center;
+    margin-top: 1rem;
+    line-height: 1.6;
+  }
+
+  .description-block h2 {
+    font-size: 1.3rem;
+    margin: 0;
+  }
+
   form {
     margin-top: 64vh;
     text-align: center;
@@ -51,13 +63,19 @@
 {% endblock %}
 
 {% block content %}
-<h2 style="margin-top: 1rem;"><strong>Minigame 2 – Identify the Danger!</strong><br>What is a possible danger of gamification?<br>Please select <strong>three</strong> appropriate terms!
+<div class="description-block">
+  <h2>
+    <strong>Minigame 2 – Identify the Danger!</strong><br><br>
+    What is a possible danger of gamification?<br><br>
+    Please select <strong>three</strong> appropriate terms!
+  </h2>
+</div>
+
+<div class="game-wrapper-full" id="gameArea"></div>
 
 <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
   <input type="hidden" name="score" id="scoreInput" value="0">
 </form>
-
-<div class="game-wrapper-full" id="gameArea"></div>
 {% endblock %}
 
 {% block script %}
@@ -68,7 +86,7 @@
 
   const words = [
     "option 1", "option 2", "option 3",
-    "option 4", "option 5", "option 6", 
+    "option 4", "option 5", "option 6",
     "option 7", "option 8", "option 9", "option 10",
   ];
 
