@@ -18,7 +18,7 @@ flow = [
     'question_5', 'question_6', 'minigame_3',
     'question_7', 'question_8', 'minigame_4',
     'question_9', 'question_10', 'minigame_5',
-    'question_11', 'question_12', 'results'
+    'results'
 ]
 
 @app.route('/', methods=['GET', 'POST'])

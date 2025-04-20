@@ -1,280 +1,111 @@
 {% extends "base.html" %}
 
-{% block title %}Minispiel 5 – Ziellinensequenz{% endblock %}
+{% block title %}Minispiel 1 – Reaktion{% endblock %}
 
 {% block extra_style %}
 <style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    background: #f5f5f5;
-    overflow: hidden;
-    overscroll-behavior: none;
-    font-family: sans-serif;
+  h2 {
+    margin: 1rem;
+    font-size: 1.5rem;
+    text-align: center;
   }
-
-  canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: #ffffff;
-    touch-action: none;
-    border: none;
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .tile {
+    background-color: #ddd;
+    padding: 1rem;
+    width: 140px;
+    height: 100px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    user-select: none;
+    text-align: center;
+  }
+  .tile.selected { background-color: #90ee90; }
+  .tile.incorrect { background-color: #ffcccb; }
+  .disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  #timer {
+    font-size: 1.2rem;
+    margin: 1rem;
+    font-weight: bold;
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<canvas id="gameCanvas"></canvas>
-<form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
-  <input type="hidden" name="score" id="scoreInput" value="0">
-</form>
+  <h2><strong>Minigame 1 – React!</strong><br>Tap 2 terms within 8 seconds that are <strong>enhanced</strong> through gamification!</h2>
+
+  <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
+    <div class="grid">
+      <div class="tile" data-word="option 1">option 1</div>
+      <div class="tile" data-word="option 2">option 2</div>
+      <div class="tile" data-word="option 3">option 3</div>
+      <div class="tile" data-word="option 4">option 4</div>
+    </div>
+    <input type="hidden" name="score" id="scoreInput" value="0">
+    <button type="submit" style="display: none;">Absenden</button>
+  </form>
+
+  <div id="timer">⏳ Time is running... 8</div>
 {% endblock %}
 
 {% block script %}
 <script>
-document.body.style.overflow = "hidden";
-document.documentElement.style.overflow = "hidden";
+  const correctWords = ["option 1", "option 2", "option 3"];
+  let score = 0;
+  let selectedCount = 0;
+  const tiles = document.querySelectorAll(".tile");
 
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+  tiles.forEach(tile => {
+    tile.addEventListener("click", () => {
+      if (tile.classList.contains("selected") || tile.classList.contains("incorrect")) return;
+      if (selectedCount >= 2) return;
 
-const dpr = window.devicePixelRatio || 1;
-canvas.width = window.innerWidth * dpr;
-canvas.height = window.innerHeight * dpr;
-canvas.style.width = window.innerWidth + "px";
-canvas.style.height = window.innerHeight + "px";
-ctx.scale(dpr, dpr);
-
-const logicalWidth = window.innerWidth;
-const logicalHeight = window.innerHeight;
-
-const carImg = new Image();
-carImg.src = "{{ url_for('static', filename='car.png') }}";
-
-const finishImg = new Image();
-finishImg.src = "{{ url_for('static', filename='ziellinie.png') }}";
-
-const initialCarWidth = logicalWidth * 0.2;
-const initialCarHeight = logicalHeight * 0.1;
-const maxCarWidth = logicalWidth * 0.4;
-const maxCarHeight = logicalHeight * 0.22;
-const aspectRatio = initialCarWidth / initialCarHeight;
-
-const car = {
-  width: initialCarWidth,
-  height: initialCarHeight,
-  x: logicalWidth / 2 - initialCarWidth / 2,
-  y: logicalHeight * 0.8 - initialCarHeight / 2
-};
-
-const labels = [...Array(30).keys()].map(i => "Begriff " + (i + 1));
-const goodWords = labels.slice(0, 15);
-const BUBBLE_SPEED = 2;
-
-function doesOverlap(x, y, radius, others) {
-  return others.some(obj => {
-    const dx = x - obj.x;
-    const dy = y - obj.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    return distance < radius + obj.radius + 4;
-  });
-}
-
-const getNewObject = (label, others = []) => {
-  ctx.font = `${logicalWidth * 0.03}px sans-serif`;
-  const textWidth = ctx.measureText(label).width;
-  const padding = logicalWidth * 0.025;
-  const radius = textWidth / 2 + padding;
-
-  let x, y, attempts = 0;
-  do {
-    x = Math.random() * (logicalWidth - 2 * radius) + radius;
-    y = -Math.random() * logicalHeight * 1.5;
-    attempts++;
-    if (attempts > 100) break;
-  } while (doesOverlap(x, y, radius, others));
-
-  return {
-    x,
-    y,
-    speed: BUBBLE_SPEED,
-    radius,
-    label,
-    good: goodWords.includes(label),
-    hit: false,
-    alpha: 1,
-    scale: 1
-  };
-};
-
-let objects = [];
-for (let label of labels) {
-  objects.push(getNewObject(label, objects));
-}
-
-let lights = [false, false, false, false, false];
-let showLights = true;
-let showText = true;
-let lightIndex = 4;
-let timer = 0;
-
-let hits = 0;
-let score = 0;
-let gameOver = false;
-let animationPhase = false;
-let animationDone = false;
-
-const finishLine = {
-  y: -logicalHeight * 0.25,
-  targetY: logicalHeight * 0.25,
-  width: logicalWidth * 1.2,
-  height: logicalHeight * 0.6
-};
-
-function drawLights() {
-  const totalWidth = logicalWidth * 0.7;
-  const spacing = totalWidth / 5;
-  const baseX = logicalWidth / 2 - totalWidth / 2 + logicalWidth * 0.06;
-  const baseY = logicalHeight / 3;
-  const lightRadius = logicalWidth * 0.04;
-
-  if (showText) {
-    ctx.fillStyle = "#333";
-    ctx.font = `bold ${logicalWidth * 0.07}px sans-serif`;
-    ctx.textAlign = "center";
-    ctx.fillText("Bereit?", logicalWidth / 2, baseY - 60);
-  }
-
-  for (let i = 0; i < 5; i++) {
-    ctx.fillStyle = "#333";
-    ctx.beginPath();
-    ctx.arc(baseX + i * spacing, baseY, lightRadius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.closePath();
-
-    ctx.beginPath();
-    ctx.arc(baseX + i * spacing, baseY + logicalHeight * 0.05, lightRadius, 0, Math.PI * 2);
-    ctx.fillStyle = lights[i] ? "#ff0000" : "#222";
-    ctx.fill();
-    ctx.closePath();
-  }
-}
-
-function drawBubblesAndCar() {
-  for (let i = 0; i < objects.length; i++) {
-    const obj = objects[i];
-    obj.y += obj.speed;
-
-    if (obj.hit) {
-      obj.scale += 0.1;
-      obj.alpha -= 0.08;
-      if (obj.alpha <= 0) {
-        objects[i] = getNewObject(obj.label);
+      const word = tile.dataset.word;
+      if (correctWords.includes(word)) {
+        tile.classList.add("selected");
+        score++;
+      } else {
+        tile.classList.add("incorrect");
       }
-    }
 
-    if (obj.alpha > 0 && obj.scale > 0) {
-      ctx.save();
-      ctx.globalAlpha = obj.alpha;
-      ctx.translate(obj.x + obj.radius, obj.y + obj.radius);
-      ctx.scale(obj.scale, obj.scale);
-
-      ctx.beginPath();
-      ctx.arc(0, 0, obj.radius, 0, Math.PI * 2);
-      ctx.fillStyle = obj.hit ? (obj.good ? "#a6f5a6" : "#f5a6a6") : "#e0e0e0";
-      ctx.fill();
-      ctx.strokeStyle = "#999";
-      ctx.stroke();
-      ctx.closePath();
-
-      ctx.fillStyle = "#000";
-      ctx.font = `${logicalWidth * 0.025}px sans-serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(obj.label, 0, 0);
-      ctx.restore();
-    }
-
-    if (!obj.hit && obj.x + obj.radius * 2 > car.x && obj.x < car.x + car.width &&
-        obj.y + obj.radius * 2 > car.y && obj.y < car.y + car.height) {
-      obj.hit = true;
-      hits++;
-      if (obj.good) score++;
-      if (hits >= 10) {
-        gameOver = true;
-        setTimeout(() => animationPhase = true, 300);
+      selectedCount++;
+      if (selectedCount === 2) {
+        tiles.forEach(t => t.classList.add("disabled"));
         document.getElementById("scoreInput").value = score;
+        setTimeout(() => {
+          document.getElementById("gameForm").submit();
+        }, 800);
       }
-    }
-  }
+    });
+  });
 
-  ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
-}
-
-function drawFinishAnimation() {
-  if (finishLine.y < finishLine.targetY) {
-    finishLine.y += 3;
-  }
-
-  const targetPoint = finishLine.y + finishLine.height / 2;
-  const startPoint = logicalHeight * 0.8;
-  const progress = 1 - Math.max(0, Math.min((car.y - targetPoint) / (startPoint - targetPoint), 1));
-
-  car.width = initialCarWidth + (maxCarWidth - initialCarWidth) * progress;
-  car.height = initialCarHeight + (maxCarHeight - initialCarHeight) * progress;
-  car.x = logicalWidth / 2 - car.width / 2;
-
-  car.y -= 2.5;
-
-  ctx.drawImage(finishImg, logicalWidth / 2 - finishLine.width / 2, finishLine.y, finishLine.width, finishLine.height);
-  ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
-
-  if (car.y + car.height < 0 && !animationDone) {
-    animationDone = true;
-    setTimeout(() => {
+  // Timer: automatischer Abbruch nach 8 Sekunden
+  let timeLeft = 8;
+  const timerEl = document.getElementById("timer");
+  const countdown = setInterval(() => {
+    timeLeft--;
+    timerEl.textContent = `⏳ Zeit läuft... ${timeLeft}`;
+    if (timeLeft <= 0 && selectedCount < 2) {
+      clearInterval(countdown);
+      tiles.forEach(t => t.classList.add("disabled"));
+      document.getElementById("scoreInput").value = score;
       document.getElementById("gameForm").submit();
-    }, 300);
-  }
-}
-
-function update() {
-  ctx.clearRect(0, 0, logicalWidth, logicalHeight);
-  timer++;
-
-  if (showLights) {
-    drawLights();
-    if (timer === 120 + 5 * 45) showText = false;
-    if (timer >= 120 && (timer - 120) % 45 === 0 && lightIndex >= 0) {
-      lights[lightIndex] = true;
-      lightIndex--;
     }
-    if (lightIndex < 0 && timer >= 120 + 5 * 45) {
-      showLights = false;
-    }
-  } else if (!gameOver) {
-    drawBubblesAndCar();
-  } else if (animationPhase) {
-    drawFinishAnimation();
-  }
-
-  requestAnimationFrame(update);
-}
-
-// === Touch & Maussteuerung deaktivieren ===
-// (entfernt)
-
-// === Bewegungssensor aktivieren ===
-window.addEventListener("deviceorientation", function(event) {
-  const gamma = event.gamma || 0;
-  const sensitivity = 0.5; // ggf. anpassen
-  car.x += gamma * sensitivity;
-  car.x = Math.max(0, Math.min(logicalWidth - car.width, car.x));
-});
-
-update();
+  }, 1000);
 </script>
 {% endblock %}
+

@@ -3,7 +3,7 @@
 {% block title %}Minispiel 3 – Reaktion per Bewegung{% endblock %}
 
 {% block content %}
-  <h2><strong>Minispiel 3 – Geschick gefragt!</strong><br>Schüttle das Handy, wenn das Wort <strong>"richtig"</strong> erscheint!</h2>
+  <h2><strong><strong>Minigame 3 – Skill Required!</strong><br>Shake your phone when <strong>"option 2"</strong> appears! 
 
   <div id="wordBox"
        style="font-size: 2rem; font-weight: bold; padding: 2rem; background-color: white;
@@ -25,7 +25,7 @@
   const scoreInput = document.getElementById("scoreInput");
   const form = document.getElementById("gameForm");
 
-  const words = ["falsch", "richtig", "nein", "richtig", "ja aber nein", "falsch"];
+  const words = ["option 1", "option 2", "option 1", "option 3", "option 2", "option 5"];
   let score = 0;
   let shakeCount = 0;
   let lastShake = 0;

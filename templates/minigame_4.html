@@ -3,12 +3,11 @@
 {% block title %}Minispiel 4 – Begriffe und Bewegung{% endblock %}
 
 {% block content %}
-  <h2><strong>Minispiel 4 – Vergesse nicht!</strong><br>
-  Gib die zwei Begriffe unseres Themas ein (getrennt mit Komma) und lege das Handy
-  <strong>innerhalb von 20 Sekunden waagerecht</strong> auf den Tisch.</h2>
+  <h2><strong>Mini Game 4 – Don’t Forget!</strong><br>Enter two key terms of our topic (separated by a comma) and place your phone<strong>flat on the table within 20 seconds</strong>.</h2>
+  
 
   <input type="text" id="inputField" placeholder="Begriffe eingeben..." style="padding: 1rem; font-size: 1rem; width: 80%; max-width: 400px; margin-bottom: 1rem;">
-  <div id="status" style="font-weight: bold; margin: 1rem; font-size: 1.2rem;">⏳ Zeit läuft: <span id="timer">20</span>s</div>
+  <div id="status" style="font-weight: bold; margin: 1rem; font-size: 1.2rem;">⏳ Time is running: <span id="timer">20</span>s</div>
   <div id="extra" style="font-weight: bold; font-size: 1.2rem; color: green;"></div>
 
   <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
@@ -80,7 +79,7 @@
           if (hasTwoInputs && !submitted) {
             flatDetected = true;
             score += 1;
-            extraDisplay.textContent = "✅ Zusatzpunkt!";
+            extraDisplay.textContent = "✅ Extra Point!";
             clearInterval(countdown);
             submitGame();
           }

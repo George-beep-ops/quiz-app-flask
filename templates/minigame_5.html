@@ -8,16 +8,21 @@
     margin: 0;
     padding: 0;
     height: 100%;
+    background: #f5f5f5;
     overflow: hidden;
+    overscroll-behavior: none;
     font-family: sans-serif;
   }
+
   canvas {
-    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100vw;
     height: 100vh;
     background-color: #ffffff;
     touch-action: none;
-    border: 3px solid #ccc;
+    border: none;
   }
 </style>
 {% endblock %}
@@ -31,6 +36,9 @@
 
 {% block script %}
 <script>
+document.body.style.overflow = "hidden";
+document.documentElement.style.overflow = "hidden";
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -50,31 +58,63 @@ carImg.src = "{{ url_for('static', filename='car.png') }}";
 const finishImg = new Image();
 finishImg.src = "{{ url_for('static', filename='ziellinie.png') }}";
 
-const initialCarWidth = logicalWidth * 0.11;
-const initialCarHeight = logicalHeight * 0.2;
+const initialCarWidth = logicalWidth * 0.2;
+const initialCarHeight = logicalHeight * 0.1;
+const maxCarWidth = logicalWidth * 0.4;
+const maxCarHeight = logicalHeight * 0.22;
 const aspectRatio = initialCarWidth / initialCarHeight;
 
 const car = {
   width: initialCarWidth,
   height: initialCarHeight,
   x: logicalWidth / 2 - initialCarWidth / 2,
-  y: logicalHeight - logicalHeight * 0.22
+  y: logicalHeight * 0.8 - initialCarHeight / 2
 };
 
-const labels = [...Array(30).keys()].map(i => "Begriff " + (i + 1));
+const labels = [...Array(30).keys()].map(i => "option " + (i + 1));
 const goodWords = labels.slice(0, 15);
-const getNewObject = label => ({
-  x: Math.random() * (logicalWidth - 80),
-  y: -Math.random() * logicalHeight * 2,
-  speed: 1.5 + Math.random() * 1.5,
-  radius: logicalWidth * 0.05,
-  label,
-  good: goodWords.includes(label),
-  hit: false,
-  alpha: 1,
-  scale: 1
-});
-let objects = labels.map(getNewObject);
+const BUBBLE_SPEED = 2;
+
+function doesOverlap(x, y, radius, others) {
+  return others.some(obj => {
+    const dx = x - obj.x;
+    const dy = y - obj.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    return distance < radius + obj.radius + 4;
+  });
+}
+
+const getNewObject = (label, others = []) => {
+  ctx.font = `${logicalWidth * 0.03}px sans-serif`;
+  const textWidth = ctx.measureText(label).width;
+  const padding = logicalWidth * 0.025;
+  const radius = textWidth / 2 + padding;
+
+  let x, y, attempts = 0;
+  do {
+    x = Math.random() * (logicalWidth - 2 * radius) + radius;
+    y = -Math.random() * logicalHeight * 1.5;
+    attempts++;
+    if (attempts > 100) break;
+  } while (doesOverlap(x, y, radius, others));
+
+  return {
+    x,
+    y,
+    speed: BUBBLE_SPEED,
+    radius,
+    label,
+    good: goodWords.includes(label),
+    hit: false,
+    alpha: 1,
+    scale: 1
+  };
+};
+
+let objects = [];
+for (let label of labels) {
+  objects.push(getNewObject(label, objects));
+}
 
 let lights = [false, false, false, false, false];
 let showLights = true;
@@ -82,43 +122,42 @@ let showText = true;
 let lightIndex = 4;
 let timer = 0;
 
-let touchActive = false;
-let touchX = 0;
-
 let hits = 0;
 let score = 0;
 let gameOver = false;
 let animationPhase = false;
+let animationDone = false;
 
 const finishLine = {
   y: -logicalHeight * 0.25,
-  targetY: logicalHeight / 7.5,
-  width: logicalWidth * 0.8,
-  height: logicalHeight * 0.8
+  targetY: logicalHeight * 0.2,
+  width: logicalWidth * 1.4,
+  height: logicalHeight * 0.7
 };
 
 function drawLights() {
-  const totalWidth = logicalWidth * 0.5;
+  const totalWidth = logicalWidth * 0.7;
   const spacing = totalWidth / 5;
-  const baseX = logicalWidth / 2 - totalWidth / 2;
+  const baseX = logicalWidth / 2 - totalWidth / 2 + logicalWidth * 0.06;
   const baseY = logicalHeight / 3;
+  const lightRadius = logicalWidth * 0.04;
 
   if (showText) {
     ctx.fillStyle = "#333";
-    ctx.font = `${logicalWidth * 0.05}px sans-serif`;
+    ctx.font = `bold ${logicalWidth * 0.07}px sans-serif`;
     ctx.textAlign = "center";
-    ctx.fillText("Bereit?", logicalWidth / 2, baseY - 60);
+    ctx.fillText("Tilt your phone to steer the car and pop the bubbles that contain matching content! Ready?", logicalWidth / 2, baseY - 60);
   }
 
   for (let i = 0; i < 5; i++) {
     ctx.fillStyle = "#333";
     ctx.beginPath();
-    ctx.arc(baseX + i * spacing, baseY, logicalWidth * 0.025, 0, Math.PI * 2);
+    ctx.arc(baseX + i * spacing, baseY, lightRadius, 0, Math.PI * 2);
     ctx.fill();
     ctx.closePath();
 
     ctx.beginPath();
-    ctx.arc(baseX + i * spacing, baseY + logicalHeight * 0.05, logicalWidth * 0.025, 0, Math.PI * 2);
+    ctx.arc(baseX + i * spacing, baseY + logicalHeight * 0.05, lightRadius, 0, Math.PI * 2);
     ctx.fillStyle = lights[i] ? "#ff0000" : "#222";
     ctx.fill();
     ctx.closePath();
@@ -126,11 +165,6 @@ function drawLights() {
 }
 
 function drawBubblesAndCar() {
-  if (touchActive) {
-    car.x = touchX - car.width / 2;
-    car.x = Math.max(0, Math.min(logicalWidth - car.width, car.x));
-  }
-
   for (let i = 0; i < objects.length; i++) {
     const obj = objects[i];
     obj.y += obj.speed;
@@ -160,11 +194,13 @@ function drawBubblesAndCar() {
       ctx.fillStyle = "#000";
       ctx.font = `${logicalWidth * 0.025}px sans-serif`;
       ctx.textAlign = "center";
-      ctx.fillText(obj.label, 0, 5);
+      ctx.textBaseline = "middle";
+      ctx.fillText(obj.label, 0, 0);
       ctx.restore();
     }
 
-    if (!obj.hit && obj.x + obj.radius * 2 > car.x && obj.x < car.x + car.width && obj.y + obj.radius * 2 > car.y && obj.y < car.y + car.height) {
+    if (!obj.hit && obj.x + obj.radius * 2 > car.x && obj.x < car.x + car.width &&
+        obj.y + obj.radius * 2 > car.y && obj.y < car.y + car.height) {
       obj.hit = true;
       hits++;
       if (obj.good) score++;
@@ -180,28 +216,25 @@ function drawBubblesAndCar() {
 }
 
 function drawFinishAnimation() {
-  if (car.width < logicalWidth * 0.18) {
-    car.width += 1.2;
-    car.height = car.width / aspectRatio;
-    car.x = logicalWidth / 2 - car.width / 2;
-  }
-
-  if (car.y > logicalHeight / 2 - car.height / 2) {
-    car.y -= 2.8;
-  }
-
   if (finishLine.y < finishLine.targetY) {
-    finishLine.y += 2.8;
+    finishLine.y += 3;
   }
+
+  const targetPoint = finishLine.y + finishLine.height / 2;
+  const startPoint = logicalHeight * 0.8;
+  const progress = 1 - Math.max(0, Math.min((car.y - targetPoint) / (startPoint - targetPoint), 1));
+
+  car.width = initialCarWidth + (maxCarWidth - initialCarWidth) * progress;
+  car.height = initialCarHeight + (maxCarHeight - initialCarHeight) * progress;
+  car.x = logicalWidth / 2 - car.width / 2;
+
+  car.y -= 2.5;
 
   ctx.drawImage(finishImg, logicalWidth / 2 - finishLine.width / 2, finishLine.y, finishLine.width, finishLine.height);
   ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
 
-  if (finishLine.y >= finishLine.targetY && car.y + car.height > 0) {
-    car.y -= 4;
-  }
-
-  if (car.y + car.height < 0) {
+  if (car.y + car.height < 0 && !animationDone) {
+    animationDone = true;
     setTimeout(() => {
       document.getElementById("gameForm").submit();
     }, 300);
@@ -214,12 +247,12 @@ function update() {
 
   if (showLights) {
     drawLights();
-    if (timer === 180) showText = false;
-    if (timer >= 180 && (timer - 180) % 120 === 0 && lightIndex >= 0) {
+    if (timer === 300 + 5 * 45) showText = false;
+    if (timer >= 300 && (timer - 300) % 45 === 0 && lightIndex >= 0) {
       lights[lightIndex] = true;
       lightIndex--;
     }
-    if (lightIndex < 0 && timer >= 180 + 5 * 120) {
+    if (lightIndex < 0 && timer >= 300 + 5 * 45) {
       showLights = false;
     }
   } else if (!gameOver) {
@@ -231,21 +264,16 @@ function update() {
   requestAnimationFrame(update);
 }
 
-// Touch & Maus-Steuerung
-["touchstart", "mousedown"].forEach(evt =>
-  canvas.addEventListener(evt, e => {
-    touchActive = true;
-    touchX = e.touches ? e.touches[0].clientX : e.clientX;
-  })
-);
-["touchmove", "mousemove"].forEach(evt =>
-  canvas.addEventListener(evt, e => {
-    if (touchActive) touchX = e.touches ? e.touches[0].clientX : e.clientX;
-  })
-);
-["touchend", "mouseup"].forEach(evt =>
-  canvas.addEventListener(evt, () => (touchActive = false))
-);
+// === Touch & Maussteuerung deaktivieren ===
+// (entfernt)
+
+// === Bewegungssensor aktivieren ===
+window.addEventListener("deviceorientation", function(event) {
+  const gamma = event.gamma || 0;
+  const sensitivity = 0.25; // ggf. anpassen
+  car.x += gamma * sensitivity;
+  car.x = Math.max(0, Math.min(logicalWidth - car.width, car.x));
+});
 
 update();
 </script>
