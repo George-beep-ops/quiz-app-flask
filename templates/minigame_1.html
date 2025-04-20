@@ -13,7 +13,6 @@
     overscroll-behavior: none;
     font-family: sans-serif;
   }
-
   canvas {
     position: fixed;
     top: 0;
@@ -36,12 +35,8 @@
 
 {% block script %}
 <script>
-document.body.style.overflow = "hidden";
-document.documentElement.style.overflow = "hidden";
-
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-
 const dpr = window.devicePixelRatio || 1;
 canvas.width = window.innerWidth * dpr;
 canvas.height = window.innerHeight * dpr;
@@ -66,12 +61,12 @@ const car = {
   width: initialCarWidth,
   height: initialCarHeight,
   x: logicalWidth / 2 - initialCarWidth / 2,
-  y: logicalHeight * 0.8 - initialCarHeight / 2
+  y: logicalHeight * 0.8 - initialCarHeight / 2,
+  crossedFinish: false
 };
 
 const labels = [...Array(30).keys()].map(i => "Begriff " + (i + 1));
 const goodWords = labels.slice(0, 15);
-
 const BUBBLE_SPEED = 2;
 
 function doesOverlap(x, y, radius, others) {
@@ -120,7 +115,6 @@ let showLights = true;
 let showText = true;
 let lightIndex = 4;
 let timer = 0;
-let formSubmitted = false;
 
 let touchActive = false;
 let touchX = 0;
@@ -132,7 +126,7 @@ let animationPhase = false;
 
 const finishLine = {
   y: -logicalHeight * 0.25,
-  targetY: logicalHeight / 2.5,
+  targetY: logicalHeight * 0.45,
   width: logicalWidth * 0.9,
   height: logicalHeight * 0.45
 };
@@ -180,14 +174,14 @@ function drawBubblesAndCar() {
       obj.scale += 0.1;
       obj.alpha -= 0.08;
       if (obj.alpha <= 0) {
-        objects[i] = getNewObject(obj.label);
+        objects[i] = getNewObject(obj.label, objects);
       }
     }
 
     if (obj.alpha > 0 && obj.scale > 0) {
       ctx.save();
       ctx.globalAlpha = obj.alpha;
-      ctx.translate(obj.x, obj.y);
+      ctx.translate(obj.x + obj.radius, obj.y + obj.radius);
       ctx.scale(obj.scale, obj.scale);
 
       ctx.beginPath();
@@ -206,13 +200,7 @@ function drawBubblesAndCar() {
       ctx.restore();
     }
 
-    if (
-      !obj.hit &&
-      obj.x + obj.radius > car.x &&
-      obj.x - obj.radius < car.x + car.width &&
-      obj.y + obj.radius > car.y &&
-      obj.y - obj.radius < car.y + car.height
-    ) {
+    if (!obj.hit && obj.x + obj.radius * 2 > car.x && obj.x < car.x + car.width && obj.y + obj.radius * 2 > car.y && obj.y < car.y + car.height) {
       obj.hit = true;
       hits++;
       if (obj.good) score++;
@@ -223,28 +211,37 @@ function drawBubblesAndCar() {
       }
     }
   }
-
   ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
 }
 
 function drawFinishAnimation() {
-  if (car.width < logicalWidth * 0.25) {
-    car.width += 2;
-    car.height = car.width / aspectRatio;
-    car.x = logicalWidth / 2 - car.width / 2;
+  // Während Auto unterhalb Ziellinie ist: größer werden + bewegen
+  if (!car.crossedFinish) {
+    if (car.width < logicalWidth * 0.25) {
+      car.width += 1.2;
+      car.height = car.width / aspectRatio;
+      car.x = logicalWidth / 2 - car.width / 2;
+    }
+    if (car.y > finishLine.y + finishLine.height) {
+      car.y -= 3.5;
+    } else {
+      car.crossedFinish = true;
+    }
+  } else {
+    // Wenn Ziellinie überschritten: oben rausfahren in gleicher Größe
+    car.y -= 4;
   }
-  if (car.y > finishLine.targetY + finishLine.height + 10) {
-    car.y -= 2.8;
-  }
+
+  // Ziellinie nach unten bewegen
   if (finishLine.y < finishLine.targetY) {
-    finishLine.y += 2.8;
+    finishLine.y += 2.5;
   }
 
   ctx.drawImage(finishImg, logicalWidth / 2 - finishLine.width / 2, finishLine.y, finishLine.width, finishLine.height);
   ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
 
-  if (!formSubmitted && car.y + car.height < 0) {
-    formSubmitted = true;
+  // Wenn Auto aus Bild: Spiel beenden
+  if (car.crossedFinish && car.y + car.height < 0) {
     setTimeout(() => {
       document.getElementById("gameForm").submit();
     }, 300);
@@ -270,7 +267,6 @@ function update() {
   } else if (animationPhase) {
     drawFinishAnimation();
   }
-
   requestAnimationFrame(update);
 }
 
@@ -282,7 +278,6 @@ canvas.addEventListener("touchmove", e => {
   if (touchActive) touchX = e.touches[0].clientX;
 });
 canvas.addEventListener("touchend", () => touchActive = false);
-
 canvas.addEventListener("mousedown", e => {
   touchActive = true;
   touchX = e.clientX;
