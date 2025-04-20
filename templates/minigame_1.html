@@ -109,7 +109,7 @@ let animationPhase = false;
 
 const finishLine = {
   y: -logicalHeight * 0.25,
-  targetY: logicalHeight / 9.5,
+  targetY: logicalHeight / 15.5,
   width: logicalWidth * 0.9,
   height: logicalHeight * 0.45
 };
@@ -288,12 +288,12 @@ function update() {
 
   if (showLights) {
     drawLights();
-    if (timer === 90) showText = false;
-    if (timer >= 90 && (timer - 90) % 45 === 0 && lightIndex >= 0) {
+    if (timer === 120) showText = false;
+    if (timer >= 150 && (timer - 150) % 45 === 0 && lightIndex >= 0) {
       lights[lightIndex] = true;
       lightIndex--;
     }
-    if (lightIndex < 0 && timer >= 90 + 5 * 45) {
+    if (lightIndex < 0 && timer >= 150 + 5 * 45) {
       showLights = false;
     }
   } else if (!gameOver) {
