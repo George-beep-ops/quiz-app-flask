@@ -13,6 +13,7 @@
     overscroll-behavior: none;
     font-family: sans-serif;
   }
+
   canvas {
     position: fixed;
     top: 0;
@@ -35,8 +36,12 @@
 
 {% block script %}
 <script>
+document.body.style.overflow = "hidden";
+document.documentElement.style.overflow = "hidden";
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+
 const dpr = window.devicePixelRatio || 1;
 canvas.width = window.innerWidth * dpr;
 canvas.height = window.innerHeight * dpr;
@@ -55,18 +60,20 @@ finishImg.src = "{{ url_for('static', filename='ziellinie.png') }}";
 
 const initialCarWidth = logicalWidth * 0.2;
 const initialCarHeight = logicalHeight * 0.1;
+const maxCarWidth = logicalWidth * 0.3;
+const maxCarHeight = logicalHeight * 0.15;
 const aspectRatio = initialCarWidth / initialCarHeight;
 
 const car = {
   width: initialCarWidth,
   height: initialCarHeight,
   x: logicalWidth / 2 - initialCarWidth / 2,
-  y: logicalHeight * 0.8 - initialCarHeight / 2,
-  crossedFinish: false
+  y: logicalHeight * 0.8 - initialCarHeight / 2
 };
 
 const labels = [...Array(30).keys()].map(i => "Begriff " + (i + 1));
 const goodWords = labels.slice(0, 15);
+
 const BUBBLE_SPEED = 2;
 
 function doesOverlap(x, y, radius, others) {
@@ -123,12 +130,13 @@ let hits = 0;
 let score = 0;
 let gameOver = false;
 let animationPhase = false;
+let animationDone = false;
 
 const finishLine = {
   y: -logicalHeight * 0.25,
-  targetY: logicalHeight * 0.45,
+  targetY: logicalHeight * 0.5 - (logicalHeight * 0.2),
   width: logicalWidth * 0.9,
-  height: logicalHeight * 0.45
+  height: logicalHeight * 0.25
 };
 
 function drawLights() {
@@ -174,7 +182,7 @@ function drawBubblesAndCar() {
       obj.scale += 0.1;
       obj.alpha -= 0.08;
       if (obj.alpha <= 0) {
-        objects[i] = getNewObject(obj.label, objects);
+        objects[i] = getNewObject(obj.label);
       }
     }
 
@@ -211,41 +219,31 @@ function drawBubblesAndCar() {
       }
     }
   }
+
   ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
 }
 
 function drawFinishAnimation() {
-  // Während Auto unterhalb Ziellinie ist: größer werden + bewegen
-  if (!car.crossedFinish) {
-    if (car.width < logicalWidth * 0.25) {
-      car.width += 1.2;
-      car.height = car.width / aspectRatio;
-      car.x = logicalWidth / 2 - car.width / 2;
-    }
-    if (car.y > finishLine.y + finishLine.height) {
-      car.y -= 3.5;
-    } else {
-      car.crossedFinish = true;
-    }
-  } else {
-    // Wenn Ziellinie überschritten: oben rausfahren in gleicher Größe
+  if (car.y > finishLine.targetY + finishLine.height) {
+    // während Auto auf Ziellinie zufährt => vergrößern
+    car.width += 1.5;
+    car.height = car.width / aspectRatio;
+    car.x = logicalWidth / 2 - car.width / 2;
+    car.y -= 2.5;
+  } else if (car.y + car.height > 0) {
+    // wenn Auto über Ziellinie ist => konstant hochfahren
     car.y -= 4;
+  } else if (!animationDone) {
+    animationDone = true;
+    setTimeout(() => document.getElementById("gameForm").submit(), 300);
   }
 
-  // Ziellinie nach unten bewegen
   if (finishLine.y < finishLine.targetY) {
     finishLine.y += 2.5;
   }
 
   ctx.drawImage(finishImg, logicalWidth / 2 - finishLine.width / 2, finishLine.y, finishLine.width, finishLine.height);
   ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
-
-  // Wenn Auto aus Bild: Spiel beenden
-  if (car.crossedFinish && car.y + car.height < 0) {
-    setTimeout(() => {
-      document.getElementById("gameForm").submit();
-    }, 300);
-  }
 }
 
 function update() {
@@ -267,6 +265,7 @@ function update() {
   } else if (animationPhase) {
     drawFinishAnimation();
   }
+
   requestAnimationFrame(update);
 }
 
