@@ -71,17 +71,26 @@ const car = {
 
 const labels = [...Array(30).keys()].map(i => "Begriff " + (i + 1));
 const goodWords = labels.slice(0, 15);
-const getNewObject = label => ({
-  x: Math.random() * (logicalWidth - 80),
-  y: -Math.random() * logicalHeight * 2,
-  speed: 1.5 + Math.random() * 1.5,
-  radius: logicalWidth * 0.05,
-  label,
-  good: goodWords.includes(label),
-  hit: false,
-  alpha: 1,
-  scale: 1
-});
+const getNewObject = label => {
+  ctx.font = `${logicalWidth * 0.03}px sans-serif`; // gleiche Schrift wie beim Zeichnen
+  const textWidth = ctx.measureText(label).width;
+
+  const padding = logicalWidth * 0.04; // etwas Platz um den Text
+  const radius = textWidth / 2 + padding;
+
+  return {
+    x: Math.random() * (logicalWidth - radius * 2),
+    y: -Math.random() * logicalHeight * 2,
+    speed: 1.5 + Math.random() * 1.5,
+    radius,
+    label,
+    good: goodWords.includes(label),
+    hit: false,
+    alpha: 1,
+    scale: 1
+  };
+};
+
 let objects = labels.map(getNewObject);
 
 let lights = [false, false, false, false, false];
