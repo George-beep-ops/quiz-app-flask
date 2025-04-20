@@ -71,17 +71,38 @@ const car = {
 
 const labels = [...Array(30).keys()].map(i => "Begriff " + (i + 1));
 const goodWords = labels.slice(0, 15);
-const getNewObject = label => {
-  ctx.font = `${logicalWidth * 0.03}px sans-serif`; // gleiche Schrift wie beim Zeichnen
-  const textWidth = ctx.measureText(label).width;
+// Konstante Geschwindigkeit
+const BUBBLE_SPEED = 2;
 
-  const padding = logicalWidth * 0.04; // etwas Platz um den Text
+// Funktion zur Kollisionsprüfung
+function doesOverlap(x, y, radius, others) {
+  return others.some(obj => {
+    const dx = x - obj.x;
+    const dy = y - obj.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    return dist < radius + obj.radius + 10; // 10 = kleiner Puffer
+  });
+}
+
+// Neues Objekt generieren ohne Überlappung
+const getNewObject = (label, others = []) => {
+  ctx.font = `${logicalWidth * 0.03}px sans-serif`;
+  const textWidth = ctx.measureText(label).width;
+  const padding = logicalWidth * 0.04;
   const radius = textWidth / 2 + padding;
 
+  let x, y, attempts = 0;
+  do {
+    x = Math.random() * (logicalWidth - radius * 2);
+    y = -Math.random() * logicalHeight * 1.5;
+    attempts++;
+    if (attempts > 100) break; // Fallback gegen Endlosschleifen
+  } while (doesOverlap(x + radius, y + radius, radius, others));
+
   return {
-    x: Math.random() * (logicalWidth - radius * 2),
-    y: -Math.random() * logicalHeight * 2,
-    speed: 1.5 + Math.random() * 1.5,
+    x,
+    y,
+    speed: BUBBLE_SPEED,
     radius,
     label,
     good: goodWords.includes(label),
@@ -91,7 +112,12 @@ const getNewObject = label => {
   };
 };
 
-let objects = labels.map(getNewObject);
+
+let objects = [];
+for (let label of labels) {
+  objects.push(getNewObject(label, objects));
+}
+
 
 let lights = [false, false, false, false, false];
 let showLights = true;
