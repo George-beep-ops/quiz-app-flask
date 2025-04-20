@@ -133,11 +133,12 @@ let animationPhase = false;
 let animationDone = false;
 
 const finishLine = {
-  y: -logicalHeight * 0.25,
-  targetY: logicalHeight * 0.5 - (logicalHeight * 0.2),
+  y: -logicalHeight * 0.25, // Startpunkt weit oben
+  targetY: logicalHeight / 2.5, // Mitte des Bildschirms
   width: logicalWidth * 1.2,
   height: logicalHeight * 0.6
 };
+
 
 function drawLights() {
   const totalWidth = logicalWidth * 0.7;
@@ -224,29 +225,48 @@ function drawBubblesAndCar() {
 }
 
 function drawFinishAnimation() {
-  if (car.y > finishLine.targetY + finishLine.height) {
-  // Fortschritt berechnen (0 = Start, 1 = Ziellinie erreicht)
-  const totalDistance = logicalHeight * 0.8 - (finishLine.targetY + finishLine.height);
-  const currentDistance = car.y - (finishLine.targetY + finishLine.height);
-  const progress = 1 - Math.max(0, Math.min(currentDistance / totalDistance, 1));
+  // === Ziellinie bewegen ===
+  if (finishLine.y < finishLine.targetY) {
+    finishLine.y += 3; // Geschwindigkeit Ziellinie
+  }
 
-  // Neue Größe berechnen anhand von progress
-  const newWidth = initialCarWidth + (maxCarWidth - initialCarWidth) * progress;
-  const newHeight = initialCarHeight + (maxCarHeight - initialCarHeight) * progress;
+  // === Fortschritt vom Auto zur Ziellinie ===
+  const targetPoint = finishLine.y + finishLine.height / 2;
+  const startPoint = logicalHeight * 0.8;
+  const progress = 1 - Math.max(0, Math.min((car.y - targetPoint) / (startPoint - targetPoint), 1));
 
-  car.width = newWidth;
-  car.height = newHeight;
+  // === Auto-Größe dynamisch skalieren ===
+  car.width = initialCarWidth + (maxCarWidth - initialCarWidth) * progress;
+  car.height = initialCarHeight + (maxCarHeight - initialCarHeight) * progress;
   car.x = logicalWidth / 2 - car.width / 2;
+
+  // === Auto nach oben bewegen ===
   car.y -= 2.5;
-} else if (car.y + car.height > 0) {
-  // Nach Ziellinie: weiter gerade hoch, ohne Größenänderung
-  car.y -= 2.5;
+
+  // === Zeichnen ===
+  ctx.drawImage(
+    finishImg,
+    logicalWidth / 2 - finishLine.width / 2,
+    finishLine.y,
+    finishLine.width,
+    finishLine.height
+  );
+  ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
+
+  // === Wenn Auto ganz oben rausgefahren ist: nächste Frage ===
+  if (car.y + car.height < 0 && !animationDone) {
+    animationDone = true;
+    setTimeout(() => {
+      document.getElementById("gameForm").submit();
+    }, 300);
+  }
 }
+
 
 
   ctx.drawImage(finishImg, logicalWidth / 2 - finishLine.width / 2, finishLine.y, finishLine.width, finishLine.height);
   ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
-}
+
 
 function update() {
   ctx.clearRect(0, 0, logicalWidth, logicalHeight);
