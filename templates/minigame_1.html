@@ -179,6 +179,62 @@ function drawBubblesAndCar() {
       ctx.fillStyle = "#000";
       ctx.font = `${logicalWidth * 0.025}px sans-serif`;
       ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(obj.label, 0, 0); // Zentriert
+      ctx.restore();
+    }
+
+    if (
+      !obj.hit &&
+      obj.x + obj.radius * 2 > car.x &&
+      obj.x < car.x + car.width &&
+      obj.y + obj.radius * 2 > car.y &&
+      obj.y < car.y + car.height
+    ) {
+      obj.hit = true;
+      hits++;
+      if (obj.good) score++;
+      if (hits >= 10) {
+        gameOver = true;
+        setTimeout(() => animationPhase = true, 300);
+        document.getElementById("scoreInput").value = score;
+      }
+    }
+  }
+
+  ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
+}
+
+
+  for (let i = 0; i < objects.length; i++) {
+    const obj = objects[i];
+    obj.y += obj.speed;
+
+    if (obj.hit) {
+      obj.scale += 0.1;
+      obj.alpha -= 0.08;
+      if (obj.alpha <= 0) {
+        objects[i] = getNewObject(obj.label);
+      }
+    }
+
+    if (obj.alpha > 0 && obj.scale > 0) {
+      ctx.save();
+      ctx.globalAlpha = obj.alpha;
+      ctx.translate(obj.x + obj.radius, obj.y + obj.radius);
+      ctx.scale(obj.scale, obj.scale);
+
+      ctx.beginPath();
+      ctx.arc(0, 0, obj.radius, 0, Math.PI * 2);
+      ctx.fillStyle = obj.hit ? (obj.good ? "#a6f5a6" : "#f5a6a6") : "#e0e0e0";
+      ctx.fill();
+      ctx.strokeStyle = "#999";
+      ctx.stroke();
+      ctx.closePath();
+
+      ctx.fillStyle = "#000";
+      ctx.font = `${logicalWidth * 0.025}px sans-serif`;
+      ctx.textAlign = "center";
       ctx.fillText(obj.label, 0, 5);
       ctx.restore();
     }
@@ -232,12 +288,12 @@ function update() {
 
   if (showLights) {
     drawLights();
-    if (timer === 180) showText = false;
+    if (timer === 90) showText = false;
     if (timer >= 90 && (timer - 90) % 45 === 0 && lightIndex >= 0) {
       lights[lightIndex] = true;
       lightIndex--;
     }
-    if (lightIndex < 0 && timer >= 180 + 5 * 120) {
+    if (lightIndex < 0 && timer >= 90 + 5 * 45) {
       showLights = false;
     }
   } else if (!gameOver) {
