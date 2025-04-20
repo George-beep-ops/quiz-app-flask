@@ -60,8 +60,8 @@ finishImg.src = "{{ url_for('static', filename='ziellinie.png') }}";
 
 const initialCarWidth = logicalWidth * 0.2;
 const initialCarHeight = logicalHeight * 0.1;
-const maxCarWidth = logicalWidth * 0.3;
-const maxCarHeight = logicalHeight * 0.15;
+const maxCarWidth = logicalWidth * 0.4;
+const maxCarHeight = logicalHeight * 0.22;
 const aspectRatio = initialCarWidth / initialCarHeight;
 
 const car = {
@@ -134,7 +134,7 @@ let animationDone = false;
 
 const finishLine = {
   y: -logicalHeight * 0.25, // Startpunkt weit oben
-  targetY: logicalHeight / 2.5, // Mitte des Bildschirms
+  targetY: logicalHeight * 0.25, // Mitte des Bildschirms
   width: logicalWidth * 1.2,
   height: logicalHeight * 0.6
 };
