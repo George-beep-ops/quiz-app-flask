@@ -136,7 +136,7 @@ const finishLine = {
   y: -logicalHeight * 0.25,
   targetY: logicalHeight * 0.5 - (logicalHeight * 0.2),
   width: logicalWidth * 0.9,
-  height: logicalHeight * 0.25
+  height: logicalHeight * 0.45
 };
 
 function drawLights() {
@@ -232,7 +232,7 @@ function drawFinishAnimation() {
     car.y -= 2.5;
   } else if (car.y + car.height > 0) {
     // wenn Auto über Ziellinie ist => konstant hochfahren
-    car.y -= 4;
+    car.y -= 2.5;
   } else if (!animationDone) {
     animationDone = true;
     setTimeout(() => document.getElementById("gameForm").submit(), 300);
@@ -252,12 +252,12 @@ function update() {
 
   if (showLights) {
     drawLights();
-    if (timer === 120) showText = false;
-    if (timer >= 150 && (timer - 150) % 45 === 0 && lightIndex >= 0) {
+    if (timer === 120 + 5*45) showText = false;
+    if (timer >= 120 && (timer - 120) % 45 === 0 && lightIndex >= 0) {
       lights[lightIndex] = true;
       lightIndex--;
     }
-    if (lightIndex < 0 && timer >= 150 + 5 * 45) {
+    if (lightIndex < 0 && timer >= 120 + 5 * 45) {
       showLights = false;
     }
   } else if (!gameOver) {
