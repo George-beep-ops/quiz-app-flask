@@ -135,8 +135,8 @@ let animationDone = false;
 const finishLine = {
   y: -logicalHeight * 0.25,
   targetY: logicalHeight * 0.5 - (logicalHeight * 0.2),
-  width: logicalWidth * 0.9,
-  height: logicalHeight * 0.45
+  width: logicalWidth * 1.8,
+  height: logicalHeight * 0.9
 };
 
 function drawLights() {
@@ -226,7 +226,7 @@ function drawBubblesAndCar() {
 function drawFinishAnimation() {
   if (car.y > finishLine.targetY + finishLine.height) {
     // während Auto auf Ziellinie zufährt => vergrößern
-    car.width += 1.5;
+    car.width += 2.5;
     car.height = car.width / aspectRatio;
     car.x = logicalWidth / 2 - car.width / 2;
     car.y -= 2.5;
