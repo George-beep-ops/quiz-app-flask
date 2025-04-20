@@ -4,54 +4,76 @@
 
 {% block content %}
   <h2>Thanks for participating!</h2>
-  <canvas id="rocketCanvas" width="400" height="400" style="margin-top: 2rem;"></canvas>
-  <div id="scoreDisplay" data-score="{{ session['score'] | default(0) }}" style="font-size: 1.6rem; font-weight: bold; display: none; margin-top: 0.2rem;"></div>
+  <canvas id="rocketCanvas" width="400" height="400" style="margin-top: 1rem; display: block; margin-left: auto; margin-right: auto;"></canvas>
+  <div id="scoreDisplay"
+       data-score="{{ session['score'] | default(0) }}"
+       style="font-size: 1.8rem; font-weight: bold; display: none; margin-top: 1rem; text-align: center; max-width: 90%; margin-left: auto; margin-right: auto; color: #222;">
+  </div>
 {% endblock %}
 
 {% block script %}
 <script>
 const canvas = document.getElementById("rocketCanvas");
 const ctx = canvas.getContext("2d");
+
+// Retina-Support
+const dpr = window.devicePixelRatio || 1;
+canvas.width = canvas.clientWidth * dpr;
+canvas.height = canvas.clientHeight * dpr;
+ctx.scale(dpr, dpr);
+
 let explode = false;
 let particles = [];
-let rocketY = canvas.height;
-let rocketX = canvas.width / 2;
-let rocketVX = (Math.random() - 0.5) * 4;
-let rocketVY = -4;
+let rocketY = canvas.height / dpr;
+let rocketX = canvas.width / dpr / 2;
+let rocketVX = (Math.random() - 0.5) * 2;
+let rocketVY = -3.5;
+
 const scoreDisplay = document.getElementById("scoreDisplay");
 const score = Number(scoreDisplay.dataset.score);
 
 function drawRocket(x, y) {
   ctx.save();
   ctx.translate(x, y);
-  ctx.scale(1.2, 1.2);
-  ctx.fillStyle = "#888";
+
+  // Body
+  ctx.fillStyle = "#444";
   ctx.beginPath();
-  ctx.moveTo(0, -25);
-  ctx.lineTo(12, 10);
-  ctx.lineTo(-12, 10);
+  ctx.moveTo(0, -30);
+  ctx.lineTo(10, 10);
+  ctx.lineTo(-10, 10);
   ctx.closePath();
   ctx.fill();
-  ctx.fillStyle = "#ff3333";
+
+  // Flame
   ctx.beginPath();
-  ctx.arc(0, 0, 6, 0, Math.PI * 2);
+  ctx.moveTo(-5, 10);
+  ctx.lineTo(0, 20 + Math.random() * 6);
+  ctx.lineTo(5, 10);
+  ctx.fillStyle = `rgba(255, ${Math.floor(Math.random()*255)}, 0, 0.8)`;
   ctx.fill();
+
+  // Window
+  ctx.beginPath();
+  ctx.arc(0, -15, 4, 0, Math.PI * 2);
+  ctx.fillStyle = "#0cf";
+  ctx.fill();
+
   ctx.restore();
 }
 
 function createParticles(x, y) {
-  for (let i = 0; i < 200; i++) {
+  const colors = ["#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "#FFFFFF", "#FFC0CB", "#FFD700", "#8A2BE2"];
+  for (let i = 0; i < 400; i++) {
     const angle = Math.random() * 2 * Math.PI;
-    const speed = Math.random() * 8 + 3;
-    const colors = ["#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "#FFFFFF"];
+    const speed = Math.random() * 10 + 2;
     particles.push({
-      x: x,
-      y: y,
+      x, y,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       alpha: 1,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      radius: Math.random() * 6 + 2
+      radius: Math.random() * 5 + 3,
+      color: colors[Math.floor(Math.random() * colors.length)]
     });
   }
 }
@@ -62,9 +84,9 @@ function drawParticles() {
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
     ctx.fill();
-    p.x += p.vx;
-    p.y += p.vy;
-    p.alpha -= 0.01;
+    p.x += p.vx * 0.8;
+    p.y += p.vy * 0.8;
+    p.alpha -= 0.007;
   });
   particles = particles.filter(p => p.alpha > 0);
 }
@@ -78,28 +100,28 @@ function hexToRgb(hex) {
 }
 
 function animate() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
 
   if (!explode) {
     drawRocket(rocketX, rocketY);
-    rocketX += rocketVX + Math.sin(rocketY / 15) * 1.2; // wellenförmige Flugbahn
+    rocketX += rocketVX + Math.sin(rocketY / 15) * 1.5;
     rocketY += rocketVY;
-    if (rocketY < canvas.height * 0.4) {
+    if (rocketY < canvas.height / dpr * 0.4) {
       explode = true;
       createParticles(rocketX, rocketY);
       setTimeout(() => {
         scoreDisplay.textContent = `You have reached ${score} Points! 👍`;
         scoreDisplay.style.display = "block";
-      }, 1000);
+      }, 600);
     }
   } else {
     drawParticles();
   }
+
   requestAnimationFrame(animate);
 }
 
 animate();
 </script>
 {% endblock %}
-
 
