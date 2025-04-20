@@ -2,42 +2,69 @@
 
 {% block title %}Ergebnisse{% endblock %}
 
+{% block extra_style %}
+<style>
+  #rocketCanvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    margin: 0;
+    padding: 0;
+  }
+  #scoreDisplay {
+    position: absolute;
+    top: 8%;
+    width: 100%;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #fff;
+    display: none;
+    z-index: 10;
+    pointer-events: none;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-  <h2>Thanks for participating!</h2>
-  <canvas id="rocketCanvas" width="400" height="400" style="margin-top: 1rem; display: block; margin-left: auto; margin-right: auto;"></canvas>
-  <div id="scoreDisplay"
-       data-score="{{ session['score'] | default(0) }}"
-       style="font-size: 1.8rem; font-weight: bold; display: none; margin-top: 1rem; text-align: center; max-width: 90%; margin-left: auto; margin-right: auto; color: #222;">
-  </div>
+<div id="scoreDisplay" data-score="{{ session['score'] | default(0) }}"></div>
+<canvas id="rocketCanvas"></canvas>
 {% endblock %}
 
 {% block script %}
 <script>
 const canvas = document.getElementById("rocketCanvas");
 const ctx = canvas.getContext("2d");
+const scoreDisplay = document.getElementById("scoreDisplay");
+const score = Number(scoreDisplay.dataset.score);
 
-// Retina-Support
+// Fullscreen + Retina-Support
 const dpr = window.devicePixelRatio || 1;
-canvas.width = canvas.clientWidth * dpr;
-canvas.height = canvas.clientHeight * dpr;
-ctx.scale(dpr, dpr);
+function resizeCanvas() {
+  canvas.width = window.innerWidth * dpr;
+  canvas.height = window.innerHeight * dpr;
+  canvas.style.width = window.innerWidth + "px";
+  canvas.style.height = window.innerHeight + "px";
+  ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+  ctx.scale(dpr, dpr);
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
 let explode = false;
 let particles = [];
-let rocketY = canvas.height / dpr;
-let rocketX = canvas.width / dpr / 2;
+let rocketY = window.innerHeight;
+let rocketX = window.innerWidth / 2;
 let rocketVX = (Math.random() - 0.5) * 2;
 let rocketVY = -3.5;
-
-const scoreDisplay = document.getElementById("scoreDisplay");
-const score = Number(scoreDisplay.dataset.score);
 
 function drawRocket(x, y) {
   ctx.save();
   ctx.translate(x, y);
 
   // Body
-  ctx.fillStyle = "#444";
+  ctx.fillStyle = "#ddd";
   ctx.beginPath();
   ctx.moveTo(0, -30);
   ctx.lineTo(10, 10);
@@ -48,9 +75,9 @@ function drawRocket(x, y) {
   // Flame
   ctx.beginPath();
   ctx.moveTo(-5, 10);
-  ctx.lineTo(0, 20 + Math.random() * 6);
+  ctx.lineTo(0, 20 + Math.random() * 8);
   ctx.lineTo(5, 10);
-  ctx.fillStyle = `rgba(255, ${Math.floor(Math.random()*255)}, 0, 0.8)`;
+  ctx.fillStyle = `rgba(255, ${Math.floor(Math.random()*255)}, 0, 0.9)`;
   ctx.fill();
 
   // Window
@@ -66,13 +93,13 @@ function createParticles(x, y) {
   const colors = ["#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "#FFFFFF", "#FFC0CB", "#FFD700", "#8A2BE2"];
   for (let i = 0; i < 400; i++) {
     const angle = Math.random() * 2 * Math.PI;
-    const speed = Math.random() * 10 + 2;
+    const speed = Math.random() * 12 + 2;
     particles.push({
       x, y,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       alpha: 1,
-      radius: Math.random() * 5 + 3,
+      radius: Math.random() * 6 + 3,
       color: colors[Math.floor(Math.random() * colors.length)]
     });
   }
@@ -86,7 +113,7 @@ function drawParticles() {
     ctx.fill();
     p.x += p.vx * 0.8;
     p.y += p.vy * 0.8;
-    p.alpha -= 0.007;
+    p.alpha -= 0.006;
   });
   particles = particles.filter(p => p.alpha > 0);
 }
@@ -104,15 +131,15 @@ function animate() {
 
   if (!explode) {
     drawRocket(rocketX, rocketY);
-    rocketX += rocketVX + Math.sin(rocketY / 15) * 1.5;
+    rocketX += rocketVX + Math.sin(rocketY / 12) * 1.5;
     rocketY += rocketVY;
-    if (rocketY < canvas.height / dpr * 0.4) {
+    if (rocketY < window.innerHeight * 0.4) {
       explode = true;
       createParticles(rocketX, rocketY);
       setTimeout(() => {
-        scoreDisplay.textContent = `You have reached ${score} Points! 👍`;
+        scoreDisplay.textContent = `You have reached ${score} Points! 🚀`;
         scoreDisplay.style.display = "block";
-      }, 600);
+      }, 800);
     }
   } else {
     drawParticles();
