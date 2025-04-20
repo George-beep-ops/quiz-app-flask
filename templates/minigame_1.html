@@ -59,7 +59,7 @@ const finishImg = new Image();
 finishImg.src = "{{ url_for('static', filename='ziellinie.png') }}";
 
 const initialCarWidth = logicalWidth * 0.15;
-const initialCarHeight = logicalHeight * 0.15;
+const initialCarHeight = logicalHeight * 0.13;
 const aspectRatio = initialCarWidth / initialCarHeight;
 
 const car = {
@@ -106,14 +106,16 @@ const finishLine = {
 };
 
 function drawLights() {
-  const totalWidth = logicalWidth * 0.5;
+  const totalWidth = logicalWidth * 0.7; // vorher z. B. 0.5
   const spacing = totalWidth / 5;
-  const baseX = logicalWidth / 2 - totalWidth / 2;
+  const baseX = logicalWidth / 2 - totalWidth / 2 + logicalWidth * 0.03; // 0.03 = 3% nach rechts
   const baseY = logicalHeight / 3;
+  const lightRadius = logicalWidth * 0.04; // größerer Radius
+
 
   if (showText) {
     ctx.fillStyle = "#333";
-    ctx.font = `${logicalWidth * 0.05}px sans-serif`;
+    ctx.font = `bold ${logicalWidth * 0.07}px sans-serif`;
     ctx.textAlign = "center";
     ctx.fillText("Bereit?", logicalWidth / 2, baseY - 60);
   }
@@ -121,12 +123,12 @@ function drawLights() {
   for (let i = 0; i < 5; i++) {
     ctx.fillStyle = "#333";
     ctx.beginPath();
-    ctx.arc(baseX + i * spacing, baseY, logicalWidth * 0.025, 0, Math.PI * 2);
+    ctx.arc(baseX + i * spacing, baseY, lightRadius, 0, Math.PI * 2);
     ctx.fill();
     ctx.closePath();
 
     ctx.beginPath();
-    ctx.arc(baseX + i * spacing, baseY + logicalHeight * 0.05, logicalWidth * 0.025, 0, Math.PI * 2);
+    ctx.arc(baseX + i * spacing, baseY + logicalHeight * 0.05, lightRadius, 0, Math.PI * 2);
     ctx.fillStyle = lights[i] ? "#ff0000" : "#222";
     ctx.fill();
     ctx.closePath();
