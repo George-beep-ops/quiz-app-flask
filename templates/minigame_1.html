@@ -58,15 +58,15 @@ carImg.src = "{{ url_for('static', filename='car.png') }}";
 const finishImg = new Image();
 finishImg.src = "{{ url_for('static', filename='ziellinie.png') }}";
 
-const initialCarWidth = logicalWidth * 0.15;
-const initialCarHeight = logicalHeight * 0.09;
+const initialCarWidth = logicalWidth * 0.2;
+const initialCarHeight = logicalHeight * 0.1;
 const aspectRatio = initialCarWidth / initialCarHeight;
 
 const car = {
   width: initialCarWidth,
   height: initialCarHeight,
   x: logicalWidth / 2 - initialCarWidth / 2,
-  y: logicalHeight * 0.45 - initialCarHeight / 2
+  y: logicalHeight * 0.8 - initialCarHeight / 2
 };
 
 const labels = [...Array(30).keys()].map(i => "Begriff " + (i + 1));
@@ -109,7 +109,7 @@ let animationPhase = false;
 
 const finishLine = {
   y: -logicalHeight * 0.25,
-  targetY: logicalHeight / 15.5,
+  targetY: logicalHeight / 20,
   width: logicalWidth * 0.9,
   height: logicalHeight * 0.45
 };
