@@ -38,9 +38,14 @@
 {% endblock %}
 
 {% block content %}
-  <h1>Willkommen zum Quiz!</h1>
+  <h1>Welcome to the Quiz!</h1>
+
+  <p style="font-size: 1rem; max-width: 500px; margin-bottom: 1rem; text-align: center;">
+    Test your knowledge and try to win the games. Each correct answer is worth one point, each wrong answer 0 points.
+  </p>
+
   <form id="startForm" method="POST">
-    <input type="text" name="nickname" placeholder="Dein Name oder Spitzname" required>
+    <input type="text" name="nickname" placeholder="Your name or nickname" required>
     <button type="button" onclick="requestMotionPermission()">Quiz starten</button>
   </form>
 {% endblock %}
@@ -57,7 +62,7 @@ function requestMotionPermission() {
         if (permissionState === 'granted') {
           document.getElementById('startForm').submit();
         } else {
-          alert('Ohne Bewegungserlaubnis können manche Minispiele nicht funktionieren.');
+          alert('Without permission the games wont function.');
         }
       })
       .catch(console.error);

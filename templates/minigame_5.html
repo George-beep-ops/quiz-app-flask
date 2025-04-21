@@ -136,7 +136,7 @@ const getNewObject = (label, others = []) => {
 };
 
 let objects = [];
-const activeBubbles = 10; // vorher 30
+const activeBubbles = 15; // vorher 30
 for (let i = 0; i < activeBubbles; i++) {
   const label = labels[i % labels.length];
   objects.push(getNewObject(label, objects));
