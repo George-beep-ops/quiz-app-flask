@@ -16,24 +16,22 @@ const scoreDisplay = document.getElementById("scoreDisplay");
 const score = Number(scoreDisplay.dataset.score);
 
 let particles = [];
-let rocketPhase = "idle"; // Ablauf: idle → launch → wait → reentry → explode
+let rocketPhase = "idle"; // idle → launch → wait → reentry → explode
 let t = 0;
 
 let rocket = {
   x: canvas.width - 40,
   y: canvas.height - 40,
-  angle: -Math.PI / 2,
+  angle: 0, // Spitze zeigt nach oben (y-)
   scale: 1
 };
 
-// Funktion zum Zeichnen der Rakete (zentriert auf (0, 0))
 function drawRocket(x, y, angle, scale = 1) {
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(angle);
   ctx.scale(scale, scale);
 
-  // Rumpf
   ctx.fillStyle = "#d32f2f";
   ctx.beginPath();
   ctx.moveTo(0, -25); // Spitze
@@ -44,13 +42,11 @@ function drawRocket(x, y, angle, scale = 1) {
   ctx.closePath();
   ctx.fill();
 
-  // Fenster
   ctx.fillStyle = "#ffffff";
   ctx.beginPath();
   ctx.arc(0, -10, 3.5, 0, 2 * Math.PI);
   ctx.fill();
 
-  // Flügel links
   ctx.fillStyle = "#9e1b1b";
   ctx.beginPath();
   ctx.moveTo(-12, 10);
@@ -59,7 +55,6 @@ function drawRocket(x, y, angle, scale = 1) {
   ctx.closePath();
   ctx.fill();
 
-  // Flügel rechts
   ctx.beginPath();
   ctx.moveTo(12, 10);
   ctx.lineTo(18, 18);
@@ -67,7 +62,6 @@ function drawRocket(x, y, angle, scale = 1) {
   ctx.closePath();
   ctx.fill();
 
-  // Flamme (nur in Bewegung sichtbar)
   if (rocketPhase !== "idle") {
     ctx.fillStyle = "orange";
     ctx.beginPath();
@@ -77,11 +71,9 @@ function drawRocket(x, y, angle, scale = 1) {
     ctx.closePath();
     ctx.fill();
   }
-
   ctx.restore();
 }
 
-// Explosionsteilchen erzeugen
 function createParticles(x, y) {
   const colors = ["#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "#FFFFFF"];
   for (let i = 0; i < 500; i++) {
@@ -89,8 +81,7 @@ function createParticles(x, y) {
     const speed = Math.random() * 10 + 2;
     const size = Math.random() * 8 + 6;
     particles.push({
-      x,
-      y,
+      x, y,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       alpha: 1,
@@ -98,11 +89,9 @@ function createParticles(x, y) {
       size
     });
   }
-
   if (navigator.vibrate) navigator.vibrate(300);
 }
 
-// Explosionsteilchen zeichnen
 function drawParticles() {
   particles.forEach(p => {
     ctx.fillStyle = `rgba(${hexToRgb(p.color)}, ${p.alpha})`;
@@ -115,7 +104,6 @@ function drawParticles() {
   });
 }
 
-// Farbkonvertierung für rgba
 function hexToRgb(hex) {
   const bigint = parseInt(hex.replace('#',''), 16);
   const r = (bigint >> 16) & 255;
@@ -124,11 +112,16 @@ function hexToRgb(hex) {
   return `${r}, ${g}, ${b}`;
 }
 
-// Hauptanimationsfunktion
+function launchPath(t) {
+  return {
+    x: canvas.width - 40 - t * 1.2,
+    y: canvas.height - 40 - 0.02 * t * t - Math.sin(t * 0.07) * 30
+  };
+}
+
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // PHASE 1: Rakete steht unten rechts
   if (rocketPhase === "idle") {
     drawRocket(rocket.x, rocket.y, rocket.angle);
     if (t > 40) {
@@ -136,62 +129,45 @@ function animate() {
       t = 0;
     }
 
-  // PHASE 2: Rakete fliegt in Parabelbahn nach links oben
   } else if (rocketPhase === "launch") {
-    // Kurvenfunktion: Parabel für Y, linear für X
-    const curve = t => ({
-      x: canvas.width - 40 - t * 1.3,
-      y: canvas.height - 40 - 0.035 * t * t // beschleunigtes Steigen
-    });
+    const p1 = launchPath(t);
+    const p2 = launchPath(t + 0.1);
 
-    const pos = curve(t);
-    const next = curve(t + 1);
-
-    rocket.x = pos.x;
-    rocket.y = pos.y;
-
-    // Richtung = Tangente = Differenz der Kurvenpunkte
-    const dx = next.x - pos.x;
-    const dy = next.y - pos.y;
-    rocket.angle = Math.atan2(dy, dx);
+    rocket.x = p1.x;
+    rocket.y = p1.y;
+    rocket.angle = Math.atan2(p2.y - p1.y, p2.x - p1.x); // Tangente
 
     drawRocket(rocket.x, rocket.y, rocket.angle);
 
-    // Wenn aus dem Bild: nächste Phase
     if (rocket.x < -50 || rocket.y < -50) {
       rocketPhase = "wait";
       t = 0;
     }
 
-  // PHASE 3: Kurze Pause
   } else if (rocketPhase === "wait") {
     if (t > 60) {
       rocketPhase = "reentry";
       rocket.x = -100;
       rocket.y = canvas.height / 2;
-      rocket.angle = 0;
+      rocket.angle = 0; // Geradeaus (nach rechts)
       rocket.scale = 0.3;
       t = 0;
     }
 
-  // PHASE 4: Rakete fliegt horizontal von links nach rechts & wird größer
   } else if (rocketPhase === "reentry") {
     rocket.x += 7;
     rocket.scale += 0.01;
-    rocket.angle = 0; // Spitze zeigt nach rechts
     drawRocket(rocket.x, rocket.y, rocket.angle, rocket.scale);
 
     if (rocket.x > canvas.width / 2) {
       rocketPhase = "explode";
       createParticles(canvas.width / 2, canvas.height / 2);
-
       setTimeout(() => {
         scoreDisplay.textContent = `You got ${score} points! 👍`;
         scoreDisplay.style.display = "block";
       }, 1000);
     }
 
-  // PHASE 5: Explosion
   } else if (rocketPhase === "explode") {
     drawParticles();
   }
