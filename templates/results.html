@@ -22,14 +22,14 @@ let t = 0;
 let rocket = {
   x: canvas.width - 40,
   y: canvas.height - 40,
-  angle: Math.PI / 2, // Spitze zeigt nach oben nach Rotation
+  angle: 0, // Start zeigt senkrecht nach oben
   scale: 1
 };
 
 function drawRocket(x, y, angle, scale = 1) {
   ctx.save();
   ctx.translate(x, y);
-  ctx.rotate(angle + Math.PI / 2); // Drehung um 90 Grad im Uhrzeigersinn
+  ctx.rotate(angle + Math.PI / 2); // Rakete zeigt entlang ihrer Längsachse (ursprünglich y-)
   ctx.scale(scale, scale);
 
   ctx.fillStyle = "#d32f2f";
@@ -112,11 +112,21 @@ function hexToRgb(hex) {
   return `${r}, ${g}, ${b}`;
 }
 
+// neue Flugbahn: erst senkrecht, dann Bogen mit Spline-Charakter
 function launchPath(t) {
-  return {
-    x: canvas.width - 40 - t * 1.2,
-    y: canvas.height - 40 - 0.02 * t * t - Math.sin(t * 0.07) * 30
-  };
+  const verticalClimb = 60;
+  if (t < verticalClimb) {
+    return {
+      x: canvas.width - 40,
+      y: canvas.height - 40 - t * 2
+    };
+  } else {
+    const t2 = t - verticalClimb;
+    return {
+      x: canvas.width - 40 - t2 * 1.1,
+      y: canvas.height - 40 - verticalClimb * 2 - t2 * 1.1 + Math.sin(t2 * 0.03) * 20
+    };
+  }
 }
 
 function animate() {
@@ -179,7 +189,3 @@ function animate() {
 animate();
 </script>
 {% endblock %}
-
-
-
-
