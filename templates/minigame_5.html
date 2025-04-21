@@ -95,6 +95,7 @@ const goodWords = labels.slice(0, 15);
 const BUBBLE_SPEED = 1.9;
 
 let usedLabels = new Set();
+let tiltX = 0; // 🆕 Sensorwert-Zwischenspeicher
 
 function doesOverlap(x, y, radius, others) {
   return others.some(obj => {
@@ -195,12 +196,9 @@ function drawBubblesAndCar() {
     const obj = objects[i];
     obj.y += obj.speed;
 
-    // Wenn Bubble unten rausfällt → nur ungetroffene nachfüllen
     if (!obj.hit && obj.y - obj.radius > logicalHeight) {
       const newObj = getNewObject(null, objects);
-      if (newObj) {
-        objects[i] = newObj;
-      }
+      if (newObj) objects[i] = newObj;
       continue;
     }
 
@@ -209,9 +207,7 @@ function drawBubblesAndCar() {
       obj.alpha -= 0.08;
       if (obj.alpha <= 0) {
         const newObj = getNewObject(null, objects);
-        if (newObj) {
-          objects[i] = newObj;
-        }
+        if (newObj) objects[i] = newObj;
       }
     }
 
@@ -237,13 +233,13 @@ function drawBubblesAndCar() {
       ctx.restore();
     }
 
-    // 💥 Kollisionserkennung: Blase berührt Auto (auch an den Rändern)
+    // Realistische Kollision: Bubble berührt Auto
     const closestX = Math.max(car.x, Math.min(obj.x + obj.radius, car.x + car.width));
     const closestY = Math.max(car.y, Math.min(obj.y + obj.radius, car.y + car.height));
     const dx = (obj.x + obj.radius) - closestX;
     const dy = (obj.y + obj.radius) - closestY;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    const collisionThreshold = obj.radius * 0.9; // etwas großzügiger
+    const collisionThreshold = obj.radius * 0.9;
 
     if (!obj.hit && distance < collisionThreshold) {
       obj.hit = true;
@@ -260,7 +256,6 @@ function drawBubblesAndCar() {
 
   ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
 }
-
 
 function drawFinishAnimation() {
   if (finishLine.y < finishLine.targetY) {
@@ -295,6 +290,11 @@ function update() {
   ctx.clearRect(0, 0, logicalWidth, logicalHeight);
   timer++;
 
+  // 🆕 Glatte Bewegung durch synchronisierte Neigung
+  const sensitivity = 0.25;
+  car.x += tiltX * sensitivity;
+  car.x = Math.max(0, Math.min(logicalWidth - car.width, car.x));
+
   if (showLights) {
     drawLights();
     if (timer === 300 + 5 * 45) {
@@ -318,14 +318,13 @@ function update() {
   requestAnimationFrame(update);
 }
 
+// 🆕 Nur Sensorwert merken – Bewegung erfolgt in update()
 window.addEventListener("deviceorientation", function(event) {
-  const gamma = event.gamma || 0;
-  const sensitivity = 0.25;
-  car.x += gamma * sensitivity;
-  car.x = Math.max(0, Math.min(logicalWidth - car.width, car.x));
+  tiltX = event.gamma || 0;
 });
 
 update();
 </script>
 {% endblock %}
+
 
