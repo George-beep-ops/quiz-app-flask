@@ -14,6 +14,7 @@
     grid-template-columns: repeat(2, minmax(120px, 1fr));
     gap: 1rem;
     margin-top: 1rem;
+    justify-content: center;
   }
   .tile {
     background-color: #ddd;
@@ -41,6 +42,8 @@
     font-size: 1.2rem;
     margin: 1rem;
     font-weight: bold;
+    display: none;
+    text-align: center;
   }
 </style>
 {% endblock %}
@@ -59,7 +62,7 @@
     <button type="submit" style="display: none;">Absenden</button>
   </form>
 
-  <div id="timer">⏳ Time is running... <span id="timer">20</span>s</div>
+  <div id="timer">⏳ Time is running... <span id="timeValue">8</span>s</div>
 {% endblock %}
 
 {% block script %}
@@ -93,19 +96,24 @@
     });
   });
 
-  // Timer: automatischer Abbruch nach 8 Sekunden
-  let timeLeft = 10;
-  const timerEl = document.getElementById("timer");
-  const countdown = setInterval(() => {
-    timeLeft--;
-    timerEl.textContent = `⏳ Time is running ... ${timeLeft}`;
-    if (timeLeft <= 0 && selectedCount < 2) {
-      clearInterval(countdown);
-      tiles.forEach(t => t.classList.add("disabled"));
-      document.getElementById("scoreInput").value = score;
-      document.getElementById("gameForm").submit();
-    }
-  }, 1000);
+  // Timer starten nach 3 Sekunden
+  setTimeout(() => {
+    const timerContainer = document.getElementById("timer");
+    const timerValue = document.getElementById("timeValue");
+    timerContainer.style.display = "block";
+
+    let timeLeft = 8;
+    const countdown = setInterval(() => {
+      timeLeft--;
+      timerValue.textContent = timeLeft;
+      if (timeLeft <= 0 && selectedCount < 2) {
+        clearInterval(countdown);
+        tiles.forEach(t => t.classList.add("disabled"));
+        document.getElementById("scoreInput").value = score;
+        document.getElementById("gameForm").submit();
+      }
+    }, 1000);
+  }, 3000);
 </script>
 {% endblock %}
 

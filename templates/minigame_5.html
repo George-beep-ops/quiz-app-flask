@@ -15,15 +15,17 @@
   }
 
   canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: #ffffff;
-    touch-action: none;
-    border: none;
-  }
+  position: absolute;
+  top: 60px; /* Platz für Header */
+  left: 0;
+  width: 100vw;
+  height: calc(100vh - 120px); /* oben Header, unten Footer */
+  background-color: #ffffff;
+  touch-action: none;
+  border: none;
+  z-index: 1;
+}
+
 </style>
 {% endblock %}
 

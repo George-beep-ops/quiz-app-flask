@@ -32,18 +32,26 @@
   const extraDisplay = document.getElementById("extra");
   const scoreInput = document.getElementById("scoreInput");
   const form = document.getElementById("gameForm");
+  const statusBlock = document.getElementById("status");
 
-  // Countdown
-  const countdown = setInterval(() => {
-    timer--;
-    timerDisplay.textContent = timer;
+  // Verstecke Timer-Anzeige anfangs
+  statusBlock.style.display = "none";
 
-    if (timer <= 0 && !submitted) {
-      clearInterval(countdown);
-      checkInput();  // Punkte vergeben
-      submitGame();
-    }
-  }, 1000);
+  // Zeige Timer und starte Countdown erst nach 3 Sekunden
+  setTimeout(() => {
+    statusBlock.style.display = "block";
+
+    const countdown = setInterval(() => {
+      timer--;
+      timerDisplay.textContent = timer;
+
+      if (timer <= 0 && !submitted) {
+        clearInterval(countdown);
+        checkInput();
+        submitGame();
+      }
+    }, 1000);
+  }, 3000);
 
   function checkInput() {
     const input = inputField.value.toLowerCase();
@@ -66,7 +74,6 @@
     const z = acc.z;
 
     const isFlat = Math.abs(x) < 1 && Math.abs(y) < 1 && Math.abs(z) > 9.5;
-
     const now = new Date().getTime();
 
     if (isFlat) {
@@ -80,7 +87,6 @@
             flatDetected = true;
             score += 1;
             extraDisplay.textContent = "✅ Extra Point!";
-            clearInterval(countdown);
             submitGame();
           }
         }
@@ -116,3 +122,4 @@
   }
 </script>
 {% endblock %}
+
