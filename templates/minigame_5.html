@@ -93,7 +93,7 @@ const car = {
 
 const labels = [...Array(30).keys()].map(i => "option " + (i + 1));
 const goodWords = labels.slice(0, 15);
-const BUBBLE_SPEED = 1.7;
+const BUBBLE_SPEED = 1.9;
 
 function doesOverlap(x, y, radius, others) {
   return others.some(obj => {
@@ -157,7 +157,7 @@ let animationDone = false;
 
 const finishLine = {
   y: -logicalHeight * 0.25,
-  targetY: logicalHeight * 0.2,
+  targetY: logicalHeight * 0.15,
   width: logicalWidth * 1.2,
   height: logicalHeight * 0.6
 };
