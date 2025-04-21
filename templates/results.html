@@ -18,18 +18,18 @@ const score = Number(scoreDisplay.dataset.score);
 let particles = [];
 let rocketPhase = "idle";
 let t = 0;
+let speedFactor = 1; // wird für Beschleunigung verwendet
 
 let rocket = {
   x: 0,
   y: 0,
-  angle: 0,
+  angle: -Math.PI / 2, // Start: Spitze zeigt nach oben
   scale: 1
 };
 
-// 🎯 Angepasste Kontrollpunkte für schöne Übergangskurve
-const P0 = { x: canvas.width - 40, y: canvas.height - 40 };         // Start: unten rechts
-const P1 = { x: canvas.width - 100, y: canvas.height / 2 };         // Kontrolle: rechter Zwischenpunkt (senkrechter Start)
-const P2 = { x: canvas.width / 2 - 100, y: 40 };                     // Ende: oben links
+const P0 = { x: canvas.width - 40, y: canvas.height - 40 };
+const P1 = { x: canvas.width - 100, y: canvas.height / 2 };
+const P2 = { x: canvas.width / 2 - 100, y: 40 };
 
 function bezier(t, p0, p1, p2) {
   const x = (1 - t) * (1 - t) * p0.x + 2 * (1 - t) * t * p1.x + t * t * p2.x;
@@ -127,21 +127,22 @@ function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if (rocketPhase === "idle") {
-    drawRocket(P0.x, P0.y, 0);
+    drawRocket(P0.x, P0.y, rocket.angle);
     if (t > 40) {
       rocketPhase = "launch";
       t = 0;
+      speedFactor = 1;
     }
   }
   else if (rocketPhase === "launch") {
-    let timeNorm = t / 180;
+    let timeNorm = t / (180 / speedFactor);
     if (timeNorm > 1) {
-      rocketPhase = "explode";
-      createParticles(rocket.x, rocket.y);
-      setTimeout(() => {
-        scoreDisplay.textContent = `You got ${score} points! 👍`;
-        scoreDisplay.style.display = "block";
-      }, 1000);
+      rocketPhase = "reentry";
+      rocket.x = canvas.width + 100;
+      rocket.y = canvas.height / 2;
+      rocket.angle = 0;
+      rocket.scale = 0.3;
+      t = 0;
     } else {
       const pos = bezier(timeNorm, P0, P1, P2);
       const next = bezier(timeNorm + 0.01, P0, P1, P2);
@@ -149,6 +150,20 @@ function animate() {
       rocket.y = pos.y;
       rocket.angle = Math.atan2(next.y - pos.y, next.x - pos.x);
       drawRocket(rocket.x, rocket.y, rocket.angle);
+      speedFactor *= 1.015; // Beschleunigung
+    }
+  }
+  else if (rocketPhase === "reentry") {
+    rocket.x -= 6; // von rechts nach innen
+    rocket.scale += 0.01;
+    drawRocket(rocket.x, rocket.y, 0, rocket.scale);
+    if (rocket.x < canvas.width / 2) {
+      rocketPhase = "explode";
+      createParticles(rocket.x, rocket.y);
+      setTimeout(() => {
+        scoreDisplay.textContent = `You got ${score} points! 👍`;
+        scoreDisplay.style.display = "block";
+      }, 1000);
     }
   }
   else if (rocketPhase === "explode") {
@@ -162,4 +177,5 @@ function animate() {
 animate();
 </script>
 {% endblock %}
+
 

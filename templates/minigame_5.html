@@ -239,7 +239,7 @@ function drawBubblesAndCar() {
     const dx = (obj.x + obj.radius) - closestX;
     const dy = (obj.y + obj.radius) - closestY;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    const collisionThreshold = obj.radius * 0.82;
+    const collisionThreshold = obj.radius * 0.95;
 
     if (!obj.hit && distance < collisionThreshold) {
       obj.hit = true;
