@@ -141,7 +141,7 @@ function animate() {
     }
   }
   else if (rocketPhase === "launch") {
-    let timeNorm = t / (150 / speedFactor);
+    let timeNorm = t / (160 / speedFactor);
     if (timeNorm > 1.0) {
       rocketPhase = "wait";
       t = 0;
@@ -166,7 +166,7 @@ function animate() {
     }
   }
   else if (rocketPhase === "reentry") {
-    rocket.x += 9;
+    rocket.x += 12;
     rocket.scale += 0.01;
     drawRocket(rocket.x, rocket.y, 0, rocket.scale);
     if (rocket.x > canvas.width / 2) {
