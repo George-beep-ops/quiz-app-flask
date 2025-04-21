@@ -6,7 +6,8 @@
   <h2><strong>Mini Game 4 – Don’t Forget!</strong><br>Enter two key terms of our topic (separated by a comma) and place your phone <strong>flat on the table within 20 seconds</strong>.</h2>
   
 
-  <input type="text" id="inputField" placeholder="Begriffe eingeben..." style="padding: 1rem; font-size: 1rem; width: 80%; max-width: 400px; margin-bottom: 1rem;">
+  <input type="text" id="inputField" placeholder="Begriffe eingeben..." style="padding: 1rem; font-size: 1rem; width: 80%; max-width: 400px; margin-bottom: 1rem;" disabled>
+
   <div id="status" style="font-weight: bold; margin: 1rem; font-size: 1.2rem;">⏳ Time is running... <span id="timer">20</span>s</div>
   <div id="extra" style="font-weight: bold; font-size: 1.2rem; color: green;"></div>
 
@@ -39,19 +40,26 @@
 
   // Zeige Timer und starte Countdown erst nach 3 Sekunden
   setTimeout(() => {
-    statusBlock.style.display = "block";
+  statusBlock.style.display = "block";
 
-    const countdown = setInterval(() => {
-      timer--;
-      timerDisplay.textContent = timer;
+  // Aktiviere das Eingabefeld nach 3 Sekunden
+  inputField.disabled = false;
+  inputField.style.backgroundColor = "white"; // optional: visuell zurücksetzen
+  inputField.style.opacity = "1"; // falls du es vorher transparenter machen willst
 
-      if (timer <= 0 && !submitted) {
-        clearInterval(countdown);
-        checkInput();
-        submitGame();
-      }
-    }, 1000);
-  }, 3000);
+  // Countdown starten
+  const countdown = setInterval(() => {
+    timer--;
+    timerDisplay.textContent = timer;
+
+    if (timer <= 0 && !submitted) {
+      clearInterval(countdown);
+      checkInput();
+      submitGame();
+    }
+  }, 1000);
+}, 3000);
+
 
   function checkInput() {
     const input = inputField.value.toLowerCase();
