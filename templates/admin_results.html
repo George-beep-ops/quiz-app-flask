@@ -3,13 +3,13 @@
 {% block title %}Admin – Ergebnisse Übersicht{% endblock %}
 
 {% block content %}
-  <h2>Live-Auswertung</h2>
+  <h2>Live-Result</h2>
   <div style="display: flex; flex-direction: row; justify-content: space-around; flex-wrap: wrap;">
     <div>
       <canvas id="barChart" width="500" height="300"></canvas>
     </div>
     <div>
-      <h3>🏆 Topliste</h3>
+      <h3>🏆 Toplist</h3>
       <ol id="topList"></ol>
     </div>
   </div>
@@ -46,7 +46,7 @@ async function fetchDataAndUpdate() {
   const barHeights = sortedScores.map(score => score);
 
   // Spieleranzahl (Labels unter Balken)
-  const playerCounts = sortedScores.map(score => `${scoreCounts[score]} Spieler`);
+  const playerCounts = sortedScores.map(score => `${scoreCounts[score]} Player`);
 
   if (chart) {
     chart.data.labels = playerCounts;
@@ -59,7 +59,7 @@ async function fetchDataAndUpdate() {
       data: {
         labels: playerCounts,
         datasets: [{
-          label: "Erreichte Punkte",
+          label: "Points",
           data: barHeights,
           backgroundColor: "#0077cc"
         }]
@@ -76,14 +76,14 @@ async function fetchDataAndUpdate() {
               size: 12
             },
             color: "#000",
-            formatter: value => `${value} Punkte`
+            formatter: value => `${value} Points`
           }
         },
         scales: {
           x: {
             title: {
               display: true,
-              text: "Spieleranzahl pro Punktzahl"
+              text: "Number of Players for each Score"
             },
             ticks: {
               precision: 0
@@ -94,7 +94,7 @@ async function fetchDataAndUpdate() {
             max: 20,
             title: {
               display: true,
-              text: "Punkte"
+              text: "Points"
             },
             ticks: {
               stepSize: 1,
@@ -113,7 +113,7 @@ async function fetchDataAndUpdate() {
   ol.innerHTML = "";
   sortedResults.forEach(r => {
     const li = document.createElement("li");
-    li.textContent = `🏆 ${r.name} – ${r.score} Punkte`;
+    li.textContent = `🏆 ${r.name} – ${r.score} Points`;
     ol.appendChild(li);
   });
 }
