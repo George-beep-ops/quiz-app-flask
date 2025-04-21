@@ -161,13 +161,13 @@ function animate() {
       rocket.x = -100;
       rocket.y = canvas.height / 2;
       rocket.angle = 0;
-      rocket.scale = 0.3;
+      rocket.scale = 1;
       t = 0;
     }
   }
   else if (rocketPhase === "reentry") {
     rocket.x += 6;
-    rocket.scale += 0.01;
+    rocket.scale += 0.02;
     drawRocket(rocket.x, rocket.y, 0, rocket.scale);
     if (rocket.x > canvas.width / 2) {
       rocketPhase = "explode";
