@@ -16,21 +16,24 @@ const scoreDisplay = document.getElementById("scoreDisplay");
 const score = Number(scoreDisplay.dataset.score);
 
 let particles = [];
-let rocketPhase = "idle"; // idle → launch → exit → reentry → explode
+let rocketPhase = "idle"; // Ablaufsteuerung: idle → launch → wait → reentry → explode
 let t = 0;
+
+// Startposition: unten rechts, zeigt nach oben
 let rocket = {
   x: canvas.width - 40,
   y: canvas.height - 40,
   angle: -Math.PI / 2,
-  speed: 0,
+  scale: 1,
 };
 
-function drawRocket(x, y, angle) {
+function drawRocket(x, y, angle, scale = 1) {
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(angle);
+  ctx.scale(scale, scale);
 
-  // Rumpf
+  // Raketenrumpf
   ctx.fillStyle = "#d32f2f";
   ctx.beginPath();
   ctx.moveTo(0, -25);
@@ -120,63 +123,67 @@ function hexToRgb(hex) {
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // PHASE 1: Rakete steht still
   if (rocketPhase === "idle") {
     drawRocket(rocket.x, rocket.y, rocket.angle);
-    if (t > 30) {
+    if (t > 40) { // wie lange sie steht (einstellbar)
       rocketPhase = "launch";
       t = 0;
     }
 
+  // PHASE 2: Startkurve nach links oben
   } else if (rocketPhase === "launch") {
-    // Beschleunigte Bogenbahn: nach links oben
-    const dx = -1.5 * t;
-    const dy = -0.5 * t * t * 0.03;
-    rocket.x = canvas.width - 40 + dx;
-    rocket.y = canvas.height - 40 + dy;
-    const nextX = canvas.width - 40 + dx - 1.5;
-    const nextY = canvas.height - 40 + (-0.5 * (t + 1) * (t + 1) * 0.03);
-    rocket.angle = Math.atan2(nextY - rocket.y, nextX - rocket.x);
+    // Flugbahn: Beschleunigte Kurve (x wird kleiner, y steigt schneller)
+    const curveX = canvas.width - 40 - t * 1.4;
+    const curveY = canvas.height - 40 - 0.03 * t * t; // beschleunigter Anstieg
+    const futureX = canvas.width - 40 - (t + 1) * 1.4;
+    const futureY = canvas.height - 40 - 0.03 * (t + 1) * (t + 1);
+    rocket.angle = Math.atan2(futureY - curveY, futureX - curveX);
+    rocket.x = curveX;
+    rocket.y = curveY;
+
     drawRocket(rocket.x, rocket.y, rocket.angle);
 
     if (rocket.x < -50 || rocket.y < -50) {
-      rocketPhase = "exit";
+      rocketPhase = "wait";
       t = 0;
     }
 
-  } else if (rocketPhase === "exit") {
-    // Kurze Pause außerhalb
-    if (t > 20) {
+  // PHASE 3: Kurze Pause außerhalb
+  } else if (rocketPhase === "wait") {
+    if (t > 60) { // Wartezeit bis Wiedereintritt (einstellbar)
       rocketPhase = "reentry";
-      rocket.x = -60;
+      rocket.scale = 0.3;
+      rocket.x = -100;
       rocket.y = canvas.height / 2;
-      rocket.angle = 0;
     }
-    t++;
 
+  // PHASE 4: Wiedereintritt – Rakete fliegt schnell von links nach rechts & wird größer
   } else if (rocketPhase === "reentry") {
-    rocket.x += 6;
-    rocket.y += Math.sin(t * 0.2) * 1.5;
-    drawRocket(rocket.x, rocket.y, rocket.angle);
-    if (rocket.x > canvas.width / 2 - 10) {
+    rocket.x += 7;
+    rocket.scale += 0.01; // Zoom simuliert Perspektive
+    drawRocket(rocket.x, rocket.y, 0, rocket.scale);
+
+    if (rocket.x > canvas.width / 2) {
       rocketPhase = "explode";
       createParticles(canvas.width / 2, canvas.height / 2);
+
       setTimeout(() => {
         scoreDisplay.textContent = `You got ${score} points! 👍`;
         scoreDisplay.style.display = "block";
       }, 1000);
     }
-    t++;
 
+  // PHASE 5: Explosion mit Partikeln
   } else if (rocketPhase === "explode") {
     drawParticles();
   }
 
-  if (rocketPhase !== "explode") t++;
+  t++;
   requestAnimationFrame(animate);
 }
 
 animate();
 </script>
 {% endblock %}
-
 
