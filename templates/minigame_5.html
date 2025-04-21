@@ -80,8 +80,8 @@ finishImg.src = "{{ url_for('static', filename='ziellinie.png') }}";
 
 const initialCarWidth = logicalWidth * 0.11;
 const initialCarHeight = logicalHeight * 0.1;
-const maxCarWidth = logicalWidth * 0.33;
-const maxCarHeight = logicalHeight * 0.3;
+const maxCarWidth = logicalWidth * 0.22;
+const maxCarHeight = logicalHeight * 0.2;
 
 const car = {
   width: initialCarWidth,
@@ -239,7 +239,7 @@ function drawBubblesAndCar() {
     const dx = (obj.x + obj.radius) - closestX;
     const dy = (obj.y + obj.radius) - closestY;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    const collisionThreshold = obj.radius * 0.95;
+    const collisionThreshold = obj.radius * 0.98;
 
     if (!obj.hit && distance < collisionThreshold) {
       obj.hit = true;

@@ -141,7 +141,7 @@ function animate() {
     }
   }
   else if (rocketPhase === "launch") {
-    let timeNorm = t / (180 / speedFactor);
+    let timeNorm = t / (150 / speedFactor);
     if (timeNorm > 1.0) {
       rocketPhase = "wait";
       t = 0;
@@ -152,7 +152,7 @@ function animate() {
       rocket.y = pos.y;
       rocket.angle = Math.atan2(next.y - pos.y, next.x - pos.x);
       drawRocket(rocket.x, rocket.y, rocket.angle);
-      speedFactor *= 1.012;
+      speedFactor *= 1.02;
     }
   }
   else if (rocketPhase === "wait") {
@@ -166,8 +166,8 @@ function animate() {
     }
   }
   else if (rocketPhase === "reentry") {
-    rocket.x += 6;
-    rocket.scale += 0.02;
+    rocket.x += 9;
+    rocket.scale += 0.01;
     drawRocket(rocket.x, rocket.y, 0, rocket.scale);
     if (rocket.x > canvas.width / 2) {
       rocketPhase = "explode";
