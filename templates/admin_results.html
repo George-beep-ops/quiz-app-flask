@@ -33,7 +33,7 @@
   <h2>Live-Auswertung</h2>
   <div style="display: flex; flex-direction: row; justify-content: space-around; flex-wrap: wrap;">
     <div>
-      <canvas id="barChart" style="width: 960px; height: 540px;"></canvas>
+      <canvas id="barChart" width="1000" height="600"></canvas>
     </div>
     <div>
       <h3>🏆 Topliste</h3>
@@ -47,18 +47,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
 let chart;
-
-function prepareHighResCanvas(canvas, width, height) {
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = width * dpr;
-  canvas.height = height * dpr;
-  canvas.style.width = width + "px";
-  canvas.style.height = height + "px";
-  const ctx = canvas.getContext("2d");
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.scale(dpr, dpr);
-  return ctx;
-}
 
 async function fetchDataAndUpdate() {
   const response = await fetch(window.location.href);
@@ -81,14 +69,12 @@ async function fetchDataAndUpdate() {
   const barHeights = sortedScores.map(score => score);
   const playerCounts = sortedScores.map(score => `${scoreCounts[score]} Spieler`);
 
-  const canvas = document.getElementById("barChart");
-  const ctx = prepareHighResCanvas(canvas, 960, 540);
-
   if (chart) {
     chart.data.labels = playerCounts;
     chart.data.datasets[0].data = barHeights;
     chart.update();
   } else {
+    const ctx = document.getElementById("barChart").getContext("2d");
     chart = new Chart(ctx, {
       type: "bar",
       data: {
@@ -100,8 +86,7 @@ async function fetchDataAndUpdate() {
         }]
       },
       options: {
-        responsive: false,
-        maintainAspectRatio: false,
+        responsive: true,
         plugins: {
           legend: { display: false },
           datalabels: {
