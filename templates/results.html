@@ -12,26 +12,32 @@
 <script>
 const canvas = document.getElementById("rocketCanvas");
 const ctx = canvas.getContext("2d");
-let angle = 0;
-let explode = false;
-let particles = [];
-
 const scoreDisplay = document.getElementById("scoreDisplay");
 const score = Number(scoreDisplay.dataset.score);
 
-function drawRocket(x, y) {
+let explode = false;
+let particles = [];
+
+let rocket = {
+  x: canvas.width / 2,
+  y: canvas.height / 2 + 100,
+  angle: -Math.PI / 2, // Start zeigt nach oben
+  speed: 2.4
+};
+
+function drawRocket(x, y, angle) {
   ctx.save();
   ctx.translate(x, y);
-  ctx.rotate(angle + Math.PI / 2); // Drehe in Flugrichtung
+  ctx.rotate(angle);
 
   // Raketenrumpf
   ctx.fillStyle = "#d32f2f";
   ctx.beginPath();
-  ctx.moveTo(0, -25);           // Spitze
-  ctx.lineTo(12, 10);           // rechte untere Ecke
+  ctx.moveTo(0, -25);
+  ctx.lineTo(12, 10);
   ctx.lineTo(6, 12);
   ctx.lineTo(-6, 12);
-  ctx.lineTo(-12, 10);          // linke untere Ecke
+  ctx.lineTo(-12, 10);
   ctx.closePath();
   ctx.fill();
 
@@ -62,7 +68,7 @@ function drawRocket(x, y) {
   ctx.fillStyle = "orange";
   ctx.beginPath();
   ctx.moveTo(-4, 12);
-  ctx.lineTo(0, 20 + Math.random() * 6);  // animierte Flamme
+  ctx.lineTo(0, 20 + Math.random() * 8);
   ctx.lineTo(4, 12);
   ctx.closePath();
   ctx.fill();
@@ -70,42 +76,35 @@ function drawRocket(x, y) {
   ctx.restore();
 }
 
-
 function createParticles(x, y) {
-  for (let i = 0; i < 100; i++) {
+  const colors = ["#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "#FFFFFF"];
+  for (let i = 0; i < 300; i++) {
     const angle = Math.random() * 2 * Math.PI;
-    const speed = Math.random() * 6 + 2;
-    const colors = ["#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500"];
+    const speed = Math.random() * 8 + 3;
+    const size = Math.random() * 6 + 4;
     particles.push({
-      x: x,
-      y: y,
+      x,
+      y,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       alpha: 1,
-      color: colors[Math.floor(Math.random() * colors.length)]
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size
     });
   }
+
+  if (navigator.vibrate) navigator.vibrate(250);
 }
 
 function drawParticles() {
   particles.forEach(p => {
     ctx.fillStyle = `rgba(${hexToRgb(p.color)}, ${p.alpha})`;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 4, 0, 2 * Math.PI);
+    ctx.arc(p.x, p.y, p.size, 0, 2 * Math.PI);
     ctx.fill();
     p.x += p.vx;
     p.y += p.vy;
-    p.alpha -= 0.004; // langsameres Verblassen
-    if (p.alpha <= 0) {
-      // Wiederverwendung für dauerhaft sichtbare Effekte
-      const angle = Math.random() * 2 * Math.PI;
-      const speed = Math.random() * 6 + 2;
-      p.x = canvas.width / 2;
-      p.y = canvas.height / 2;
-      p.vx = Math.cos(angle) * speed;
-      p.vy = Math.sin(angle) * speed;
-      p.alpha = 1;
-    }
+    p.alpha -= 0.008;
   });
 }
 
@@ -121,14 +120,19 @@ function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if (!explode) {
-    const radius = 140;
-    const x = canvas.width / 2 + Math.cos(angle) * radius;
-    const y = canvas.height / 2 + Math.sin(angle) * radius;
-    drawRocket(x, y);
-    angle += 0.06;
-    if (angle > 2 * Math.PI) {
+    // Flug in Blickrichtung der Rakete
+    rocket.x += Math.cos(rocket.angle) * rocket.speed;
+    rocket.y += Math.sin(rocket.angle) * rocket.speed;
+
+    drawRocket(rocket.x, rocket.y, rocket.angle);
+
+    // Wenn Rakete Canvas verlässt → Explosion
+    if (
+      rocket.x < -50 || rocket.x > canvas.width + 50 ||
+      rocket.y < -50 || rocket.y > canvas.height + 50
+    ) {
       explode = true;
-      createParticles(x, y);
+      createParticles(rocket.x, rocket.y);
       setTimeout(() => {
         scoreDisplay.textContent = `You got ${score} points! 👍`;
         scoreDisplay.style.display = "block";
@@ -144,4 +148,5 @@ function animate() {
 animate();
 </script>
 {% endblock %}
+
 

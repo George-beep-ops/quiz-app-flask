@@ -237,13 +237,19 @@ function drawBubblesAndCar() {
       ctx.restore();
     }
 
-    // Kollision
-    if (!obj.hit && obj.x + obj.radius * 2 > car.x && obj.x < car.x + car.width &&
-        obj.y + obj.radius * 2 > car.y && obj.y < car.y + car.height) {
+    // 💥 Kollisionserkennung: Blase berührt Auto (auch an den Rändern)
+    const closestX = Math.max(car.x, Math.min(obj.x + obj.radius, car.x + car.width));
+    const closestY = Math.max(car.y, Math.min(obj.y + obj.radius, car.y + car.height));
+    const dx = (obj.x + obj.radius) - closestX;
+    const dy = (obj.y + obj.radius) - closestY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const collisionThreshold = obj.radius * 0.9; // etwas großzügiger
+
+    if (!obj.hit && distance < collisionThreshold) {
       obj.hit = true;
       hits++;
       if (obj.good) score++;
-      usedLabels.add(obj.label); // NEU: Merke getroffene Labels
+      usedLabels.add(obj.label);
       if (hits >= 10) {
         gameOver = true;
         setTimeout(() => animationPhase = true, 300);
@@ -254,6 +260,7 @@ function drawBubblesAndCar() {
 
   ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
 }
+
 
 function drawFinishAnimation() {
   if (finishLine.y < finishLine.targetY) {
