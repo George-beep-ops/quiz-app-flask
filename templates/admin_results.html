@@ -3,40 +3,13 @@
 {% block title %}Admin – Ergebnisse Übersicht{% endblock %}
 
 {% block content %}
-  <style>
-    h2 {
-      font-size: 2.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    h3 {
-      font-size: 1.8rem;
-      margin-top: 1rem;
-    }
-
-    ol#topList {
-      font-size: 1.3rem;
-      line-height: 1.8;
-    }
-
-    li {
-      margin-bottom: 0.5rem;
-    }
-
-    #barChart {
-      width: 100%;
-      max-width: 1000px;
-      height: auto;
-    }
-  </style>
-
   <h2>Live-Auswertung</h2>
   <div style="display: flex; flex-direction: row; justify-content: space-around; flex-wrap: wrap;">
     <div>
-      <canvas id="barChart" style="width: 960px; height: 540px;"></canvas>
+      <canvas id="barChart" width="500" height="300"></canvas>
     </div>
     <div>
-      <h3>🏆 Toplist</h3>
+      <h3>🏆 Topliste</h3>
       <ol id="topList"></ol>
     </div>
   </div>
@@ -47,18 +20,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
 let chart;
-
-function prepareHighResCanvas(canvas, width, height) {
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = width * dpr;
-  canvas.height = height * dpr;
-  canvas.style.width = width + "px";
-  canvas.style.height = height + "px";
-  const ctx = canvas.getContext("2d");
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.scale(dpr, dpr);
-  return ctx;
-}
 
 async function fetchDataAndUpdate() {
   const response = await fetch(window.location.href);
@@ -72,35 +33,39 @@ async function fetchDataAndUpdate() {
   const results = JSON.parse(raw);
   const scoreCounts = {};
 
+  // Zähle wie viele Spieler jede Punktzahl erreicht haben
   results.forEach(entry => {
     const score = entry.score;
     scoreCounts[score] = (scoreCounts[score] || 0) + 1;
   });
 
+  // Sortierte Punktzahlen
   const sortedScores = Object.keys(scoreCounts).map(Number).sort((a, b) => a - b);
-  const playerCounts = sortedScores.map(score => scoreCounts[score]);
 
-  const canvas = document.getElementById("barChart");
-  const ctx = prepareHighResCanvas(canvas, 960, 540);
+  // Die Punktzahlen sind die Balkenhöhen (y-Achse)
+  const barHeights = sortedScores.map(score => score);
+
+  // Spieleranzahl (Labels unter Balken)
+  const playerCounts = sortedScores.map(score => `${scoreCounts[score]} Spieler`);
 
   if (chart) {
-    chart.data.labels = sortedScores.map(score => `${score}`);
-    chart.data.datasets[0].data = playerCounts;
+    chart.data.labels = playerCounts;
+    chart.data.datasets[0].data = barHeights;
     chart.update();
   } else {
+    const ctx = document.getElementById("barChart").getContext("2d");
     chart = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: sortedScores.map(score => `${score}`),
+        labels: playerCounts,
         datasets: [{
-          label: "Anzahl Spieler",
-          data: playerCounts,
+          label: "Erreichte Punkte",
+          data: barHeights,
           backgroundColor: "#0077cc"
         }]
       },
       options: {
-        responsive: false,
-        maintainAspectRatio: false,
+        responsive: true,
         plugins: {
           legend: { display: false },
           datalabels: {
@@ -108,43 +73,32 @@ async function fetchDataAndUpdate() {
             align: 'end',
             font: {
               weight: 'bold',
-              size: 18
+              size: 12
             },
             color: "#000",
-            formatter: (value, context) => `${sortedScores[context.dataIndex]} Punkte`
+            formatter: value => `${value} Punkte`
           }
         },
         scales: {
           x: {
             title: {
               display: true,
-              text: "Anzahl Spieler",
-              font: {
-                size: 18
-              }
+              text: "Spieleranzahl pro Punktzahl"
             },
             ticks: {
-              font: {
-                size: 14
-              }
+              precision: 0
             }
           },
           y: {
             beginAtZero: true,
-            suggestedMax: 20,
+            max: 20,
             title: {
               display: true,
-              text: "Spieler",
-              font: {
-                size: 18
-              }
+              text: "Punkte"
             },
             ticks: {
               stepSize: 1,
-              precision: 0,
-              font: {
-                size: 14
-              }
+              precision: 0
             }
           }
         }
@@ -153,6 +107,7 @@ async function fetchDataAndUpdate() {
     });
   }
 
+  // Topliste aktualisieren
   const sortedResults = results.slice().sort((a, b) => b.score - a.score);
   const ol = document.getElementById("topList");
   ol.innerHTML = "";
