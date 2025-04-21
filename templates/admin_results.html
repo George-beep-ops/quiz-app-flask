@@ -33,10 +33,10 @@
   <h2>Live-Auswertung</h2>
   <div style="display: flex; flex-direction: row; justify-content: space-around; flex-wrap: wrap;">
     <div>
-      <canvas id="barChart" width="1000" height="600"></canvas>
+      <canvas id="barChart" style="width: 960px; height: 540px;"></canvas>
     </div>
     <div>
-      <h3>🏆 Topliste</h3>
+      <h3>🏆 Toplist</h3>
       <ol id="topList"></ol>
     </div>
   </div>
@@ -47,6 +47,18 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
 let chart;
+
+function prepareHighResCanvas(canvas, width, height) {
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(dpr, dpr);
+  return ctx;
+}
 
 async function fetchDataAndUpdate() {
   const response = await fetch(window.location.href);
@@ -66,27 +78,29 @@ async function fetchDataAndUpdate() {
   });
 
   const sortedScores = Object.keys(scoreCounts).map(Number).sort((a, b) => a - b);
-  const barHeights = sortedScores.map(score => score);
-  const playerCounts = sortedScores.map(score => `${scoreCounts[score]} Spieler`);
+  const playerCounts = sortedScores.map(score => scoreCounts[score]);
+
+  const canvas = document.getElementById("barChart");
+  const ctx = prepareHighResCanvas(canvas, 960, 540);
 
   if (chart) {
-    chart.data.labels = playerCounts;
-    chart.data.datasets[0].data = barHeights;
+    chart.data.labels = playerCounts.map(count => `${count} Player`);
+    chart.data.datasets[0].data = sortedScores;
     chart.update();
   } else {
-    const ctx = document.getElementById("barChart").getContext("2d");
     chart = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: playerCounts,
+        labels: playerCounts.map(count => `${count} Player`),
         datasets: [{
-          label: "Erreichte Punkte",
-          data: barHeights,
+          label: "Points",
+          data: sortedScores,
           backgroundColor: "#0077cc"
         }]
       },
       options: {
-        responsive: true,
+        responsive: false,
+        maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
           datalabels: {
@@ -97,20 +111,19 @@ async function fetchDataAndUpdate() {
               size: 18
             },
             color: "#000",
-            formatter: value => `${value} Punkte`
+            formatter: (value) => `${value} Points`
           }
         },
         scales: {
           x: {
             title: {
               display: true,
-              text: "Spieleranzahl pro Punktzahl",
+              text: "Number of Players",
               font: {
                 size: 18
               }
             },
             ticks: {
-              precision: 0,
               font: {
                 size: 14
               }
@@ -118,10 +131,10 @@ async function fetchDataAndUpdate() {
           },
           y: {
             beginAtZero: true,
-            max: 20,
+            suggestedMax: 20,
             title: {
               display: true,
-              text: "Punkte",
+              text: "Points",
               font: {
                 size: 18
               }

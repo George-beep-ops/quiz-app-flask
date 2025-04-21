@@ -45,6 +45,13 @@ def next_step():
         question_index = int(current.split('_')[1]) - 1
         if request.method == 'POST':
             answer = request.form.get('answer')
+            if not answer:
+                return render_template(
+                    'question.html',
+                    q=questions[question_index],
+                    index=question_index + 1,
+                    error='⚠️ Please choose your answer!'
+                )
             correct = questions[question_index]['correct']
             if answer == correct:
                 session['score'] += 1

@@ -3,12 +3,45 @@
 {% block title %}Frage {{ index }}{% endblock %}
 
 {% block content %}
+  <style>
+    .error-message {
+      color: #050505;
+      font-weight: bold;
+      background-color: #fff3cd;
+      border: 1px solid #ffeeba;
+      padding: 0.8rem 1rem;
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      animation: shake 0.4s;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      50% { transform: translateX(6px); }
+      75% { transform: translateX(-4px); }
+      100% { transform: translateX(0); }
+    }
+  </style>
+
   <h2>{{ q.question }}</h2>
+
+  {% if error %}
+    <div class="error-message">
+      ⚠️ Please choose your answer!
+    </div>
+  {% endif %}
+
   <form method="POST" action="{{ url_for('next_step') }}" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
     <div style="display: flex; flex-direction: column; gap: 1.2rem; margin-top: 1.5rem; width: 100%; max-width: 500px;">
       {% for option in q.options %}
         <label style="display: flex; align-items: center; font-size: 1.3rem; gap: 0.8rem; background-color: #f0f0f0; padding: 0.8rem 1rem; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-          <input type="radio" name="answer" value="{{ option }}" required style="transform: scale(1.5);">
+          <input type="radio" name="answer" value="{{ option }}" style="transform: scale(1.5);">
           {{ option }}
         </label>
       {% endfor %}
@@ -28,3 +61,4 @@
     </button>
   </form>
 {% endblock %}
+
