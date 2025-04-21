@@ -43,17 +43,23 @@
   <p style="font-size: 1rem; font-weight: bold; max-width: 500px; margin-top: 0.5rem; margin-bottom: 2rem; text-align: center;">
     Test your knowledge and try to win the games. Each correct answer is worth one point, each wrong answer 0 points.
   </p>
-  
 
   <form id="startForm" method="POST">
-    <input type="text" name="nickname" placeholder="Your name or nickname" required>
-    <button type="button" onclick="requestMotionPermission()">Start quiz</button>
+    <input type="text" name="nickname" id="nickname" placeholder="Your name or nickname" required>
+    <button type="button" onclick="validateAndStart()">Start quiz</button>
   </form>
 {% endblock %}
 
 {% block script %}
 <script>
-function requestMotionPermission() {
+function validateAndStart() {
+  const nameInput = document.getElementById("nickname");
+  if (!nameInput.value.trim()) {
+    alert("Please enter your name or nickname.");
+    nameInput.focus();
+    return;
+  }
+
   if (
     typeof DeviceMotionEvent !== 'undefined' &&
     typeof DeviceMotionEvent.requestPermission === 'function'
@@ -74,7 +80,6 @@ function requestMotionPermission() {
 }
 </script>
 {% endblock %}
-
 
 
 

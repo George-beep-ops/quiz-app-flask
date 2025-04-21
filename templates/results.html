@@ -157,12 +157,12 @@ function animate() {
     }
   }
   else if (rocketPhase === "wait") {
-    if (t > 500) {
+    if (t > 200) {
       rocketPhase = "reentry";
       rocket.x = -100;
       rocket.y = canvas.height / 2;
       rocket.angle = 0;
-      rocket.scale = 1.5;
+      rocket.scale = 2;
       t = 0;
     }
   }
