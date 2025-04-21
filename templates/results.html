@@ -15,15 +15,14 @@ const ctx = canvas.getContext("2d");
 const scoreDisplay = document.getElementById("scoreDisplay");
 const score = Number(scoreDisplay.dataset.score);
 
-let explode = false;
 let particles = [];
-
+let rocketPhase = "idle"; // idle → launch → exit → reentry → explode
 let t = 0;
 let rocket = {
-  x: 0,
-  y: 0,
-  angle: 0,
-  speed: 1.8
+  x: canvas.width - 40,
+  y: canvas.height - 40,
+  angle: -Math.PI / 2,
+  speed: 0,
 };
 
 function drawRocket(x, y, angle) {
@@ -31,10 +30,10 @@ function drawRocket(x, y, angle) {
   ctx.translate(x, y);
   ctx.rotate(angle);
 
-  // Raketenrumpf
+  // Rumpf
   ctx.fillStyle = "#d32f2f";
   ctx.beginPath();
-  ctx.moveTo(0, -25); // Spitze nach oben
+  ctx.moveTo(0, -25);
   ctx.lineTo(12, 10);
   ctx.lineTo(6, 12);
   ctx.lineTo(-6, 12);
@@ -66,23 +65,25 @@ function drawRocket(x, y, angle) {
   ctx.fill();
 
   // Flamme
-  ctx.fillStyle = "orange";
-  ctx.beginPath();
-  ctx.moveTo(-4, 12);
-  ctx.lineTo(0, 20 + Math.random() * 8);
-  ctx.lineTo(4, 12);
-  ctx.closePath();
-  ctx.fill();
+  if (rocketPhase !== "idle") {
+    ctx.fillStyle = "orange";
+    ctx.beginPath();
+    ctx.moveTo(-4, 12);
+    ctx.lineTo(0, 20 + Math.random() * 10);
+    ctx.lineTo(4, 12);
+    ctx.closePath();
+    ctx.fill();
+  }
 
   ctx.restore();
 }
 
 function createParticles(x, y) {
   const colors = ["#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "#FFFFFF"];
-  for (let i = 0; i < 300; i++) {
+  for (let i = 0; i < 500; i++) {
     const angle = Math.random() * 2 * Math.PI;
-    const speed = Math.random() * 8 + 3;
-    const size = Math.random() * 6 + 4;
+    const speed = Math.random() * 10 + 2;
+    const size = Math.random() * 8 + 6;
     particles.push({
       x,
       y,
@@ -93,8 +94,7 @@ function createParticles(x, y) {
       size
     });
   }
-
-  if (navigator.vibrate) navigator.vibrate(250);
+  if (navigator.vibrate) navigator.vibrate(300);
 }
 
 function drawParticles() {
@@ -120,45 +120,63 @@ function hexToRgb(hex) {
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  if (!explode) {
-    // 🎯 Neue kurvige Flugbahn (Sinus auf x, gleichmäßig auf y)
-    const pathY = canvas.height - t * rocket.speed;
-    const pathX = canvas.width / 2 + Math.sin(t * 0.05) * 100;
+  if (rocketPhase === "idle") {
+    drawRocket(rocket.x, rocket.y, rocket.angle);
+    if (t > 30) {
+      rocketPhase = "launch";
+      t = 0;
+    }
 
-    // Berechne zukünftige Position für Winkel
-    const futureT = t + 1;
-    const futureY = canvas.height - futureT * rocket.speed;
-    const futureX = canvas.width / 2 + Math.sin(futureT * 0.05) * 100;
-
-    const dx = futureX - pathX;
-    const dy = futureY - pathY;
-    rocket.angle = Math.atan2(dy, dx); // Richtung berechnen
-    rocket.x = pathX;
-    rocket.y = pathY;
-
+  } else if (rocketPhase === "launch") {
+    // Beschleunigte Bogenbahn: nach links oben
+    const dx = -1.5 * t;
+    const dy = -0.5 * t * t * 0.03;
+    rocket.x = canvas.width - 40 + dx;
+    rocket.y = canvas.height - 40 + dy;
+    const nextX = canvas.width - 40 + dx - 1.5;
+    const nextY = canvas.height - 40 + (-0.5 * (t + 1) * (t + 1) * 0.03);
+    rocket.angle = Math.atan2(nextY - rocket.y, nextX - rocket.x);
     drawRocket(rocket.x, rocket.y, rocket.angle);
 
-    // Nach 180 Schritten oder oben angekommen → Explosion
-    if (t > 180 || rocket.y < 80) {
-      explode = true;
-      createParticles(rocket.x, rocket.y);
+    if (rocket.x < -50 || rocket.y < -50) {
+      rocketPhase = "exit";
+      t = 0;
+    }
+
+  } else if (rocketPhase === "exit") {
+    // Kurze Pause außerhalb
+    if (t > 20) {
+      rocketPhase = "reentry";
+      rocket.x = -60;
+      rocket.y = canvas.height / 2;
+      rocket.angle = 0;
+    }
+    t++;
+
+  } else if (rocketPhase === "reentry") {
+    rocket.x += 6;
+    rocket.y += Math.sin(t * 0.2) * 1.5;
+    drawRocket(rocket.x, rocket.y, rocket.angle);
+    if (rocket.x > canvas.width / 2 - 10) {
+      rocketPhase = "explode";
+      createParticles(canvas.width / 2, canvas.height / 2);
       setTimeout(() => {
         scoreDisplay.textContent = `You got ${score} points! 👍`;
         scoreDisplay.style.display = "block";
-      }, 1200);
+      }, 1000);
     }
-
     t++;
-  } else {
+
+  } else if (rocketPhase === "explode") {
     drawParticles();
   }
 
+  if (rocketPhase !== "explode") t++;
   requestAnimationFrame(animate);
 }
 
 animate();
 </script>
 {% endblock %}
-
 
 
