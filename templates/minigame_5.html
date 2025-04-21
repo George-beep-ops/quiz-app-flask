@@ -93,7 +93,7 @@ const car = {
 
 const labels = [...Array(30).keys()].map(i => "option " + (i + 1));
 const goodWords = labels.slice(0, 15);
-const BUBBLE_SPEED = 1.5;
+const BUBBLE_SPEED = 1.7;
 
 function doesOverlap(x, y, radius, others) {
   return others.some(obj => {
@@ -247,10 +247,14 @@ function drawFinishAnimation() {
   car.width = initialCarWidth + (maxCarWidth - initialCarWidth) * progress;
   car.height = initialCarHeight + (maxCarHeight - initialCarHeight) * progress;
   car.x = logicalWidth / 2 - car.width / 2;
-
   car.y -= 3.5;
 
-  ctx.drawImage(finishImg, logicalWidth / 2 - finishLine.width / 2, finishLine.y, finishLine.width, finishLine.height);
+  // NEU: Ziellinie skalieren
+  const lineProgress = Math.min(1, (finishLine.y - (-logicalHeight * 0.25)) / (finishLine.targetY - (-logicalHeight * 0.25)));
+  const dynamicWidth = logicalWidth * (0.4 + 0.8 * lineProgress);
+  const dynamicHeight = logicalHeight * (0.2 + 0.4 * lineProgress);
+
+  ctx.drawImage(finishImg, logicalWidth / 2 - dynamicWidth / 2, finishLine.y, dynamicWidth, dynamicHeight);
   ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
 
   if (car.y + car.height < 0 && !animationDone) {
@@ -260,6 +264,7 @@ function drawFinishAnimation() {
     }, 300);
   }
 }
+
 
 function update() {
   ctx.clearRect(0, 0, logicalWidth, logicalHeight);
