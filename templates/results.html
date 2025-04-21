@@ -3,9 +3,9 @@
 {% block title %}Ergebnisse{% endblock %}
 
 {% block content %}
-  <h2>Danke fürs Mitmachen!</h2>
-  <canvas id="rocketCanvas" width="400" height="400" style="margin-top: 2rem;"></canvas>
-  <div id="scoreDisplay" data-score="{{ session['score'] | default(0) }}" style="font-size: 1.6rem; font-weight: bold; display: none; margin-top: 0.2rem;"></div>
+  <h2>Thanks for your participation!</h2>
+  <canvas id="rocketCanvas" width="400" height="400" style="margin-top: 0.5rem;"></canvas>
+  <div id="scoreDisplay" data-score="{{ session['score'] | default(0) }}" style="font-size: 1.6rem; font-weight: bold; display: none; margin-top: 0.5rem;"></div>
 {% endblock %}
 
 {% block script %}
@@ -91,7 +91,7 @@ function animate() {
       explode = true;
       createParticles(x, y);
       setTimeout(() => {
-        scoreDisplay.textContent = `Du hast ${score} Punkte erreicht! 👍`;
+        scoreDisplay.textContent = `You got ${score} points! 👍`;
         scoreDisplay.style.display = "block";
       }, 1200);
     }
