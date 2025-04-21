@@ -16,27 +16,27 @@ const scoreDisplay = document.getElementById("scoreDisplay");
 const score = Number(scoreDisplay.dataset.score);
 
 let particles = [];
-let rocketPhase = "idle"; // Ablaufsteuerung: idle → launch → wait → reentry → explode
+let rocketPhase = "idle"; // Ablauf: idle → launch → wait → reentry → explode
 let t = 0;
 
-// Startposition: unten rechts, zeigt nach oben
 let rocket = {
   x: canvas.width - 40,
   y: canvas.height - 40,
   angle: -Math.PI / 2,
-  scale: 1,
+  scale: 1
 };
 
+// Funktion zum Zeichnen der Rakete (zentriert auf (0, 0))
 function drawRocket(x, y, angle, scale = 1) {
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(angle);
   ctx.scale(scale, scale);
 
-  // Raketenrumpf
+  // Rumpf
   ctx.fillStyle = "#d32f2f";
   ctx.beginPath();
-  ctx.moveTo(0, -25);
+  ctx.moveTo(0, -25); // Spitze
   ctx.lineTo(12, 10);
   ctx.lineTo(6, 12);
   ctx.lineTo(-6, 12);
@@ -67,7 +67,7 @@ function drawRocket(x, y, angle, scale = 1) {
   ctx.closePath();
   ctx.fill();
 
-  // Flamme
+  // Flamme (nur in Bewegung sichtbar)
   if (rocketPhase !== "idle") {
     ctx.fillStyle = "orange";
     ctx.beginPath();
@@ -81,6 +81,7 @@ function drawRocket(x, y, angle, scale = 1) {
   ctx.restore();
 }
 
+// Explosionsteilchen erzeugen
 function createParticles(x, y) {
   const colors = ["#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "#FFFFFF"];
   for (let i = 0; i < 500; i++) {
@@ -97,9 +98,11 @@ function createParticles(x, y) {
       size
     });
   }
+
   if (navigator.vibrate) navigator.vibrate(300);
 }
 
+// Explosionsteilchen zeichnen
 function drawParticles() {
   particles.forEach(p => {
     ctx.fillStyle = `rgba(${hexToRgb(p.color)}, ${p.alpha})`;
@@ -112,6 +115,7 @@ function drawParticles() {
   });
 }
 
+// Farbkonvertierung für rgba
 function hexToRgb(hex) {
   const bigint = parseInt(hex.replace('#',''), 16);
   const r = (bigint >> 16) & 255;
@@ -120,49 +124,62 @@ function hexToRgb(hex) {
   return `${r}, ${g}, ${b}`;
 }
 
+// Hauptanimationsfunktion
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // PHASE 1: Rakete steht still
+  // PHASE 1: Rakete steht unten rechts
   if (rocketPhase === "idle") {
     drawRocket(rocket.x, rocket.y, rocket.angle);
-    if (t > 40) { // wie lange sie steht (einstellbar)
+    if (t > 40) {
       rocketPhase = "launch";
       t = 0;
     }
 
-  // PHASE 2: Startkurve nach links oben
+  // PHASE 2: Rakete fliegt in Parabelbahn nach links oben
   } else if (rocketPhase === "launch") {
-    // Flugbahn: Beschleunigte Kurve (x wird kleiner, y steigt schneller)
-    const curveX = canvas.width - 40 - t * 1.4;
-    const curveY = canvas.height - 40 - 0.03 * t * t; // beschleunigter Anstieg
-    const futureX = canvas.width - 40 - (t + 1) * 1.4;
-    const futureY = canvas.height - 40 - 0.03 * (t + 1) * (t + 1);
-    rocket.angle = Math.atan2(futureY - curveY, futureX - curveX);
-    rocket.x = curveX;
-    rocket.y = curveY;
+    // Kurvenfunktion: Parabel für Y, linear für X
+    const curve = t => ({
+      x: canvas.width - 40 - t * 1.3,
+      y: canvas.height - 40 - 0.035 * t * t // beschleunigtes Steigen
+    });
+
+    const pos = curve(t);
+    const next = curve(t + 1);
+
+    rocket.x = pos.x;
+    rocket.y = pos.y;
+
+    // Richtung = Tangente = Differenz der Kurvenpunkte
+    const dx = next.x - pos.x;
+    const dy = next.y - pos.y;
+    rocket.angle = Math.atan2(dy, dx);
 
     drawRocket(rocket.x, rocket.y, rocket.angle);
 
+    // Wenn aus dem Bild: nächste Phase
     if (rocket.x < -50 || rocket.y < -50) {
       rocketPhase = "wait";
       t = 0;
     }
 
-  // PHASE 3: Kurze Pause außerhalb
+  // PHASE 3: Kurze Pause
   } else if (rocketPhase === "wait") {
-    if (t > 60) { // Wartezeit bis Wiedereintritt (einstellbar)
+    if (t > 60) {
       rocketPhase = "reentry";
-      rocket.scale = 0.3;
       rocket.x = -100;
       rocket.y = canvas.height / 2;
+      rocket.angle = 0;
+      rocket.scale = 0.3;
+      t = 0;
     }
 
-  // PHASE 4: Wiedereintritt – Rakete fliegt schnell von links nach rechts & wird größer
+  // PHASE 4: Rakete fliegt horizontal von links nach rechts & wird größer
   } else if (rocketPhase === "reentry") {
     rocket.x += 7;
-    rocket.scale += 0.01; // Zoom simuliert Perspektive
-    drawRocket(rocket.x, rocket.y, 0, rocket.scale);
+    rocket.scale += 0.01;
+    rocket.angle = 0; // Spitze zeigt nach rechts
+    drawRocket(rocket.x, rocket.y, rocket.angle, rocket.scale);
 
     if (rocket.x > canvas.width / 2) {
       rocketPhase = "explode";
@@ -174,7 +191,7 @@ function animate() {
       }, 1000);
     }
 
-  // PHASE 5: Explosion mit Partikeln
+  // PHASE 5: Explosion
   } else if (rocketPhase === "explode") {
     drawParticles();
   }
@@ -186,4 +203,5 @@ function animate() {
 animate();
 </script>
 {% endblock %}
+
 
