@@ -44,14 +44,20 @@
   }
 
   .description-block {
+  position: fixed;
+  top: 80px; /* 🔧 Hier kannst du die vertikale Position selbst anpassen */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90vw;
+  max-width: 600px;
+  background-color: rgba(255, 255, 255, 0.95);
   padding: 1rem;
   text-align: center;
-  margin-top: 0.2rem; /* weniger Abstand */
-  margin-bottom: 1rem; /* näher an Canvas */
-  line-height: 1.6;
-  z-index: 2;
-  position: relative;
+  border-radius: 12px;
+  z-index: 5;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
+
 
   .description-block h2 {
     font-size: 1.3rem;
