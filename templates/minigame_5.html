@@ -88,12 +88,12 @@ const car = {
   width: initialCarWidth,
   height: initialCarHeight,
   x: logicalWidth / 2 - initialCarWidth / 2,
-  y: logicalHeight * 0.7 - initialCarHeight / 2
+  y: logicalHeight * 0.75 - initialCarHeight / 2
 };
 
 const labels = [...Array(30).keys()].map(i => "option " + (i + 1));
 const goodWords = labels.slice(0, 15);
-const BUBBLE_SPEED = 2;
+const BUBBLE_SPEED = 1.5;
 
 function doesOverlap(x, y, radius, others) {
   return others.some(obj => {
