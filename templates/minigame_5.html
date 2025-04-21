@@ -115,7 +115,11 @@ const getNewObject = (label, others = []) => {
     x = Math.random() * (logicalWidth - 2 * radius) + radius;
     y = -Math.random() * logicalHeight * 1.5;
     attempts++;
-    if (attempts > 100) break;
+    if (attempts > 100) {
+  radius = Math.min(radius * 0.9, 20); // notfalls kleiner machen
+  attempts = 0; // Neustart mit kleinerer Bubble
+}
+
   } while (doesOverlap(x, y, radius, others));
 
   return {
@@ -132,9 +136,12 @@ const getNewObject = (label, others = []) => {
 };
 
 let objects = [];
-for (let label of labels) {
+const activeBubbles = 10; // vorher 30
+for (let i = 0; i < activeBubbles; i++) {
+  const label = labels[i % labels.length];
   objects.push(getNewObject(label, objects));
 }
+
 
 let lights = [false, false, false, false, false];
 let showLights = true;
