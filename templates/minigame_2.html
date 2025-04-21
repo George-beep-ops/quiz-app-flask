@@ -1,170 +1,124 @@
 {% extends "base.html" %}
 
-{% block title %}Minispiel 2 – Gefahr erkennen{% endblock %}
+{% block title %}Minispiel 1 – Reaktion{% endblock %}
 
 {% block extra_style %}
 <style>
-  .game-wrapper-full {
-    position: fixed;
-    top: 200px; /* weiter nach unten verschoben */
-    left: 0;
-    width: 100vw;
-    height: 60vh;
-    background: #f5f5f5;
-    border-top: 3px solid #ccc;
-    border-bottom: 3px solid #ccc;
-    overflow: hidden;
-    z-index: 1;
+  h2 {
+    margin: 1rem;
+    font-size: 1.5rem;
+    text-align: center;
   }
-
-  .word-tile {
-    position: absolute;
-    padding: 0.6rem 1rem;
-    font-size: 1rem;
-    font-weight: bold;
-    background-color: #e0e0e0;
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+    justify-content: center;
+  }
+  .tile {
+    background-color: #ddd;
+    padding: 1rem;
+    width: 140px;
+    height: 100px;
     border-radius: 8px;
-    white-space: nowrap;
+    font-weight: bold;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    z-index: 2;
+    transition: background-color 0.2s;
+    user-select: none;
+    text-align: center;
   }
-
-  .word-tile.correct {
-    background-color: #90ee90 !important;
-  }
-
-  .word-tile.incorrect {
-    background-color: #ffcccb !important;
-  }
-
-  .word-tile.disabled {
+  .tile.selected { background-color: #90ee90; }
+  .tile.incorrect { background-color: #ffcccb; }
+  .disabled {
     pointer-events: none;
-    opacity: 0.6;
+    opacity: 0.5;
   }
-
-  .description-block {
-  position: fixed;
-  top: 80px; /* 🔧 Hier kannst du die vertikale Position selbst anpassen */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90vw;
-  max-width: 600px;
-  background-color: rgba(245, 245, 245, 1);
-  padding: 1rem;
-  text-align: center;
-  border-radius: 12px;
-  z-index: 5;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-
-  .description-block h2 {
-    font-size: 1.3rem;
-    margin: 0;
-  }
-
-  form {
-    margin-top: 64vh;
+  #timer {
+    font-size: 1.2rem;
+    margin: 1rem;
+    font-weight: bold;
+    display: none;
     text-align: center;
   }
 </style>
 {% endblock %}
 
-
-
 {% block content %}
-<div class="description-block">
-  <h2>
-    <strong>Minigame 2 – Identify the Danger!</strong><br>
-    What is a possible danger of gamification?
-    Please select <strong>three</strong> appropriate terms!
-  </h2>
-</div>
+  <h2><strong>Minigame 1 – React!</strong><br>Tap 2 terms within 8 seconds that are <strong>enhanced</strong> through gamification!</h2>
 
-<div class="game-wrapper-full" id="gameArea"></div>
+  <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
+    <div class="grid">
+      <div class="tile disabled" data-word="option 1">option 1</div>
+      <div class="tile disabled" data-word="option 2">option 2</div>
+      <div class="tile disabled" data-word="option 3">option 3</div>
+      <div class="tile disabled" data-word="option 4">option 4</div>
+    </div>
+    <input type="hidden" name="score" id="scoreInput" value="0">
+    <button type="submit" style="display: none;">Absenden</button>
+  </form>
 
-<form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
-  <input type="hidden" name="score" id="scoreInput" value="0">
-</form>
+  <div id="timer">⏳ Time is running... <span id="timeValue">8</span>s</div>
 {% endblock %}
 
 {% block script %}
 <script>
-  const gameArea = document.getElementById("gameArea");
-  const form = document.getElementById("gameForm");
-  const scoreInput = document.getElementById("scoreInput");
-
-  const words = [
-    "option 1", "option 2", "option 3",
-    "option 4", "option 5", "option 6",
-    "option 7", "option 8", "option 9", "option 10",
-  ];
-
-  const correct = [
-    "option 2", "option 3", "option 4", "option 6"
-  ];
-
+  const correctWords = ["option 1", "option 2", "option 3"];
   let score = 0;
   let selectedCount = 0;
-  let submitted = false;
+  const tiles = document.querySelectorAll(".tile");
 
-  function submitGame() {
-    if (submitted) return;
-    submitted = true;
-    scoreInput.value = score;
-    form.submit();
+  function enableTiles() {
+    tiles.forEach(tile => {
+      tile.classList.remove("disabled");
+      tile.addEventListener("click", () => {
+        if (tile.classList.contains("selected") || tile.classList.contains("incorrect")) return;
+        if (selectedCount >= 2) return;
+
+        const word = tile.dataset.word;
+        if (correctWords.includes(word)) {
+          tile.classList.add("selected");
+          score++;
+        } else {
+          tile.classList.add("incorrect");
+        }
+
+        selectedCount++;
+        if (selectedCount === 2) {
+          tiles.forEach(t => t.classList.add("disabled"));
+          document.getElementById("scoreInput").value = score;
+          setTimeout(() => {
+            document.getElementById("gameForm").submit();
+          }, 800);
+        }
+      });
+    });
   }
 
-  words.forEach(word => {
-    const tile = document.createElement("div");
-    tile.className = "word-tile";
-    tile.textContent = word;
-    gameArea.appendChild(tile);
+  // Start timer and enable tiles after 3 seconds
+  setTimeout(() => {
+    const timerContainer = document.getElementById("timer");
+    const timerValue = document.getElementById("timeValue");
+    timerContainer.style.display = "block";
 
-    let x = Math.random() * (window.innerWidth - 140);
-    let y = Math.random() * (gameArea.clientHeight - 40);
-    let dx = (Math.random() - 0.5) * 5;
-    let dy = (Math.random() - 0.5) * 5;
+    enableTiles();
 
-    tile.style.left = x + "px";
-    tile.style.top = y + "px";
-
-    function animate() {
-      if (submitted) return;
-
-      x += dx;
-      y += dy;
-
-      if (x <= 0 || x >= window.innerWidth - tile.offsetWidth) dx *= -1;
-      if (y <= 0 || y >= gameArea.clientHeight - tile.offsetHeight) dy *= -1;
-
-      tile.style.left = x + "px";
-      tile.style.top = y + "px";
-
-      requestAnimationFrame(animate);
-    }
-
-    animate();
-
-    tile.addEventListener("click", () => {
-      if (submitted || tile.classList.contains("correct") || tile.classList.contains("incorrect")) return;
-
-      if (correct.includes(word)) {
-        tile.classList.add("correct");
-        score++;
-      } else {
-        tile.classList.add("incorrect");
+    let timeLeft = 8;
+    const countdown = setInterval(() => {
+      timeLeft--;
+      timerValue.textContent = timeLeft;
+      if (timeLeft <= 0 && selectedCount < 2) {
+        clearInterval(countdown);
+        tiles.forEach(t => t.classList.add("disabled"));
+        document.getElementById("scoreInput").value = score;
+        document.getElementById("gameForm").submit();
       }
-
-      selectedCount++;
-      if (selectedCount === 3) {
-        document.querySelectorAll(".word-tile").forEach(t => t.classList.add("disabled"));
-        setTimeout(submitGame, 800);
-      }
-    });
-  });
-
-
+    }, 1000);
+  }, 3000);
 </script>
 {% endblock %}
+
