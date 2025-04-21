@@ -2,38 +2,81 @@
 
 {% block title %}Ergebnisse{% endblock %}
 
+{% block extra_style %}
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #f5f5f5;
+    overflow: hidden;
+    font-family: sans-serif;
+  }
+
+  #rocketCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    z-index: 0;
+  }
+
+  #scoreDisplay {
+    position: fixed;
+    bottom: 1.2rem;
+    width: 100%;
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    display: none;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+  }
+
+  h2 {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 1.6rem;
+    z-index: 1;
+    position: relative;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-  <h2 style="margin-bottom: 1rem;">Thanks for participating!</h2>
-  <canvas id="rocketCanvas" width="400" height="500" style="margin-top: 1rem;"></canvas>
-  <div id="scoreDisplay"
-       data-score="{{ session['score'] | default(0) }}"
-       style="position: fixed; bottom: 1rem; width: 100%; text-align: center; font-size: 1.4rem; font-weight: bold; display: none;">
-  </div>
+  <h2>Thanks for participating!</h2>
+  <canvas id="rocketCanvas"></canvas>
+  <div id="scoreDisplay" data-score="{{ session['score'] | default(0) }}"></div>
 {% endblock %}
 
 {% block script %}
 <script>
-// ==== Canvas Setup ====
+// === Canvas Setup ===
 const canvas = document.getElementById("rocketCanvas");
 const ctx = canvas.getContext("2d");
+
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let explode = false;
 let particles = [];
-let rocketY = canvas.height;
 let rocketX = canvas.width / 2;
+let rocketY = canvas.height;
 let rocketVX = (Math.random() - 0.5) * 3;
 let rocketVY = -4;
 
 const scoreDisplay = document.getElementById("scoreDisplay");
 const score = Number(scoreDisplay.dataset.score);
 
-// ==== Rocket SVG as Image ====
+// === Rocket Icon (SVG als Image) ===
 const rocketImg = new Image();
-rocketImg.src = "https://www.svgrepo.com/show/448130/rocket-flying.svg"; // verspielte Rakete
+rocketImg.src = "https://www.svgrepo.com/show/448130/rocket-flying.svg";
 
-// ==== Partikel-Explosion ====
+// === Explosionseffekt ===
 function createParticles(x, y) {
   for (let i = 0; i < 250; i++) {
     const angle = Math.random() * 2 * Math.PI;
@@ -57,13 +100,14 @@ function drawParticles() {
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
     ctx.fill();
+
     p.x += p.vx;
     p.y += p.vy;
     p.alpha -= 0.008;
   });
 
-  // Reset fade-out Particles (endlos verglühend)
-  particles.forEach((p, i) => {
+  // Dauerhafte Glutpartikel
+  particles.forEach(p => {
     if (p.alpha <= 0) {
       const angle = Math.random() * 2 * Math.PI;
       const speed = Math.random() * 10 + 2;
@@ -84,25 +128,24 @@ function hexToRgb(hex) {
   return `${r}, ${g}, ${b}`;
 }
 
-// ==== Animation ====
+// === Animation ===
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if (!explode) {
-    // wellenförmiger Flug
     rocketX += rocketVX + Math.sin(rocketY / 40) * 1.4;
     rocketY += rocketVY;
 
     ctx.save();
     ctx.translate(rocketX, rocketY);
-    ctx.drawImage(rocketImg, -25, -30, 50, 60); // zentriert gezeichnet
+    ctx.drawImage(rocketImg, -25, -30, 50, 60);
     ctx.restore();
 
     if (rocketY < canvas.height * 0.4) {
       explode = true;
       createParticles(rocketX, rocketY);
       setTimeout(() => {
-        scoreDisplay.textContent = `You have reached ${score} Points! 👍`;
+        scoreDisplay.textContent = `You have reached ${score} points! 👍`;
         scoreDisplay.style.display = "block";
       }, 1000);
     }
@@ -113,6 +156,6 @@ function animate() {
   requestAnimationFrame(animate);
 }
 
-rocketImg.onload = () => animate(); // nur starten wenn Raketenbild geladen
+rocketImg.onload = animate;
 </script>
 {% endblock %}

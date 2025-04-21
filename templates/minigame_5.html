@@ -29,6 +29,9 @@
 
 {% block content %}
 <canvas id="gameCanvas"></canvas>
+<div id="instructionOverlay" style="position: fixed; top: 2vh; left: 5vw; width: 90vw; text-align: center; background: rgba(255,255,255,0.9); padding: 1rem; border-radius: 12px; z-index: 10; font-size: 1.1rem; line-height: 1.5; font-weight: bold;">
+  Tilt your phone to steer the car<br>and pop the bubbles that contain matching content!<br><br>Ready?
+</div>
 <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
   <input type="hidden" name="score" id="scoreInput" value="0">
 </form>
@@ -131,8 +134,8 @@ let animationDone = false;
 const finishLine = {
   y: -logicalHeight * 0.25,
   targetY: logicalHeight * 0.2,
-  width: logicalWidth * 1.4,
-  height: logicalHeight * 0.7
+  width: logicalWidth * 1.2,
+  height: logicalHeight * 0.6
 };
 
 function drawLights() {
@@ -141,13 +144,6 @@ function drawLights() {
   const baseX = logicalWidth / 2 - totalWidth / 2 + logicalWidth * 0.06;
   const baseY = logicalHeight / 3;
   const lightRadius = logicalWidth * 0.04;
-
-  if (showText) {
-    ctx.fillStyle = "#333";
-    ctx.font = `bold ${logicalWidth * 0.07}px sans-serif`;
-    ctx.textAlign = "center";
-    ctx.fillText("Tilt your phone to steer the car and pop the bubbles that contain matching content! Ready?", logicalWidth / 2, baseY - 60);
-  }
 
   for (let i = 0; i < 5; i++) {
     ctx.fillStyle = "#333";
@@ -228,7 +224,7 @@ function drawFinishAnimation() {
   car.height = initialCarHeight + (maxCarHeight - initialCarHeight) * progress;
   car.x = logicalWidth / 2 - car.width / 2;
 
-  car.y -= 2.5;
+  car.y -= 3.5;
 
   ctx.drawImage(finishImg, logicalWidth / 2 - finishLine.width / 2, finishLine.y, finishLine.width, finishLine.height);
   ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
@@ -247,7 +243,11 @@ function update() {
 
   if (showLights) {
     drawLights();
-    if (timer === 300 + 5 * 45) showText = false;
+    if (timer === 300 + 5 * 45) {
+      showText = false;
+      const overlay = document.getElementById("instructionOverlay");
+      if (overlay) overlay.style.display = "none";
+    }
     if (timer >= 300 && (timer - 300) % 45 === 0 && lightIndex >= 0) {
       lights[lightIndex] = true;
       lightIndex--;
@@ -264,13 +264,9 @@ function update() {
   requestAnimationFrame(update);
 }
 
-// === Touch & Maussteuerung deaktivieren ===
-// (entfernt)
-
-// === Bewegungssensor aktivieren ===
 window.addEventListener("deviceorientation", function(event) {
   const gamma = event.gamma || 0;
-  const sensitivity = 0.25; // ggf. anpassen
+  const sensitivity = 0.25;
   car.x += gamma * sensitivity;
   car.x = Math.max(0, Math.min(logicalWidth - car.width, car.x));
 });
