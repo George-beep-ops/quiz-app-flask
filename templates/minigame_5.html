@@ -82,7 +82,6 @@ const initialCarWidth = logicalWidth * 0.2;
 const initialCarHeight = logicalHeight * 0.1;
 const maxCarWidth = logicalWidth * 0.4;
 const maxCarHeight = logicalHeight * 0.22;
-const aspectRatio = initialCarWidth / initialCarHeight;
 
 const car = {
   width: initialCarWidth,
@@ -95,6 +94,8 @@ const labels = [...Array(30).keys()].map(i => "option " + (i + 1));
 const goodWords = labels.slice(0, 15);
 const BUBBLE_SPEED = 1.9;
 
+let usedLabels = new Set();
+
 function doesOverlap(x, y, radius, others) {
   return others.some(obj => {
     const dx = x - obj.x;
@@ -104,11 +105,18 @@ function doesOverlap(x, y, radius, others) {
   });
 }
 
-const getNewObject = (label, others = []) => {
+const getNewObject = (label = null, others = []) => {
+  const availableLabels = labels.filter(l => !usedLabels.has(l));
+  if (availableLabels.length === 0) return null;
+
+  if (!label) {
+    label = availableLabels[Math.floor(Math.random() * availableLabels.length)];
+  }
+
   ctx.font = `${logicalWidth * 0.03}px sans-serif`;
   const textWidth = ctx.measureText(label).width;
   const padding = logicalWidth * 0.025;
-  const radius = textWidth / 2 + padding;
+  let radius = textWidth / 2 + padding;
 
   let x, y, attempts = 0;
   do {
@@ -116,10 +124,9 @@ const getNewObject = (label, others = []) => {
     y = -Math.random() * logicalHeight * 1.5;
     attempts++;
     if (attempts > 100) {
-  radius = Math.min(radius * 0.9, 20); // notfalls kleiner machen
-  attempts = 0; // Neustart mit kleinerer Bubble
-}
-
+      radius = Math.min(radius * 0.9, 20);
+      attempts = 0;
+    }
   } while (doesOverlap(x, y, radius, others));
 
   return {
@@ -136,12 +143,11 @@ const getNewObject = (label, others = []) => {
 };
 
 let objects = [];
-const activeBubbles = 15; // vorher 30
+const activeBubbles = 15;
 for (let i = 0; i < activeBubbles; i++) {
   const label = labels[i % labels.length];
   objects.push(getNewObject(label, objects));
 }
-
 
 let lights = [false, false, false, false, false];
 let showLights = true;
@@ -189,11 +195,23 @@ function drawBubblesAndCar() {
     const obj = objects[i];
     obj.y += obj.speed;
 
+    // Wenn Bubble unten rausfällt → nur ungetroffene nachfüllen
+    if (!obj.hit && obj.y - obj.radius > logicalHeight) {
+      const newObj = getNewObject(null, objects);
+      if (newObj) {
+        objects[i] = newObj;
+      }
+      continue;
+    }
+
     if (obj.hit) {
       obj.scale += 0.1;
       obj.alpha -= 0.08;
       if (obj.alpha <= 0) {
-        objects[i] = getNewObject(obj.label);
+        const newObj = getNewObject(null, objects);
+        if (newObj) {
+          objects[i] = newObj;
+        }
       }
     }
 
@@ -219,11 +237,13 @@ function drawBubblesAndCar() {
       ctx.restore();
     }
 
+    // Kollision
     if (!obj.hit && obj.x + obj.radius * 2 > car.x && obj.x < car.x + car.width &&
         obj.y + obj.radius * 2 > car.y && obj.y < car.y + car.height) {
       obj.hit = true;
       hits++;
       if (obj.good) score++;
+      usedLabels.add(obj.label); // NEU: Merke getroffene Labels
       if (hits >= 10) {
         gameOver = true;
         setTimeout(() => animationPhase = true, 300);
@@ -249,7 +269,6 @@ function drawFinishAnimation() {
   car.x = logicalWidth / 2 - car.width / 2;
   car.y -= 3;
 
-  // NEU: Ziellinie skalieren
   const lineProgress = Math.min(1, (finishLine.y - (-logicalHeight * 0.25)) / (finishLine.targetY - (-logicalHeight * 0.25)));
   const dynamicWidth = logicalWidth * (0.4 + 0.8 * lineProgress);
   const dynamicHeight = logicalHeight * (0.2 + 0.4 * lineProgress);
@@ -264,7 +283,6 @@ function drawFinishAnimation() {
     }, 300);
   }
 }
-
 
 function update() {
   ctx.clearRect(0, 0, logicalWidth, logicalHeight);
@@ -303,3 +321,4 @@ window.addEventListener("deviceorientation", function(event) {
 update();
 </script>
 {% endblock %}
+
