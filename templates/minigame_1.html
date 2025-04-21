@@ -53,10 +53,10 @@
 
   <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
     <div class="grid">
-      <div class="tile" data-word="option 1">option 1</div>
-      <div class="tile" data-word="option 2">option 2</div>
-      <div class="tile" data-word="option 3">option 3</div>
-      <div class="tile" data-word="option 4">option 4</div>
+      <div class="tile disabled" data-word="option 1">option 1</div>
+      <div class="tile disabled" data-word="option 2">option 2</div>
+      <div class="tile disabled" data-word="option 3">option 3</div>
+      <div class="tile disabled" data-word="option 4">option 4</div>
     </div>
     <input type="hidden" name="score" id="scoreInput" value="0">
     <button type="submit" style="display: none;">Absenden</button>
@@ -72,35 +72,40 @@
   let selectedCount = 0;
   const tiles = document.querySelectorAll(".tile");
 
-  tiles.forEach(tile => {
-    tile.addEventListener("click", () => {
-      if (tile.classList.contains("selected") || tile.classList.contains("incorrect")) return;
-      if (selectedCount >= 2) return;
+  function enableTiles() {
+    tiles.forEach(tile => {
+      tile.classList.remove("disabled");
+      tile.addEventListener("click", () => {
+        if (tile.classList.contains("selected") || tile.classList.contains("incorrect")) return;
+        if (selectedCount >= 2) return;
 
-      const word = tile.dataset.word;
-      if (correctWords.includes(word)) {
-        tile.classList.add("selected");
-        score++;
-      } else {
-        tile.classList.add("incorrect");
-      }
+        const word = tile.dataset.word;
+        if (correctWords.includes(word)) {
+          tile.classList.add("selected");
+          score++;
+        } else {
+          tile.classList.add("incorrect");
+        }
 
-      selectedCount++;
-      if (selectedCount === 2) {
-        tiles.forEach(t => t.classList.add("disabled"));
-        document.getElementById("scoreInput").value = score;
-        setTimeout(() => {
-          document.getElementById("gameForm").submit();
-        }, 800);
-      }
+        selectedCount++;
+        if (selectedCount === 2) {
+          tiles.forEach(t => t.classList.add("disabled"));
+          document.getElementById("scoreInput").value = score;
+          setTimeout(() => {
+            document.getElementById("gameForm").submit();
+          }, 800);
+        }
+      });
     });
-  });
+  }
 
-  // Timer starten nach 3 Sekunden
+  // Start timer and enable tiles after 3 seconds
   setTimeout(() => {
     const timerContainer = document.getElementById("timer");
     const timerValue = document.getElementById("timeValue");
     timerContainer.style.display = "block";
+
+    enableTiles();
 
     let timeLeft = 8;
     const countdown = setInterval(() => {
@@ -116,4 +121,3 @@
   }, 3000);
 </script>
 {% endblock %}
-
