@@ -63,7 +63,7 @@ function requestMotionPermission() {
         if (permissionState === 'granted') {
           document.getElementById('startForm').submit();
         } else {
-          alert('Without permission the games wont function.');
+          alert('Without permission the games wont work.');
         }
       })
       .catch(console.error);
