@@ -22,14 +22,14 @@ let t = 0;
 let rocket = {
   x: canvas.width - 40,
   y: canvas.height - 40,
-  angle: 0, // Spitze zeigt nach oben (y-)
+  angle: Math.PI / 2, // Spitze zeigt nach oben nach Rotation
   scale: 1
 };
 
 function drawRocket(x, y, angle, scale = 1) {
   ctx.save();
   ctx.translate(x, y);
-  ctx.rotate(angle);
+  ctx.rotate(angle + Math.PI / 2); // Drehung um 90 Grad im Uhrzeigersinn
   ctx.scale(scale, scale);
 
   ctx.fillStyle = "#d32f2f";
@@ -135,7 +135,7 @@ function animate() {
 
     rocket.x = p1.x;
     rocket.y = p1.y;
-    rocket.angle = Math.atan2(p2.y - p1.y, p2.x - p1.x); // Tangente
+    rocket.angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
 
     drawRocket(rocket.x, rocket.y, rocket.angle);
 
@@ -149,7 +149,7 @@ function animate() {
       rocketPhase = "reentry";
       rocket.x = -100;
       rocket.y = canvas.height / 2;
-      rocket.angle = 0; // Geradeaus (nach rechts)
+      rocket.angle = 0;
       rocket.scale = 0.3;
       t = 0;
     }
@@ -179,5 +179,6 @@ function animate() {
 animate();
 </script>
 {% endblock %}
+
 
 
