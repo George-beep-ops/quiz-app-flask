@@ -247,7 +247,7 @@ function drawFinishAnimation() {
   car.width = initialCarWidth + (maxCarWidth - initialCarWidth) * progress;
   car.height = initialCarHeight + (maxCarHeight - initialCarHeight) * progress;
   car.x = logicalWidth / 2 - car.width / 2;
-  car.y -= 3.5;
+  car.y -= 3;
 
   // NEU: Ziellinie skalieren
   const lineProgress = Math.min(1, (finishLine.y - (-logicalHeight * 0.25)) / (finishLine.targetY - (-logicalHeight * 0.25)));
