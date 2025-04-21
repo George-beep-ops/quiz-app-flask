@@ -3,37 +3,10 @@
 {% block title %}Admin – Ergebnisse Übersicht{% endblock %}
 
 {% block content %}
-  <style>
-    h2 {
-      font-size: 2.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    h3 {
-      font-size: 1.8rem;
-      margin-top: 1rem;
-    }
-
-    ol#topList {
-      font-size: 1.3rem;
-      line-height: 1.8;
-    }
-
-    li {
-      margin-bottom: 0.5rem;
-    }
-
-    #barChart {
-      width: 100%;
-      max-width: 1000px;
-      height: auto;
-    }
-  </style>
-
   <h2>Live-Auswertung</h2>
   <div style="display: flex; flex-direction: row; justify-content: space-around; flex-wrap: wrap;">
     <div>
-      <canvas id="barChart" width="1000" height="600"></canvas>
+      <canvas id="barChart" width="500" height="300"></canvas>
     </div>
     <div>
       <h3>🏆 Topliste</h3>
@@ -60,13 +33,19 @@ async function fetchDataAndUpdate() {
   const results = JSON.parse(raw);
   const scoreCounts = {};
 
+  // Zähle wie viele Spieler jede Punktzahl erreicht haben
   results.forEach(entry => {
     const score = entry.score;
     scoreCounts[score] = (scoreCounts[score] || 0) + 1;
   });
 
+  // Sortierte Punktzahlen
   const sortedScores = Object.keys(scoreCounts).map(Number).sort((a, b) => a - b);
+
+  // Die Punktzahlen sind die Balkenhöhen (y-Achse)
   const barHeights = sortedScores.map(score => score);
+
+  // Spieleranzahl (Labels unter Balken)
   const playerCounts = sortedScores.map(score => `${scoreCounts[score]} Spieler`);
 
   if (chart) {
@@ -94,7 +73,7 @@ async function fetchDataAndUpdate() {
             align: 'end',
             font: {
               weight: 'bold',
-              size: 18
+              size: 12
             },
             color: "#000",
             formatter: value => `${value} Punkte`
@@ -104,16 +83,10 @@ async function fetchDataAndUpdate() {
           x: {
             title: {
               display: true,
-              text: "Spieleranzahl pro Punktzahl",
-              font: {
-                size: 18
-              }
+              text: "Spieleranzahl pro Punktzahl"
             },
             ticks: {
-              precision: 0,
-              font: {
-                size: 14
-              }
+              precision: 0
             }
           },
           y: {
@@ -121,17 +94,11 @@ async function fetchDataAndUpdate() {
             max: 20,
             title: {
               display: true,
-              text: "Punkte",
-              font: {
-                size: 18
-              }
+              text: "Punkte"
             },
             ticks: {
               stepSize: 1,
-              precision: 0,
-              font: {
-                size: 14
-              }
+              precision: 0
             }
           }
         }
@@ -140,6 +107,7 @@ async function fetchDataAndUpdate() {
     });
   }
 
+  // Topliste aktualisieren
   const sortedResults = results.slice().sort((a, b) => b.score - a.score);
   const ol = document.getElementById("topList");
   ol.innerHTML = "";
