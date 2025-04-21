@@ -94,11 +94,11 @@
   });
 
   // Timer: automatischer Abbruch nach 8 Sekunden
-  let timeLeft = 8;
+  let timeLeft = 10;
   const timerEl = document.getElementById("timer");
   const countdown = setInterval(() => {
     timeLeft--;
-    timerEl.textContent = `⏳ Zeit läuft... ${timeLeft}`;
+    timerEl.textContent = `⏳ Time is running ... ${timeLeft}`;
     if (timeLeft <= 0 && selectedCount < 2) {
       clearInterval(countdown);
       tiles.forEach(t => t.classList.add("disabled"));

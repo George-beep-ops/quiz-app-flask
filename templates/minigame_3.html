@@ -2,20 +2,54 @@
 
 {% block title %}Minispiel 3 – Reaktion per Bewegung{% endblock %}
 
-{% block content %}
-  <h2><strong><strong>Minigame 3 – Skill Required!</strong><br>Shake your phone when <strong>"option 2"</strong> appears! 
+{% block extra_style %}
+<style>
+  #wordBox {
+    font-size: 2rem;
+    font-weight: bold;
+    padding: 2rem;
+    background-color: white;
+    border: 2px solid #333;
+    border-radius: 12px;
+    display: inline-block;
+    min-width: 200px;
+    transition: background-color 0.4s ease;
+  }
 
-  <div id="wordBox"
-       style="font-size: 2rem; font-weight: bold; padding: 2rem; background-color: white;
-              border: 2px solid #333; border-radius: 12px; display: inline-block; min-width: 200px;">
-    Bereit?
-  </div>
+  #wordBox.correct {
+    background-color: #90ee90 !important;
+  }
+
+  #wordBox.incorrect {
+    background-color: #ffcccb !important;
+  }
+
+  #gameForm {
+    margin-top: 3rem;
+  }
+
+  #info {
+    margin-top: 1.5rem;
+    font-size: 1.2rem;
+  }
+
+  h2 {
+    margin-bottom: 3rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+  <h2><strong>Minigame 3 – Skill Required!</strong><br>
+  Shake your phone when <strong>"option 2"</strong> appears!</h2>
+
+  <div id="wordBox">Ready?</div>
 
   <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
     <input type="hidden" name="score" id="scoreInput" value="0">
   </form>
 
-  <div id="info" style="margin-top: 1rem; font-size: 1.2rem;"></div>
+  <div id="info"></div>
 {% endblock %}
 
 {% block script %}
@@ -32,8 +66,9 @@
   let currentWord = "";
   let index = 0;
   let shakeAllowed = false;
+  let currentWordShaken = false;
 
-  // Starte das Spiel nach 3,5 Sekunden – vorher kein Schütteln erlaubt
+  // Spiel startet nach 3,5 Sekunden
   setTimeout(() => {
     shakeAllowed = true;
     showNextWord();
@@ -44,16 +79,18 @@
 
     currentWord = words[index];
     wordBox.textContent = currentWord;
+    wordBox.classList.remove("correct", "incorrect");
     info.textContent = "";
+    currentWordShaken = false;
     index = (index + 1) % words.length;
 
     setTimeout(showNextWord, 2000);
   }
 
   function detectShake(event) {
-    if (!shakeAllowed || shakeCount >= 2) return;
+    if (!shakeAllowed || shakeCount >= 2 || currentWordShaken) return;
 
-    const now = new Date().getTime();
+    const now = Date.now();
     if ((now - lastShake) < 1000) return;
 
     const acc = event.accelerationIncludingGravity;
@@ -61,15 +98,18 @@
 
     if (total > 25) {
       lastShake = now;
-      if (currentWord === "richtig") {
+      currentWordShaken = true; // nur eine Wertung pro Wort
+
+      if (currentWord === "option 2") {
+        wordBox.classList.add("correct");
+        info.innerHTML = '<span style="color: green;">✔️ Point awarded!</span>';
         score++;
-        info.innerHTML = '<span style="color: green;">✔️ Punkt erhalten!</span>';
       } else {
-        info.innerHTML = '<span style="color: red;">❌ Kein Punkt.</span>';
+        wordBox.classList.add("incorrect");
+        info.innerHTML = '<span style="color: red;">❌ No point.</span>';
       }
 
       shakeCount++;
-
       if (shakeCount === 2) {
         setTimeout(() => {
           scoreInput.value = score;
@@ -82,7 +122,7 @@
   if (window.DeviceMotionEvent) {
     window.addEventListener("devicemotion", detectShake, false);
   } else {
-    alert("Dein Gerät unterstützt leider keine Bewegungserkennung.");
+    alert("Your device does not support motion detection.");
   }
 </script>
 {% endblock %}

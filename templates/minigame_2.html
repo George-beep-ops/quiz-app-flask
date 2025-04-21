@@ -18,16 +18,21 @@
   }
 
   .word-tile {
-    position: absolute;
-    padding: 0.6rem 1rem;
-    font-size: 1rem;
-    font-weight: bold;
-    background-color: #e0e0e0;
+    background-color: #ddd;
+    padding: 1rem;
+    width: 140px;
+    height: 100px;
     border-radius: 8px;
-    white-space: nowrap;
+    font-weight: bold;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    z-index: 2;
+    transition: background-color 0.2s;
+    user-select: none;
+    text-align: center;
+    position: absolute;
   }
 
   .word-tile.correct {
@@ -154,12 +159,6 @@
     });
   });
 
-  // Zeitlimit 8 Sekunden
-  setTimeout(() => {
-    if (!submitted) {
-      document.querySelectorAll(".word-tile").forEach(t => t.classList.add("disabled"));
-      submitGame();
-    }
-  }, 8000);
+  // Zeitlimit entfernt (war vorher hier)
 </script>
 {% endblock %}
