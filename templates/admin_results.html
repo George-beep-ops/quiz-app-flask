@@ -84,17 +84,17 @@ async function fetchDataAndUpdate() {
   const ctx = prepareHighResCanvas(canvas, 960, 540);
 
   if (chart) {
-    chart.data.labels = playerCounts.map(count => `${count} Player`);
-    chart.data.datasets[0].data = sortedScores;
+    chart.data.labels = sortedScores.map(score => `${score} Pkt.`);
+    chart.data.datasets[0].data = playerCounts;
     chart.update();
   } else {
     chart = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: playerCounts.map(count => `${count} Player`),
+        labels: sortedScores.map(score => `${score} Pkt.`),
         datasets: [{
-          label: "Points",
-          data: sortedScores,
+          label: "Spieleranzahl",
+          data: playerCounts,
           backgroundColor: "#0077cc"
         }]
       },
@@ -111,14 +111,14 @@ async function fetchDataAndUpdate() {
               size: 18
             },
             color: "#000",
-            formatter: (value) => `${value} Points`
+            formatter: (value) => `${value} Spieler`
           }
         },
         scales: {
           x: {
             title: {
               display: true,
-              text: "Number of Players",
+              text: "Punktzahl",
               font: {
                 size: 18
               }
@@ -134,7 +134,7 @@ async function fetchDataAndUpdate() {
             suggestedMax: 20,
             title: {
               display: true,
-              text: "Points",
+              text: "Anzahl der Spieler",
               font: {
                 size: 18
               }

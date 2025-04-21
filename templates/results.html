@@ -123,9 +123,10 @@ function hexToRgb(hex) {
 let P0, P1, P2;
 
 function updateBezierPoints() {
-  P0 = { x: canvas.width - 40, y: canvas.height - 40 };
-  P1 = { x: canvas.width - 40, y: canvas.height / 2 };
-  P2 = { x: canvas.width / 2 + 100, y: 40 };
+  P0 = { x: canvas.width * 0.7, y: canvas.height - 60 };         // Startpunkt etwas weiter links
+  P1 = { x: canvas.width * 0.65, y: canvas.height / 2 };         // Kontrollpunkt
+  P2 = { x: canvas.width * 0.5, y: 50 };                         // Zielpunkt oben links
+
 }
 
 function animate() {
@@ -141,7 +142,7 @@ function animate() {
     }
   }
   else if (rocketPhase === "launch") {
-    let timeNorm = t / (160 / speedFactor);
+    let timeNorm = t / (180 / speedFactor);
     if (timeNorm > 1.0) {
       rocketPhase = "wait";
       t = 0;
@@ -156,17 +157,17 @@ function animate() {
     }
   }
   else if (rocketPhase === "wait") {
-    if (t > 120) {
+    if (t > 500) {
       rocketPhase = "reentry";
       rocket.x = -100;
       rocket.y = canvas.height / 2;
       rocket.angle = 0;
-      rocket.scale = 1;
+      rocket.scale = 1.5;
       t = 0;
     }
   }
   else if (rocketPhase === "reentry") {
-    rocket.x += 12;
+    rocket.x += 10;
     rocket.scale += 0.01;
     drawRocket(rocket.x, rocket.y, 0, rocket.scale);
     if (rocket.x > canvas.width / 2) {
