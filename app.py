@@ -8,10 +8,11 @@ app.secret_key = 'your_secret_key'
 # Punkte für Minispiele
 minigame_points = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
 
-# Ergebnisse nur temporär im RAM
+# Ergebnisse und verwendete Nicknames nur temporär im RAM
 results = []
+used_nicknames = set()  # Wird nur bei Server-Neustart zurückgesetzt
 
-# Fester Ablauf: jede Frage und jedes Minispiel ist ein Schritt
+# Fester Ablauf: jede Frage und jedes Minigame ist ein Schritt
 flow = [
     'question_1', 'question_2', 'minigame_1',
     'question_3', 'question_4', 'minigame_2',
@@ -23,19 +24,28 @@ flow = [
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    error_message = None
+
     if request.method == 'POST':
-        nickname = request.form['nickname']
-        session['nickname'] = nickname
-        session['score'] = 0
-        session['step'] = 0
-        return redirect(url_for('next_step'))
-    return render_template('start.html')
+        nickname = request.form['nickname'].strip()
+
+        if not nickname:
+            error_message = "Please enter a name!"
+        elif nickname in used_nicknames:
+            error_message = f"The name '{nickname}' is already taken. Please choose another."
+        else:
+            used_nicknames.add(nickname)
+            session['nickname'] = nickname
+            session['score'] = 0
+            session['step'] = 0
+            return redirect(url_for('next_step'))
+
+    return render_template('start.html', error=error_message)
 
 @app.route('/next', methods=['GET', 'POST'])
 def next_step():
     step = session.get('step', 0)
 
-    # Wenn Ablauf abgeschlossen ist
     if step >= len(flow):
         return redirect(url_for('results_page'))
 
@@ -97,5 +107,6 @@ def favicon():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
+
 
 
