@@ -47,7 +47,7 @@
   line-height: 1.5;
   font-weight: bold;">
 
-  <strong>Tilt your phone to steer the car and pop the bubbles that contain matching content!<br>Ready?</strong>
+  <strong>Which of the folowing are success factors of gamification? Tilt your phone to steer the car and pop the bubbles. !<br>Ready?</strong>
 </div>
 <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
   <input type="hidden" name="score" id="scoreInput" value="0">
@@ -90,9 +90,28 @@ const car = {
   y: logicalHeight * 0.75 - initialCarHeight / 2
 };
 
-const labels = [...Array(30).keys()].map(i => "option " + (i + 1));
-const goodWords = labels.slice(0, 15);
-const BUBBLE_SPEED = 1.9;
+const labels = [
+  "Clear goals",
+  "Personalization",
+  "Feedback",
+  "Storytelling",
+  "Targeting",
+  "Randomization",
+  "Overload",
+  "Guesswork",
+  "Complexity",
+  "Distraction"
+];
+
+const goodWords = [
+  "Clear goals",
+  "Personalization",
+  "Feedback",
+  "Storytelling",
+  "Targeting"
+];
+
+const BUBBLE_SPEED = 1.5;
 
 let usedLabels = new Set();
 let tiltX = 0; // 🆕 Sensorwert-Zwischenspeicher
@@ -246,7 +265,7 @@ function drawBubblesAndCar() {
       hits++;
       if (obj.good) score++;
       usedLabels.add(obj.label);
-      if (hits >= 10) {
+      if (hits >= 6) {
         gameOver = true;
         setTimeout(() => animationPhase = true, 300);
         document.getElementById("scoreInput").value = score;
@@ -297,16 +316,16 @@ function update() {
 
   if (showLights) {
     drawLights();
-    if (timer === 300 + 5 * 45) {
+    if (timer === 480 + 5 * 45) {
       showText = false;
       const overlay = document.getElementById("instructionOverlay");
       if (overlay) overlay.style.display = "none";
     }
-    if (timer >= 300 && (timer - 300) % 45 === 0 && lightIndex >= 0) {
+    if (timer >= 480 && (timer - 480) % 45 === 0 && lightIndex >= 0) {
       lights[lightIndex] = true;
       lightIndex--;
     }
-    if (lightIndex < 0 && timer >= 300 + 5 * 45) {
+    if (lightIndex < 0 && timer >= 480 + 5 * 45) {
       showLights = false;
     }
   } else if (!gameOver) {
