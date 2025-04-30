@@ -43,7 +43,7 @@
   <h2><strong>Minigame 3 – Skill Required!</strong><br>
     <h2>
       Shake your phone when you see one of the <strong>3</strong> core components of Self-Determination Theory!<br>
-      The game ends after <strong>5</strong> attempts or when you find all <strong>3</strong> correct ones.
+      The game ends after <strong>4</strong> attempts or when you find all <strong>3</strong> correct ones.
       </h2>
       
 
@@ -84,7 +84,7 @@
   }, 4000);
 
   function showNextWord() {
-    if (shakeCount >= 5 || score >= 3) return;
+    if (shakeCount >= 4 || score >= 3) return;
 
     currentWord = words[index];
     wordBox.textContent = currentWord;
@@ -97,7 +97,7 @@
   }
 
   function detectShake(event) {
-    if (!shakeAllowed || shakeCount >= 5 || score >= 3 || currentWordShaken) return;
+    if (!shakeAllowed || shakeCount >= 4 || score >= 3 || currentWordShaken) return;
 
     const now = Date.now();
     if ((now - lastShake) < 1000) return;
