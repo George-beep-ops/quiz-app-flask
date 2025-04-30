@@ -11,7 +11,7 @@
   }
   .grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(120px, 1fr));
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
     gap: 1rem;
     margin-top: 1rem;
     justify-content: center;
@@ -51,7 +51,7 @@
 {% block content %}
 <h2><strong>Minigame 1 – React!</strong><br>
   Tap <strong>3</strong> terms within <strong>15</strong> seconds that are <strong>positively</strong> influenced by gamification. 
-  The game ends after <strong>3</strong> attempts.</h2>
+  The game ends after 3 attempts.</h2>
   
 
   <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
