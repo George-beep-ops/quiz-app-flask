@@ -319,16 +319,16 @@ function update() {
 
   if (showLights) {
     drawLights();
-    if (timer === 480 + 5 * 45) {
+    if (timer === 480 + 5 * 50) {
       showText = false;
       const overlay = document.getElementById("instructionOverlay");
       if (overlay) overlay.style.display = "none";
     }
-    if (timer >= 480 && (timer - 480) % 45 === 0 && lightIndex >= 0) {
+    if (timer >= 480 && (timer - 480) % 50 === 0 && lightIndex >= 0) {
       lights[lightIndex] = true;
       lightIndex--;
     }
-    if (lightIndex < 0 && timer >= 480 + 5 * 45) {
+    if (lightIndex < 0 && timer >= 480 + 5 * 50) {
       showLights = false;
     }
   } else if (!gameOver) {
