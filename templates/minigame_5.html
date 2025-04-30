@@ -33,7 +33,7 @@
 <canvas id="gameCanvas"></canvas>
 <div id="instructionOverlay" style="
   position: fixed;
-  top: 100px;
+  top: 40px;
   left: 50%;
   transform: translateX(-50%);
   width: 90vw;
@@ -82,7 +82,7 @@ const finishImg = new Image();
 finishImg.src = "{{ url_for('static', filename='ziellinie.png') }}";
 
 const initialCarWidth = logicalWidth * 0.11;
-const initialCarHeight = logicalHeight * 0.1;
+const initialCarHeight = logicalHeight * 0.3;
 const maxCarWidth = logicalWidth * 0.22;
 const maxCarHeight = logicalHeight * 0.2;
 
