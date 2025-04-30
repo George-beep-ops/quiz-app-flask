@@ -33,7 +33,7 @@
 <canvas id="gameCanvas"></canvas>
 <div id="instructionOverlay" style="
   position: fixed;
-  top: 40px;
+  top: 100px;
   left: 50%;
   transform: translateX(-50%);
   width: 90vw;
@@ -82,7 +82,7 @@ const finishImg = new Image();
 finishImg.src = "{{ url_for('static', filename='ziellinie.png') }}";
 
 const initialCarWidth = logicalWidth * 0.11;
-const initialCarHeight = logicalHeight * 0.3;
+const initialCarHeight = logicalHeight * 0.1;
 const maxCarWidth = logicalWidth * 0.22;
 const maxCarHeight = logicalHeight * 0.2;
 
@@ -114,7 +114,7 @@ const goodWords = [
   "Targeting"
 ];
 
-const BUBBLE_SPEED = 1.2;
+const BUBBLE_SPEED = 1.5;
 
 let usedLabels = new Set();
 let tiltX = 0; // 🆕 Sensorwert-Zwischenspeicher
