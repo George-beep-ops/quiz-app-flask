@@ -49,25 +49,46 @@
 {% endblock %}
 
 {% block content %}
-  <h2><strong>Minigame 1 – React!</strong><br>Tap 2 terms within 8 seconds that are <strong>enhanced</strong> through gamification!</h2>
+  <h2><strong>Minigame 1 – React!</strong><br>Tap <strong>3</strong> terms within 15 seconds that are <strong>positively</strong> influenced by gamification!</h2>
 
   <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
-    <div class="grid">
-      <div class="tile disabled" data-word="option 1">option 1</div>
-      <div class="tile disabled" data-word="option 2">option 2</div>
-      <div class="tile disabled" data-word="option 3">option 3</div>
-      <div class="tile disabled" data-word="option 4">option 4</div>
-    </div>
+    <div class="grid" id="tileGrid"></div>
     <input type="hidden" name="score" id="scoreInput" value="0">
     <button type="submit" style="display: none;">Absenden</button>
   </form>
 
-  <div id="timer">⏳ Time is running... <span id="timeValue">8</span>s</div>
+  <div id="timer">⏳ Time is running... <span id="timeValue">15</span>s</div>
 {% endblock %}
+
 
 {% block script %}
 <script>
-  const correctWords = ["option 1", "option 2", "option 3"];
+  const correctWords = ["Engagement", "Participation", "Attention", "Motivation"];
+  const allWords = [
+    "Confusion", "Desinterest", "Engagement", "Overregulation",
+    "Participation", "Memory Loss", "Motivation", "Attention"
+  ];
+
+  // Fisher-Yates Shuffle
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  const shuffledWords = shuffle([...allWords]);
+
+  const grid = document.getElementById("tileGrid");
+  shuffledWords.forEach(word => {
+    const div = document.createElement("div");
+    div.className = "tile disabled";
+    div.dataset.word = word;
+    div.textContent = word;
+    grid.appendChild(div);
+  });
+
   let score = 0;
   let selectedCount = 0;
   const tiles = document.querySelectorAll(".tile");
@@ -77,7 +98,7 @@
       tile.classList.remove("disabled");
       tile.addEventListener("click", () => {
         if (tile.classList.contains("selected") || tile.classList.contains("incorrect")) return;
-        if (selectedCount >= 2) return;
+        if (selectedCount >= 3) return;
 
         const word = tile.dataset.word;
         if (correctWords.includes(word)) {
@@ -88,7 +109,7 @@
         }
 
         selectedCount++;
-        if (selectedCount === 2) {
+        if (selectedCount === 3) {
           tiles.forEach(t => t.classList.add("disabled"));
           document.getElementById("scoreInput").value = score;
           setTimeout(() => {
@@ -107,17 +128,17 @@
 
     enableTiles();
 
-    let timeLeft = 8;
+    let timeLeft = 15;
     const countdown = setInterval(() => {
       timeLeft--;
       timerValue.textContent = timeLeft;
-      if (timeLeft <= 0 && selectedCount < 2) {
+      if (timeLeft <= 0 && selectedCount < 3) {
         clearInterval(countdown);
         tiles.forEach(t => t.classList.add("disabled"));
         document.getElementById("scoreInput").value = score;
         document.getElementById("gameForm").submit();
       }
     }, 1000);
-  }, 3000);
+  }, 5000);
 </script>
 {% endblock %}

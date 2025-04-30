@@ -41,7 +41,7 @@
 
 {% block content %}
   <h2><strong>Minigame 3 – Skill Required!</strong><br>
-  Shake your phone when <strong>"option 2"</strong> appears!</h2>
+  Shake your phone when you see core aspects of the Self Determination Theory!</h2>
 
   <div id="wordBox">Ready?</div>
 
@@ -59,7 +59,12 @@
   const scoreInput = document.getElementById("scoreInput");
   const form = document.getElementById("gameForm");
 
-  const words = ["option 1", "option 2", "option 1", "option 3", "option 2", "option 5"];
+  const correctWords = ["Autonomy", "Competence", "Relatedness"];
+  const words = [
+    "Stress", "Autonomy", "Efficiency", "Repetition", "Relatedness", 
+    "Punishment", "Competence", "Obedience", "Intelligence"
+  ].sort(() => Math.random() - 0.5); // zufällige Reihenfolge
+
   let score = 0;
   let shakeCount = 0;
   let lastShake = 0;
@@ -68,11 +73,11 @@
   let shakeAllowed = false;
   let currentWordShaken = false;
 
-  // Spiel startet nach 3,5 Sekunden
+  // Spiel startet nach 4 Sekunden
   setTimeout(() => {
     shakeAllowed = true;
     showNextWord();
-  }, 3500);
+  }, 4000);
 
   function showNextWord() {
     if (shakeCount >= 2) return;
@@ -84,7 +89,7 @@
     currentWordShaken = false;
     index = (index + 1) % words.length;
 
-    setTimeout(showNextWord, 2000);
+    setTimeout(showNextWord, 3000);
   }
 
   function detectShake(event) {
@@ -98,9 +103,9 @@
 
     if (total > 25) {
       lastShake = now;
-      currentWordShaken = true; // nur eine Wertung pro Wort
+      currentWordShaken = true;
 
-      if (currentWord === "option 2") {
+      if (correctWords.includes(currentWord)) {
         wordBox.classList.add("correct");
         info.innerHTML = '<span style="color: green;">✔️ Point awarded!</span>';
         score++;

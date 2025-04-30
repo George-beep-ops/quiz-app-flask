@@ -3,7 +3,7 @@
 {% block title %}Minispiel 4 – Begriffe und Bewegung{% endblock %}
 
 {% block content %}
-  <h2><strong>Mini Game 4 – Don’t Forget!</strong><br>Enter two key terms of our topic (separated by a comma) and place your phone <strong>flat on the table within 20 seconds</strong>.</h2>
+  <h2><strong>Mini Game 4 – Don’t Forget!</strong><br>Type in <strong>2</strong> visible signs, separated by a comma, that show your progress in a gamified learning system. Enter the 2 terms within 20 seconds and get an extra point with laying down your phone flat on the table afterwards.</h2>
   
 
   <input type="text" id="inputField" placeholder="Type in .." style="padding: 1rem; font-size: 1rem; width: 80%; max-width: 400px; margin-bottom: 1rem;" disabled>
@@ -18,7 +18,7 @@
 
 {% block script %}
 <script>
-  const correctAnswers = ["learning", "gamification"];
+  const correctAnswers = ["progress bar", "progress bars", "points", "badge", "badges","leaderboards", "leaderboard", "level","levels", "rank", "ranks", "score", "scores"];
   let score = 0;
   let submitted = false;
   let flatDetected = false;
@@ -58,7 +58,7 @@
       submitGame();
     }
   }, 1000);
-}, 4000);
+}, 8000);
 
 
   function checkInput() {

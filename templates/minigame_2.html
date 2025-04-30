@@ -76,9 +76,9 @@
 {% block content %}
 <div class="description-block">
   <h2>
-    <strong>Minigame 2 – Identify the Danger!</strong><br>
-    What is a possible danger of gamification?
-    Please select <strong>three</strong> appropriate terms!
+    <strong>Minigame 2 – Identify the risks!</strong><br>
+    What are possible risks of gamification?
+    Please select <strong>3</strong> appropriate terms!
   </h2>
 </div>
 
@@ -96,14 +96,17 @@
   const scoreInput = document.getElementById("scoreInput");
 
   const words = [
-    "option 1", "option 2", "option 3",
-    "option 4", "option 5", "option 6",
-    "option 7", "option 8", "option 9", "option 10",
+  "Only Extrinsic Motivation", "Technical Complexity", "Increased Attention",
+  "User Satisfaction", "Distraction from Learning Goals", "Better Collaboration",
+  "Demotivation", "Personalized Learning", "Lack of Sustainability", "Boosted Creativity"
   ];
 
+
   const correct = [
-    "option 2", "option 3", "option 4", "option 6"
+  "Only Extrinsic Motivation", "Technical Complexity",
+  "Distraction from Learning Goals", "Lack of Sustainability"
   ];
+
 
   let score = 0;
   let selectedCount = 0;
