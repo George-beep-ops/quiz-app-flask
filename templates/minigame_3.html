@@ -41,7 +41,7 @@
 
 {% block content %}
   <h2><strong>Minigame 3 – Skill Required!</strong><br>
-  Shake your phone when you see core aspects of the Self Determination Theory!</h2>
+  Shake your phone when you see the 3 core aspects of the Self Determination Theory!</h2>
 
   <div id="wordBox">Ready?</div>
 
@@ -63,7 +63,7 @@
   const words = [
     "Stress", "Autonomy", "Efficiency", "Repetition", "Relatedness", 
     "Punishment", "Competence", "Obedience", "Intelligence"
-  ].sort(() => Math.random() - 0.5); // zufällige Reihenfolge
+  ].sort(() => Math.random() - 0.5);
 
   let score = 0;
   let shakeCount = 0;
@@ -80,7 +80,7 @@
   }, 4000);
 
   function showNextWord() {
-    if (shakeCount >= 2) return;
+    if (shakeCount >= 5 || score >= 3) return;
 
     currentWord = words[index];
     wordBox.textContent = currentWord;
@@ -93,7 +93,7 @@
   }
 
   function detectShake(event) {
-    if (!shakeAllowed || shakeCount >= 2 || currentWordShaken) return;
+    if (!shakeAllowed || shakeCount >= 5 || score >= 3 || currentWordShaken) return;
 
     const now = Date.now();
     if ((now - lastShake) < 1000) return;
@@ -115,7 +115,8 @@
       }
 
       shakeCount++;
-      if (shakeCount === 2) {
+
+      if (shakeCount === 5 || score === 3) {
         setTimeout(() => {
           scoreInput.value = score;
           form.submit();
@@ -131,3 +132,4 @@
   }
 </script>
 {% endblock %}
+
