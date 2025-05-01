@@ -146,10 +146,11 @@ const getNewObject = (label = null, others = []) => {
 
   let x, y, attempts = 0;
   do {
-    const minX = -0.2;                     // linker Rand = ganz links
-    const maxX = logicalWidth * 0.9;    // rechter Rand = bei 70 %
+    const minX = -logicalWidth * 0.1; // 5 % weiter links als der sichtbare Bereich
+    const maxX = logicalWidth * 0.85;  // Begrenzung nach rechts
 
     x = Math.random() * (maxX - minX - 2 * radius) + radius + minX;
+
 
 
 
@@ -175,7 +176,7 @@ const getNewObject = (label = null, others = []) => {
 };
 
 let objects = [];
-const activeBubbles = 12;
+const activeBubbles = 10;
 for (let i = 0; i < activeBubbles; i++) {
   const label = labels[i % labels.length];
   objects.push(getNewObject(label, objects));
