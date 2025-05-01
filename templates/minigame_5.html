@@ -146,8 +146,8 @@ const getNewObject = (label = null, others = []) => {
 
   let x, y, attempts = 0;
   do {
-    const minX = 0;                     // linker Rand = ganz links
-    const maxX = logicalWidth * 0.7;    // rechter Rand = bei 70 %
+    const minX = -0.1;                     // linker Rand = ganz links
+    const maxX = logicalWidth * 0.8;    // rechter Rand = bei 70 %
 
     x = Math.random() * (maxX - minX - 2 * radius) + radius + minX;
 
