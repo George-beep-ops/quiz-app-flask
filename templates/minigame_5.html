@@ -279,11 +279,16 @@ function drawBubblesAndCar() {
       hits++;
       if (obj.good) score++;
       usedLabels.add(obj.label);
-      if (hits >= 5) {
-        gameOver = true;
-        setTimeout(() => animationPhase = true, 1000);
-        document.getElementById("scoreInput").value = score;
-      }
+      if (hits >= 5 && !gameOver) {
+      gameOver = true;
+      document.getElementById("scoreInput").value = score;
+
+  // Verzögerung erst starten, wenn Blasenanimation sichtbar war
+      setTimeout(() => {
+      animationPhase = true;
+  }, 2000);
+}
+
     }
   }
 
@@ -342,12 +347,11 @@ function update() {
     if (lightIndex < 0 && timer >= 480 + 5 * 50) {
       showLights = false;
     }
-  } else if (!gameOver) {
-    drawBubblesAndCar();
-  } else if (animationPhase) {
+  } else if (!animationPhase) {
+    drawBubblesAndCar(); // auch bei gameOver=true, solange Animation noch nicht läuft
+  } else {
     drawFinishAnimation();
   }
-
   requestAnimationFrame(update);
 }
 
