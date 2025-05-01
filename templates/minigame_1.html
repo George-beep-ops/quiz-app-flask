@@ -40,7 +40,7 @@
   }
   #timer {
     font-size: 1.2rem;
-    margin: 1rem;
+    margin: 1.5rem 0;
     font-weight: bold;
     text-align: center;
   }
@@ -52,16 +52,16 @@
   Tap <strong>3</strong> terms within <strong>15</strong> seconds that are <strong>positively</strong> influenced by gamification. 
   The game ends after 3 attempts.</h2>
 
-<!-- ⏳ Anzeige für Wartezeit und Timer -->
-<div id="timer">
-  <span id="timerText">⏳ Wait...</span>
-</div>
-
 <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
   <div class="grid" id="tileGrid"></div>
   <input type="hidden" name="score" id="scoreInput" value="0">
   <button type="submit" style="display: none;">Absenden</button>
 </form>
+
+<!-- ⏳ Jetzt unter den Kacheln -->
+<div id="timer">
+  <span id="timerText">⏳ Wait...</span>
+</div>
 {% endblock %}
 
 {% block script %}
@@ -72,7 +72,6 @@
     "Participation", "Memory Loss", "Motivation", "Attention"
   ];
 
-  // Shuffle Funktion
   function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -145,4 +144,3 @@
   }, 5000);
 </script>
 {% endblock %}
-
