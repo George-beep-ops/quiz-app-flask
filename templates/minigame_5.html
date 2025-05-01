@@ -15,17 +15,16 @@
   }
 
   canvas {
-  position: absolute;
-  top: 0px; /* Platz für Header */
-  left: 0;
-  width: 100vw;
-  height: calc(100vh - 250px); /* oben Header, unten Footer */
-  background-color: #ffffff;
-  touch-action: none;
-  border: none;
-  z-index: 1;
-}
-
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: calc(100vh - 250px); /* oben Header, unten Footer */
+    background-color: #ffffff;
+    touch-action: none;
+    border: none;
+    z-index: 1;
+  }
 </style>
 {% endblock %}
 
@@ -46,7 +45,6 @@
   font-size: 1.4rem;
   line-height: 1.5;
   font-weight: bold;">
-
   <strong>Which of the following are success factors of gamification?<br>
     Tilt your phone to steer the car and pop the bubbles.<br>
     <strong>5</strong> correct answers are hidden – you have <strong>6</strong> attempts.<br>
@@ -66,14 +64,17 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 const dpr = window.devicePixelRatio || 1;
-canvas.width = window.innerWidth * dpr;
-canvas.height = window.innerHeight * dpr;
-canvas.style.width = window.innerWidth + "px";
-canvas.style.height = window.innerHeight + "px";
+const canvasLogicalHeight = window.innerHeight - 250;
+const canvasLogicalWidth = window.innerWidth;
+
+canvas.width = canvasLogicalWidth * dpr;
+canvas.height = canvasLogicalHeight * dpr;
+canvas.style.width = canvasLogicalWidth + "px";
+canvas.style.height = canvasLogicalHeight + "px";
 ctx.scale(dpr, dpr);
 
-const logicalWidth = window.innerWidth;
-const logicalHeight = window.innerHeight;
+const logicalWidth = canvasLogicalWidth;
+const logicalHeight = canvasLogicalHeight;
 
 const carImg = new Image();
 carImg.src = "{{ url_for('static', filename='car.png') }}";
@@ -94,30 +95,18 @@ const car = {
 };
 
 const labels = [
-  "Clear goals",
-  "Personalization",
-  "Feedback",
-  "Storytelling",
-  "Targeting",
-  "Randomization",
-  "Overload",
-  "Guesswork",
-  "Complexity",
-  "Distraction"
+  "Clear goals", "Personalization", "Feedback", "Storytelling", "Targeting",
+  "Randomization", "Overload", "Guesswork", "Complexity", "Distraction"
 ];
 
 const goodWords = [
-  "Clear goals",
-  "Personalization",
-  "Feedback",
-  "Storytelling",
-  "Targeting"
+  "Clear goals", "Personalization", "Feedback", "Storytelling", "Targeting"
 ];
 
 const BUBBLE_SPEED = 1.5;
 
 let usedLabels = new Set();
-let tiltX = 0; // 🆕 Sensorwert-Zwischenspeicher
+let tiltX = 0;
 
 function doesOverlap(x, y, radius, others) {
   return others.some(obj => {
@@ -174,7 +163,6 @@ for (let i = 0; i < activeBubbles; i++) {
 
 let lights = [false, false, false, false, false];
 let showLights = true;
-let showText = true;
 let lightIndex = 4;
 let timer = 0;
 
@@ -255,7 +243,6 @@ function drawBubblesAndCar() {
       ctx.restore();
     }
 
-    // Realistische Kollision: Bubble berührt Auto
     const closestX = Math.max(car.x, Math.min(obj.x + obj.radius, car.x + car.width));
     const closestY = Math.max(car.y, Math.min(obj.y + obj.radius, car.y + car.height));
     const dx = (obj.x + obj.radius) - closestX;
@@ -312,7 +299,6 @@ function update() {
   ctx.clearRect(0, 0, logicalWidth, logicalHeight);
   timer++;
 
-  // 🆕 Glatte Bewegung durch synchronisierte Neigung
   const sensitivity = 0.25;
   car.x += tiltX * sensitivity;
   car.x = Math.max(0, Math.min(logicalWidth - car.width, car.x));
@@ -320,7 +306,6 @@ function update() {
   if (showLights) {
     drawLights();
     if (timer === 480 + 5 * 50) {
-      showText = false;
       const overlay = document.getElementById("instructionOverlay");
       if (overlay) overlay.style.display = "none";
     }
@@ -340,7 +325,6 @@ function update() {
   requestAnimationFrame(update);
 }
 
-// 🆕 Nur Sensorwert merken – Bewegung erfolgt in update()
 window.addEventListener("deviceorientation", function(event) {
   tiltX = event.gamma || 0;
 });
