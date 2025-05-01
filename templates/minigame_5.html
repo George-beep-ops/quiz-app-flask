@@ -104,7 +104,9 @@ const labels = [
   "Overload",
   "Guesswork",
   "Complexity",
-  "Distraction"
+  "Distraction",
+  "Frustration"
+
 ];
 
 const goodWords = [
@@ -144,7 +146,11 @@ const getNewObject = (label = null, others = []) => {
 
   let x, y, attempts = 0;
   do {
-    x = Math.random() * (logicalWidth - 2 * radius) + radius;
+    const usableWidth = logicalWidth * 0.8;
+    const offsetX = logicalWidth * 0.1;  // links und rechts 10% Rand
+
+    x = Math.random() * (usableWidth - 2 * radius) + radius + offsetX;
+
     y = -Math.random() * logicalHeight * 1.5;
     attempts++;
     if (attempts > 100) {
@@ -196,7 +202,7 @@ function drawLights() {
   const totalWidth = logicalWidth * 0.7;
   const spacing = totalWidth / 5;
   const baseX = logicalWidth / 2 - totalWidth / 2 + logicalWidth * 0.06;
-  const baseY = logicalHeight / 1.2;
+  const baseY = logicalHeight / 2.2;
   const lightRadius = logicalWidth * 0.04;
 
   for (let i = 0; i < 5; i++) {
