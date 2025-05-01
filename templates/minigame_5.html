@@ -47,10 +47,10 @@
   line-height: 1.5;
   font-weight: bold;">
 
-  <strong>Which of the following are success factors of gamification?<br>
+  Which of the following are success factors of gamification?<br>
     Tilt your phone to steer the car and pop the bubbles.<br>
     <strong>5</strong> correct answers are hidden – you have <strong>6</strong> attempts.<br>
-    Keep your phone upright! <br>Ready?</strong>
+    Keep your phone upright! <br>Ready?
 </div>
 <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
   <input type="hidden" name="score" id="scoreInput" value="0">
@@ -146,8 +146,8 @@ const getNewObject = (label = null, others = []) => {
 
   let x, y, attempts = 0;
   do {
-    const minX = -0.1;                     // linker Rand = ganz links
-    const maxX = logicalWidth * 0.8;    // rechter Rand = bei 70 %
+    const minX = -0.2;                     // linker Rand = ganz links
+    const maxX = logicalWidth * 0.9;    // rechter Rand = bei 70 %
 
     x = Math.random() * (maxX - minX - 2 * radius) + radius + minX;
 
@@ -175,7 +175,7 @@ const getNewObject = (label = null, others = []) => {
 };
 
 let objects = [];
-const activeBubbles = 15;
+const activeBubbles = 12;
 for (let i = 0; i < activeBubbles; i++) {
   const label = labels[i % labels.length];
   objects.push(getNewObject(label, objects));
