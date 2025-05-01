@@ -59,24 +59,22 @@
 
 {% block script %}
 <script>
-  document.body.style.overflow = "hidden";
-  document.documentElement.style.overflow = "hidden";
-  
-  const canvas = document.getElementById("gameCanvas");
-  const ctx = canvas.getContext("2d");
-  
-  const dpr = window.devicePixelRatio || 1;
-  const canvasLogicalWidth = document.documentElement.clientWidth;
-  const canvasLogicalHeight = window.innerHeight;
-  
-  canvas.width = canvasLogicalWidth * dpr;
-  canvas.height = canvasLogicalHeight * dpr;
-  canvas.style.width = canvasLogicalWidth + "px";
-  canvas.style.height = canvasLogicalHeight + "px";
-  ctx.scale(dpr, dpr);
-  
-  const logicalWidth = canvasLogicalWidth;
-  const logicalHeight = canvasLogicalHeight;
+document.body.style.overflow = "hidden";
+document.documentElement.style.overflow = "hidden";
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+const dpr = window.devicePixelRatio || 1;
+canvas.width = window.innerWidth * dpr;
+canvas.height = window.innerHeight * dpr;
+canvas.style.width = window.innerWidth + "px";
+canvas.style.height = window.innerHeight + "px";
+ctx.scale(dpr, dpr);
+
+const logicalWidth = canvas.width / dpr;
+const logicalHeight = canvas.height / dpr;
+
 
 const carImg = new Image();
 carImg.src = "{{ url_for('static', filename='car.png') }}";
@@ -117,7 +115,7 @@ const goodWords = [
   "Targeting"
 ];
 
-const BUBBLE_SPEED = 1.5;
+const BUBBLE_SPEED = 1.4;
 
 let usedLabels = new Set();
 let tiltX = 0; // 🆕 Sensorwert-Zwischenspeicher
@@ -198,7 +196,7 @@ function drawLights() {
   const totalWidth = logicalWidth * 0.7;
   const spacing = totalWidth / 5;
   const baseX = logicalWidth / 2 - totalWidth / 2 + logicalWidth * 0.06;
-  const baseY = logicalHeight / 3;
+  const baseY = logicalHeight / 1.2;
   const lightRadius = logicalWidth * 0.04;
 
   for (let i = 0; i < 5; i++) {
