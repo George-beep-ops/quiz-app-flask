@@ -139,7 +139,9 @@
       x += dx;
       y += dy;
 
-      if (x <= 0 || x >= window.innerWidth - tile.offsetWidth) dx *= -1;
+      const maxX = gameArea.clientWidth - tile.offsetWidth;
+      if (x <= 0 || x >= maxX) dx *= -1;
+
       if (y <= 0 || y >= gameArea.clientHeight - tile.offsetHeight) dy *= -1;
 
       tile.style.left = x + "px";

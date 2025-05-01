@@ -195,7 +195,7 @@ function drawLights() {
   const totalWidth = logicalWidth * 0.7;
   const spacing = totalWidth / 5;
   const baseX = logicalWidth / 2 - totalWidth / 2 + logicalWidth * 0.06;
-  const baseY = logicalHeight / 3;
+  const baseY = logicalHeight * 0.4;
   const lightRadius = logicalWidth * 0.04;
 
   for (let i = 0; i < 5; i++) {
@@ -236,7 +236,8 @@ function drawBubblesAndCar() {
     if (obj.alpha > 0 && obj.scale > 0) {
       ctx.save();
       ctx.globalAlpha = obj.alpha;
-      ctx.translate(obj.x + obj.radius, obj.y + obj.radius);
+      ctx.translate(obj.x, obj.y);
+
       ctx.scale(obj.scale, obj.scale);
 
       ctx.beginPath();
