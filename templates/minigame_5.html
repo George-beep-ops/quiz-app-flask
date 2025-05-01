@@ -146,10 +146,12 @@ const getNewObject = (label = null, others = []) => {
 
   let x, y, attempts = 0;
   do {
-    const usableWidth = logicalWidth * 0.8;
-    const offsetX = logicalWidth * 0.1;  // links und rechts 10% Rand
+    const minX = 0;                     // linker Rand = ganz links
+    const maxX = logicalWidth * 0.7;    // rechter Rand = bei 70 %
 
-    x = Math.random() * (usableWidth - 2 * radius) + radius + offsetX;
+    x = Math.random() * (maxX - minX - 2 * radius) + radius + minX;
+
+
 
     y = -Math.random() * logicalHeight * 1.5;
     attempts++;
@@ -202,7 +204,7 @@ function drawLights() {
   const totalWidth = logicalWidth * 0.7;
   const spacing = totalWidth / 5;
   const baseX = logicalWidth / 2 - totalWidth / 2 + logicalWidth * 0.06;
-  const baseY = logicalHeight / 2.2;
+  const baseY = logicalHeight / 1.8;
   const lightRadius = logicalWidth * 0.04;
 
   for (let i = 0; i < 5; i++) {

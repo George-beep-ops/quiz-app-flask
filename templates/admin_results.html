@@ -109,13 +109,21 @@ async function fetchDataAndUpdate() {
 
   // Topliste aktualisieren
   const sortedResults = results.slice().sort((a, b) => b.score - a.score);
-  const ol = document.getElementById("topList");
-  ol.innerHTML = "";
-  sortedResults.forEach(r => {
+const ol = document.getElementById("topList");
+ol.innerHTML = "";
+
+if (sortedResults.length > 0) {
+  const maxScore = sortedResults[0].score;
+
+  const topPlayers = sortedResults.filter(r => r.score === maxScore);
+
+  topPlayers.forEach(r => {
     const li = document.createElement("li");
     li.textContent = `🏆 ${r.name} – ${r.score} Points`;
     ol.appendChild(li);
   });
+}
+
 }
 
 fetchDataAndUpdate();
