@@ -49,7 +49,7 @@
 
   Which of the following are success factors of gamification?<br>
     Tilt your phone to steer the car and pop the bubbles.<br>
-    <strong>5</strong> correct answers are hidden – you have <strong>6</strong> attempts.<br>
+    <strong>5</strong> correct answers are hidden – you have <strong>5</strong> attempts.<br>
     Keep your phone upright! <br><strong>Ready?</strong>
 </div>
 <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
@@ -105,7 +105,7 @@ const labels = [
   "Guesswork",
   "Complexity",
   "Distraction",
-  "Frustration"
+  "Frustration",
 
 ];
 
@@ -115,6 +115,7 @@ const goodWords = [
   "Feedback",
   "Storytelling",
   "Targeting"
+  
 ];
 
 const BUBBLE_SPEED = 1.6;
@@ -278,7 +279,7 @@ function drawBubblesAndCar() {
       hits++;
       if (obj.good) score++;
       usedLabels.add(obj.label);
-      if (hits >= 6) {
+      if (hits >= 5) {
         gameOver = true;
         setTimeout(() => animationPhase = true, 300);
         document.getElementById("scoreInput").value = score;

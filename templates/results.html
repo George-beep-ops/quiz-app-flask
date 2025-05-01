@@ -4,7 +4,10 @@
 
 {% block content %}
   <h2>Thanks for your participation!</h2>
-  <canvas id="rocketCanvas" width="400" height="400" style="margin-top: 0.5rem;"></canvas>
+  <div style="width: 100%; max-width: 400px; margin: 0 auto;">
+    <canvas id="rocketCanvas" style="width: 100%; aspect-ratio: 1 / 1;"></canvas>
+  </div>
+  
   <div id="scoreDisplay" data-score="{{ session['score'] | default(0) }}" style="font-size: 1.4rem; font-weight: bold; display: none; margin-top: 0.1rem;"></div>
 {% endblock %}
 
