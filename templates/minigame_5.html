@@ -275,31 +275,16 @@ function drawBubblesAndCar() {
     const collisionThreshold = obj.radius * 0.98;
 
     if (!obj.hit && distance < collisionThreshold) {
-  obj.hit = true;
-  hits++;
-  if (obj.good) score++;
-  usedLabels.add(obj.label);
-
-  if (hits >= 5 && !gameOver) {
-    gameOver = true;
-    document.getElementById("scoreInput").value = score;
-
-    // Warte auf das vollständige Verblassen der letzten getroffenen Bubble
-    const waitForFinalBubble = () => {
-      const active = objects.some(o => o.hit && o.alpha > 0);
-      if (active) {
-        requestAnimationFrame(waitForFinalBubble);
-      } else {
-        // Danach mit Verzögerung zur Animation
-        setTimeout(() => {
-          animationPhase = true;
-        }, 800); // ggf. anpassen
+      obj.hit = true;
+      hits++;
+      if (obj.good) score++;
+      usedLabels.add(obj.label);
+      if (hits >= 5) {
+        gameOver = true;
+        setTimeout(() => animationPhase = true, 1000);
+        document.getElementById("scoreInput").value = score;
       }
-    };
-    waitForFinalBubble();
-  }
-}
-
+    }
   }
 
   ctx.drawImage(carImg, car.x, car.y, car.width, car.height);
