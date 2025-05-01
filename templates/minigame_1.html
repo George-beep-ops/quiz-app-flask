@@ -20,7 +20,7 @@
     background-color: #ddd;
     padding: 1rem;
     width: 140px;
-    height: 25px;
+    height: 20px;
     border-radius: 8px;
     font-weight: bold;
     font-size: 1rem;
@@ -42,7 +42,6 @@
     font-size: 1.2rem;
     margin: 1rem;
     font-weight: bold;
-    display: none;
     text-align: center;
   }
 </style>
@@ -53,25 +52,17 @@
   Tap <strong>3</strong> terms within <strong>15</strong> seconds that are <strong>positively</strong> influenced by gamification. 
   The game ends after 3 attempts.</h2>
 
-  <div id="waitingMessage" style="
-    font-size: 1.5rem;
-    text-align: center;
-    margin-top: 2rem;
-    font-weight: bold;
-  ">
-    ⏳ Wait...
-  </div>
+<!-- ⏳ Anzeige für Wartezeit und Timer -->
+<div id="timer">
+  <span id="timerText">⏳ Wait...</span>
+</div>
 
-  <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
-    <div class="grid" id="tileGrid"></div>
-    <input type="hidden" name="score" id="scoreInput" value="0">
-    <button type="submit" style="display: none;">Absenden</button>
-  </form>
-
-  <div id="timer">⏳ Time is running... <span id="timeValue">15</span>s</div>
+<form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
+  <div class="grid" id="tileGrid"></div>
+  <input type="hidden" name="score" id="scoreInput" value="0">
+  <button type="submit" style="display: none;">Absenden</button>
+</form>
 {% endblock %}
-
-
 
 {% block script %}
 <script>
@@ -81,7 +72,7 @@
     "Participation", "Memory Loss", "Motivation", "Attention"
   ];
 
-  // Fisher-Yates Shuffle
+  // Shuffle Funktion
   function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -132,12 +123,11 @@
     });
   }
 
-  // Start timer and enable tiles after 3 seconds
+  // Timer nach 5 Sekunden aktivieren
   setTimeout(() => {
-    document.getElementById("waitingMessage").style.display = "none";
-    const timerContainer = document.getElementById("timer");
+    const timerText = document.getElementById("timerText");
+    timerText.innerHTML = '⏳ Time is running... <span id="timeValue">15</span>s';
     const timerValue = document.getElementById("timeValue");
-    timerContainer.style.display = "block";
 
     enableTiles();
 
@@ -155,3 +145,4 @@
   }, 5000);
 </script>
 {% endblock %}
+

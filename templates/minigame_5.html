@@ -66,19 +66,14 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 const dpr = window.devicePixelRatio || 1;
-
-// ⚠️ Korrigierte Höhe entsprechend CSS
-const canvasLogicalHeight = window.innerHeight - 250;
-const canvasLogicalWidth = window.innerWidth;
-
-canvas.width = canvasLogicalWidth * dpr;
-canvas.height = canvasLogicalHeight * dpr;
-canvas.style.width = canvasLogicalWidth + "px";
-canvas.style.height = canvasLogicalHeight + "px";
+canvas.width = window.innerWidth * dpr;
+canvas.height = window.innerHeight * dpr;
+canvas.style.width = window.innerWidth + "px";
+canvas.style.height = window.innerHeight + "px";
 ctx.scale(dpr, dpr);
 
-const logicalWidth = canvasLogicalWidth;
-const logicalHeight = canvasLogicalHeight;
+const logicalWidth = window.innerWidth;
+const logicalHeight = window.innerHeight;
 
 const carImg = new Image();
 carImg.src = "{{ url_for('static', filename='car.png') }}";
@@ -99,18 +94,30 @@ const car = {
 };
 
 const labels = [
-  "Clear goals", "Personalization", "Feedback", "Storytelling", "Targeting",
-  "Randomization", "Overload", "Guesswork", "Complexity", "Distraction"
+  "Clear goals",
+  "Personalization",
+  "Feedback",
+  "Storytelling",
+  "Targeting",
+  "Randomization",
+  "Overload",
+  "Guesswork",
+  "Complexity",
+  "Distraction"
 ];
 
 const goodWords = [
-  "Clear goals", "Personalization", "Feedback", "Storytelling", "Targeting"
+  "Clear goals",
+  "Personalization",
+  "Feedback",
+  "Storytelling",
+  "Targeting"
 ];
 
 const BUBBLE_SPEED = 1.5;
 
 let usedLabels = new Set();
-let tiltX = 0;
+let tiltX = 0; // 🆕 Sensorwert-Zwischenspeicher
 
 function doesOverlap(x, y, radius, others) {
   return others.some(obj => {
@@ -188,7 +195,7 @@ function drawLights() {
   const totalWidth = logicalWidth * 0.7;
   const spacing = totalWidth / 5;
   const baseX = logicalWidth / 2 - totalWidth / 2 + logicalWidth * 0.06;
-  const baseY = logicalHeight * 0.7;
+  const baseY = logicalHeight / 3;
   const lightRadius = logicalWidth * 0.04;
 
   for (let i = 0; i < 5; i++) {
@@ -248,6 +255,7 @@ function drawBubblesAndCar() {
       ctx.restore();
     }
 
+    // Realistische Kollision: Bubble berührt Auto
     const closestX = Math.max(car.x, Math.min(obj.x + obj.radius, car.x + car.width));
     const closestY = Math.max(car.y, Math.min(obj.y + obj.radius, car.y + car.height));
     const dx = (obj.x + obj.radius) - closestX;
@@ -304,6 +312,7 @@ function update() {
   ctx.clearRect(0, 0, logicalWidth, logicalHeight);
   timer++;
 
+  // 🆕 Glatte Bewegung durch synchronisierte Neigung
   const sensitivity = 0.25;
   car.x += tiltX * sensitivity;
   car.x = Math.max(0, Math.min(logicalWidth - car.width, car.x));
@@ -331,6 +340,7 @@ function update() {
   requestAnimationFrame(update);
 }
 
+// 🆕 Nur Sensorwert merken – Bewegung erfolgt in update()
 window.addEventListener("deviceorientation", function(event) {
   tiltX = event.gamma || 0;
 });
@@ -338,3 +348,5 @@ window.addEventListener("deviceorientation", function(event) {
 update();
 </script>
 {% endblock %}
+
+
