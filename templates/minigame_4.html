@@ -6,23 +6,26 @@
 <h2><strong>Mini Game 4 – Don’t Forget!</strong><br>
   Type <strong>2</strong> visible signs that show your progress in a gamified learning system, separated by a comma.<br>
   Enter both terms within <strong>20</strong> seconds and earn an extra point by placing your phone flat on the table afterwards.
-  </h2>
-  
-  
+</h2>
 
-  <input type="text" id="inputField" placeholder="Type in .." style="padding: 1rem; font-size: 1rem; width: 80%; max-width: 400px; margin-bottom: 1rem;" disabled>
+<input type="text" id="inputField" placeholder="Type in .." style="padding: 1rem; font-size: 1rem; width: 80%; max-width: 400px; margin-bottom: 1rem;" disabled>
 
-  <div id="status" style="font-weight: bold; margin: 1rem; font-size: 1.2rem;">⏳ Time is running... <span id="timer">30</span>s</div>
-  <div id="extra" style="font-weight: bold; font-size: 1.2rem; color: green;"></div>
+<!-- 🆕 Wait-Meldung -->
+<div id="waitMessage" style="font-weight: bold; font-size: 1.2rem; color: gray; margin-top: 1rem;">
+  ⏳ Wait...
+</div>
 
-  <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
-    <input type="hidden" name="score" id="scoreInput" value="0">
-  </form>
+<div id="status" style="font-weight: bold; margin: 1rem; font-size: 1.2rem;">⏳ Time is running... <span id="timer">30</span>s</div>
+<div id="extra" style="font-weight: bold; font-size: 1.2rem; color: green;"></div>
+
+<form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
+  <input type="hidden" name="score" id="scoreInput" value="0">
+</form>
 {% endblock %}
 
 {% block script %}
 <script>
-  const correctAnswers = ["progress bar", "progress bars", "points", "point","badge", "badges","leaderboards", "leaderboard", "level","levels", "rank", "ranks", "score", "scores"];
+  const correctAnswers = ["progress bar", "progress bars", "points", "point", "badge", "badges", "leaderboards", "leaderboard", "level", "levels", "rank", "ranks", "score", "scores"];
   let score = 0;
   let submitted = false;
   let flatDetected = false;
@@ -38,32 +41,35 @@
   const scoreInput = document.getElementById("scoreInput");
   const form = document.getElementById("gameForm");
   const statusBlock = document.getElementById("status");
+  const waitMessage = document.getElementById("waitMessage");
 
   // Verstecke Timer-Anzeige anfangs
   statusBlock.style.display = "none";
 
-  // Zeige Timer und starte Countdown erst nach 3 Sekunden
+  // Zeige Timer und starte Countdown nach 10 Sekunden
   setTimeout(() => {
-  statusBlock.style.display = "block";
+    statusBlock.style.display = "block";
 
-  // Aktiviere das Eingabefeld nach 3 Sekunden
-  inputField.disabled = false;
-  inputField.style.backgroundColor = "white"; // optional: visuell zurücksetzen
-  inputField.style.opacity = "1"; // falls du es vorher transparenter machen willst
+    // Aktiviere das Eingabefeld
+    inputField.disabled = false;
+    inputField.style.backgroundColor = "white";
+    inputField.style.opacity = "1";
 
-  // Countdown starten
-  const countdown = setInterval(() => {
-    timer--;
-    timerDisplay.textContent = timer;
+    // 🆕 Verstecke "Wait..."-Meldung
+    waitMessage.style.display = "none";
 
-    if (timer <= 0 && !submitted) {
-      clearInterval(countdown);
-      checkInput();
-      submitGame();
-    }
-  }, 1000);
-}, 10000);
+    // Countdown starten
+    const countdown = setInterval(() => {
+      timer--;
+      timerDisplay.textContent = timer;
 
+      if (timer <= 0 && !submitted) {
+        clearInterval(countdown);
+        checkInput();
+        submitGame();
+      }
+    }, 1000);
+  }, 10000);
 
   function checkInput() {
     const input = inputField.value.toLowerCase();

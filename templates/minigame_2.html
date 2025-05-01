@@ -120,13 +120,18 @@
   }
 
   words.forEach(word => {
-    const tile = document.createElement("div");
-    tile.className = "word-tile";
-    tile.textContent = word;
-    gameArea.appendChild(tile);
+  const tile = document.createElement("div");
+  tile.className = "word-tile";
+  tile.textContent = word;
+  gameArea.appendChild(tile);
 
-    let x = Math.random() * (window.innerWidth - 140);
-    let y = Math.random() * (gameArea.clientHeight - 40);
+  // Nach dem Anhängen: Position und Bewegung festlegen
+  requestAnimationFrame(() => {
+    const maxX = gameArea.clientWidth - tile.offsetWidth;
+    const maxY = gameArea.clientHeight - tile.offsetHeight;
+
+    let x = Math.random() * maxX;
+    let y = Math.random() * maxY;
     let dx = (Math.random() - 0.5) * 5;
     let dy = (Math.random() - 0.5) * 5;
 
@@ -139,10 +144,8 @@
       x += dx;
       y += dy;
 
-      const maxX = gameArea.clientWidth - tile.offsetWidth;
       if (x <= 0 || x >= maxX) dx *= -1;
-
-      if (y <= 0 || y >= gameArea.clientHeight - tile.offsetHeight) dy *= -1;
+      if (y <= 0 || y >= maxY) dy *= -1;
 
       tile.style.left = x + "px";
       tile.style.top = y + "px";
@@ -151,24 +154,26 @@
     }
 
     animate();
-
-    tile.addEventListener("click", () => {
-      if (submitted || tile.classList.contains("correct") || tile.classList.contains("incorrect")) return;
-
-      if (correct.includes(word)) {
-        tile.classList.add("correct");
-        score++;
-      } else {
-        tile.classList.add("incorrect");
-      }
-
-      selectedCount++;
-      if (selectedCount === 3) {
-        document.querySelectorAll(".word-tile").forEach(t => t.classList.add("disabled"));
-        setTimeout(submitGame, 800);
-      }
-    });
   });
+
+  tile.addEventListener("click", () => {
+    if (submitted || tile.classList.contains("correct") || tile.classList.contains("incorrect")) return;
+
+    if (correct.includes(word)) {
+      tile.classList.add("correct");
+      score++;
+    } else {
+      tile.classList.add("incorrect");
+    }
+
+    selectedCount++;
+    if (selectedCount === 3) {
+      document.querySelectorAll(".word-tile").forEach(t => t.classList.add("disabled"));
+      setTimeout(submitGame, 800);
+    }
+  });
+});
+
 
 
 </script>

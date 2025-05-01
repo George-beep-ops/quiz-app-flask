@@ -20,7 +20,7 @@
     background-color: #ddd;
     padding: 1rem;
     width: 140px;
-    height: 30px;
+    height: 25px;
     border-radius: 8px;
     font-weight: bold;
     font-size: 1rem;
@@ -52,7 +52,15 @@
 <h2><strong>Minigame 1 – React!</strong><br>
   Tap <strong>3</strong> terms within <strong>15</strong> seconds that are <strong>positively</strong> influenced by gamification. 
   The game ends after 3 attempts.</h2>
-  
+
+  <div id="waitingMessage" style="
+    font-size: 1.5rem;
+    text-align: center;
+    margin-top: 2rem;
+    font-weight: bold;
+  ">
+    ⏳ Wait...
+  </div>
 
   <form id="gameForm" method="POST" action="{{ url_for('next_step') }}">
     <div class="grid" id="tileGrid"></div>
@@ -62,6 +70,7 @@
 
   <div id="timer">⏳ Time is running... <span id="timeValue">15</span>s</div>
 {% endblock %}
+
 
 
 {% block script %}
@@ -125,6 +134,7 @@
 
   // Start timer and enable tiles after 3 seconds
   setTimeout(() => {
+    document.getElementById("waitingMessage").style.display = "none";
     const timerContainer = document.getElementById("timer");
     const timerValue = document.getElementById("timeValue");
     timerContainer.style.display = "block";
