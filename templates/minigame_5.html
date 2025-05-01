@@ -281,7 +281,7 @@ function drawBubblesAndCar() {
       usedLabels.add(obj.label);
       if (hits >= 5) {
         gameOver = true;
-        setTimeout(() => animationPhase = true, 300);
+        setTimeout(() => animationPhase = true, 2000);
         document.getElementById("scoreInput").value = score;
       }
     }
@@ -315,7 +315,7 @@ function drawFinishAnimation() {
     animationDone = true;
     setTimeout(() => {
       document.getElementById("gameForm").submit();
-    }, 3000);
+    }, 1000);
   }
 }
 
