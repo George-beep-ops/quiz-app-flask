@@ -279,19 +279,24 @@ function drawBubblesAndCar() {
   hits++;
   if (obj.good) score++;
   usedLabels.add(obj.label);
-  document.getElementById("scoreInput").value = score;
 
-  if (hits >= 5 && !animationPhase) {
+  if (hits >= 5 && !gameOver) {
     gameOver = true;
+    document.getElementById("scoreInput").value = score;
 
-    // Warte, bis alle getroffenen Bubbles vollständig zerplatzt sind
-    const waitForBubbles = setInterval(() => {
-      const allGone = objects.every(o => !o.hit || o.alpha <= 0);
-      if (allGone) {
-        clearInterval(waitForBubbles);
-        animationPhase = true;
+    // Warte auf das vollständige Verblassen der letzten getroffenen Bubble
+    const waitForFinalBubble = () => {
+      const active = objects.some(o => o.hit && o.alpha > 0);
+      if (active) {
+        requestAnimationFrame(waitForFinalBubble);
+      } else {
+        // Danach mit Verzögerung zur Animation
+        setTimeout(() => {
+          animationPhase = true;
+        }, 800); // ggf. anpassen
       }
-    }, 100); // prüfe alle 100ms
+    };
+    waitForFinalBubble();
   }
 }
 
